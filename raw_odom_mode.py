@@ -198,20 +198,36 @@ class RawChassisSession:
     def status(self):return {'outbound':'记录同会话原始里程去程','arrival_check':'导航成功，等待原始反馈停稳','outbound_stopped':'原始去程记录完成；可核验受控短测','blocked':'记录失效：'+str(self.block_reason)}.get(self.phase,self.phase)+'\n原始样本 {} 点；地图仅用于去程导航。'.format(len(self.samples))
 
 class RawReturnRuntime:
-    def __init__(self,plan,conditions,store_path,*,feedback_speed_limit_m_s=None):
+    def __init__(self,plan,conditions,store_path,*,feedback_speed_limit_m_s=None,activation_mode="hold"):
         conditions.require();check_raw_plan(plan);
         if conditions.speed_limit_m_s not in (.05,.10,.15) or conditions.minimum_radius_m<1.78:raise CycleError("返程速度/转弯半径配置不支持")
         self.plan=copy.deepcopy(plan);self.c=conditions;self.runner=self;self.phase='ready';self.reason=None;self.started=None;self.heartbeat_at=None;self.held=False;self.last=None;self.distance=0.;self.progress=0.;self.last_progress=None;self.progress_anchor=0.;self.goal_at=None;self.stop_anchor=None;self.receipt=Path(store_path).parent/('raw-return-'+plan['cycle_id']+'.json')
         if self.receipt.exists():raise CycleError('本轮原始返程已完成，不允许重复覆盖')
         self.feedback_speed_limit=conditions.speed_limit_m_s*1.2 if feedback_speed_limit_m_s is None else feedback_speed_limit_m_s
         if type(self.feedback_speed_limit) not in (int,float) or not math.isfinite(self.feedback_speed_limit) or not conditions.speed_limit_m_s<=self.feedback_speed_limit<=.40:raise CycleError('反馈速度停车边界配置无效')
+        if activation_mode not in ('hold','click'):raise CycleError('返程启动模式无效')
+        self.activation_mode=activation_mode;self.run_session=None;self.run_sequence=0
         self.follower=PoseAwareReversePursuit(self.plan['poses'],self.c.speed_limit_m_s,1.78);self.cone=HeadingCone()
     def result(self,v=0.,w=0.):return dict(phase=self.phase,reason=self.reason,v=v,w=w,cycle_id=self.plan['cycle_id'],goal_id=self.plan['goal_id'],coordinate_mode=SOURCE,measured_distance_m=self.distance,progress_m=self.progress)
     def stop(self,reason):self.phase='stopped';self.reason=reason;return self.result()
     def heartbeat(self,now,held):
+        if self.activation_mode!='hold':return
         if self.phase in ('stopped','complete'):return
         self.held=bool(held);self.heartbeat_at=now
         if not held:self.stop('松手停车；不自动恢复')
+    def start_run(self,now,session):
+        if self.activation_mode!='click':raise CycleError('当前仲裁不支持单击启动')
+        if self.phase!='ready' or self.run_session is not None:return False
+        if not isinstance(session,str) or len(session)!=32:raise CycleError('启动会话无效')
+        self.run_session=session;self.run_sequence=1;self.heartbeat_at=now
+        return True
+    def run_heartbeat(self,now,session):
+        if self.activation_mode!='click' or self.phase in ('stopped','complete'):return False
+        if not self.run_session or session!=self.run_session:
+            self.stop('返程运行会话失效；不自动恢复');return False
+        if self.heartbeat_at is None or not 0<=now-self.heartbeat_at<=.25:
+            self.stop('界面运行心跳过期；不自动恢复');return False
+        self.heartbeat_at=now;self.run_sequence+=1;return True
     def check_coordinates(self,snapshot,now,starting=False):
         if scope(snapshot)!=self.plan['scope']:raise CycleError('原始里程/发布端/控制会话已变化；不得套旧轨迹')
         p=sample_now(snapshot,now)
@@ -221,10 +237,13 @@ class RawReturnRuntime:
         if p['velocity'][0]>.01 or feedback_speed_exceeded(p['velocity'][0],self.feedback_speed_limit):raise CycleError('原始返程实测速度异常')
         return p
     def tick(self,snapshot,now,owns_control):
+        if self.phase in ('stopped','complete'):return self.result()
         try:
             p=self.check_coordinates(snapshot,now,starting=self.started is None)
             if self.cone.update(p['pose']):raise CycleError('返程实测累计航向/路径曲率异常')
-            if not self.held or self.heartbeat_at is None or not 0<=now-self.heartbeat_at<=.25:raise CycleError('保持运行心跳丢失')
+            if self.heartbeat_at is None or not 0<=now-self.heartbeat_at<=.25:raise CycleError('界面运行心跳丢失')
+            if self.activation_mode=='hold' and not self.held:raise CycleError('保持运行心跳丢失')
+            if self.activation_mode=='click' and not self.run_session:raise CycleError('尚未显式启动返程')
             if self.started is None:
                 if snapshot.get('raw_stationary_s',0)<2:raise CycleError('尚未实测停稳')
                 self.started=now;self.phase='running';self.last_progress=now

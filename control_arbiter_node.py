@@ -15,14 +15,15 @@ from std_msgs.msg import String
 from control_arbiter import Arbiter
 from release_policy import ReleasePolicy,TrialLimiter
 from runtime_provenance import process_identity,boot_id
+from driver_watchdog_bridge import DriverWatchdogControl
 from raw_odom_mode import RawTracker,SOURCE
 from rcl_interfaces.srv import GetParameters
 
 ROOT = Path(__file__).resolve().parent
 
 
-class ArbiterNode(Node):
-    def __init__(self, *, isolated=True, context=None, test_profile="supervised_route", test_return_speed=.05, test_config=None):
+class ArbiterNode(DriverWatchdogControl,Node):
+    def __init__(self, *, isolated=True, context=None, test_profile="supervised_route", test_return_speed=.05, test_config=None,test_driver_watchdog=False):
         self.prefix = '/charging_return_isolated' if isolated else '/charging_control'
         self.isolated = isolated
         super().__init__('charging_control_arbiter', context=context,
@@ -54,6 +55,7 @@ class ArbiterNode(Node):
             self.limiter.claim_trial=claim_trial
             ledger=Path('/tmp/return-work/trial-ledger') if isolated else ROOT/'logs'/'full-trial-authorizations'
             self.limiter.full_trial_consumed=(ledger/(self.policy.trial_authorization['authorization_id']+'.json')).exists()
+        self.init_driver_watchdog(not isolated or test_driver_watchdog)
         self.position=None;self.measured_velocity=(0.,0.)
         self.raw_tracker=RawTracker();self.raw_source_identity=None;self.raw_gid=None;self.relay_instance=None
         self.driver_gate_verified=isolated;self.driver_gate_at=time.monotonic() if isolated else None
@@ -87,6 +89,7 @@ class ArbiterNode(Node):
                     self.core.fail('raw odom return mode required');return
                 if packet.get('raw_source_key')!=self.raw_tracker.source_key or packet.get('raw_epoch')!=self.raw_tracker.epoch or self.raw_tracker.error:
                     self.core.fail('raw odom identity/epoch invalid');return
+            if self.driver_watchdog_required and self.handle_driver_reset(packet):return
             self.core.receive(packet,time.monotonic(),self.get_clock().now().nanoseconds/1e9)
             if packet.get('reset') is True and self.core.fault is None:
                 self.limiter.reset(quiet=self.core.quiet(time.monotonic()),explicit_reset=True)
@@ -126,42 +129,50 @@ class ArbiterNode(Node):
 
     def graph_ok(self):
         p = self.prefix
+        self.graph_ready=False
+        def reject(reason):
+            self.graph_reason=reason
+            return False
         def identities(items):
             return [(x.node_namespace, x.node_name) for x in items]
-        if identities(self.get_publishers_info_by_topic(p+'/chassis')) != [('/', self.get_name())]:
-            return False
+        pubs=identities(self.get_publishers_info_by_topic(p+'/chassis'))
+        if pubs != [('/', self.get_name())]:
+            return reject('chassis publishers: '+repr(pubs))
         expected_sink = 'charging_return_test_sink' if self.isolated else 'ychd_robot'
         sinks=self.get_subscriptions_info_by_topic(p+'/chassis')
-        if identities(sinks) != [('/', expected_sink)]:return False
+        if identities(sinks) != [('/', expected_sink)]:return reject('chassis subscribers: '+repr(identities(sinks)))
         self.driver_gid=bytes(sinks[0].endpoint_gid).hex()
         raw_topic=p+'/odom' if self.isolated else '/odom';raw_pubs=self.get_publishers_info_by_topic(raw_topic)
         expected_raw='controller_server' if self.isolated else 'ychd_robot'
-        if identities(raw_pubs)!=[('/',expected_raw)]:return False
+        if identities(raw_pubs)!=[('/',expected_raw)]:return reject('raw odom publishers: '+repr(identities(raw_pubs)))
         self.raw_gid=bytes(raw_pubs[0].endpoint_gid)[:16].hex()
-        if identities(self.get_publishers_info_by_topic(p+'/raw_odometry'))!=[('/', 'charging_raw_odom_relay')]:return False
+        relays=identities(self.get_publishers_info_by_topic(p+'/raw_odometry'))
+        if relays!=[('/', 'charging_raw_odom_relay')]:return reject('raw envelope publishers: '+repr(relays))
         if self.driver_process and self.driver_gate_verified and self.relay_instance:
             self.raw_source_identity=dict(boot_id='isolated' if self.isolated else boot_id(),driver=self.driver_process,publisher_gid=self.raw_gid,relay_instance=self.relay_instance,topic=raw_topic,source_kind=SOURCE)
             self.raw_tracker.bind(self.raw_source_identity)
         if not self.isolated:
-            if not self.driver_gate_verified or self.driver_gate_at is None or time.monotonic()-self.driver_gate_at>1.5:return False
-            if not self.driver_process:return False
+            if not self.driver_gate_verified:return reject('driver gate parameter not yet verified or rejected')
+            if self.driver_gate_at is None or time.monotonic()-self.driver_gate_at>1.5:return reject('driver gate verification expired')
+            if not self.driver_process:return reject('driver process identity missing or ambiguous')
             inputs=self.get_subscriber_names_and_types_by_node('ychd_robot','/')
             services=self.get_service_names_and_types_by_node('ychd_robot','/')
-            if any(name in ('/red_vel','/robot_recharge_flag') for name,_ in inputs) or any(name=='/set_charge' for name,_ in services):return False
+            bypass=[name for name,_ in inputs if name in ('/red_vel','/robot_recharge_flag')]+[name for name,_ in services if name=='/set_charge']
+            if bypass:return reject('driver bypass interfaces: '+repr(bypass))
             amcl=[x for x in self.get_publishers_info_by_topic('/tf') if x.node_name=='amcl' and x.node_namespace=='/']
-            if self.core.mode=='navigation' and (not self.localizer_process or len(amcl)!=1):return False
+            if self.core.mode=='navigation' and (not self.localizer_process or len(amcl)!=1):return reject('navigation localizer identity or AMCL TF not unique')
             self.localizer_gid=bytes(amcl[0].endpoint_gid).hex() if len(amcl)==1 else None
-        if identities(self.get_publishers_info_by_topic(p+'/authority')) != [('/', 'charging_navigation_panel')]:
-            return False
+        owners=identities(self.get_publishers_info_by_topic(p+'/authority'))
+        if owners != [('/', 'charging_navigation_panel')]:return reject('authority publishers: '+repr(owners))
         sources = identities(self.get_publishers_info_by_topic(p+'/navigation'))
         limits={('/', 'controller_server'):1,('/', 'behavior_server'):4}
         counts={}
         for source in sources:counts[source]=counts.get(source,0)+1
-        if any(source not in limits or count>limits.get(source,0) for source,count in counts.items()):
-            return False
-        # A vendor teleop or legacy panel must not retain a bypass to the driver.
-        if not self.isolated and self.get_publishers_info_by_topic('/cmd_vel'):
-            return False
+        if any(source not in limits or count>limits.get(source,0) for source,count in counts.items()):return reject('navigation publishers: '+repr(counts))
+        if not self.isolated and self.get_publishers_info_by_topic('/cmd_vel'):return reject('legacy /cmd_vel bypass publisher present')
+        if self.driver_watchdog_required and not self.driver_watchdog_graph_ok():return reject('driver watchdog state/service graph invalid')
+        if self.driver_watchdog_required and not self.driver_watchdog.contract_ready(time.monotonic()):return reject('driver watchdog v2 state missing or stale')
+        self.graph_ready=True;self.graph_reason=None
         return True
 
     def check_driver_gate(self):
@@ -176,13 +187,17 @@ class ArbiterNode(Node):
     def gate_response(self,future):
         try:
             values=future.result().values
-            self.driver_gate_verified=len(values)==1 and values[0].type==2 and values[0].integer_value==1
+            self.driver_gate_verified=len(values)==1 and values[0].type==2 and values[0].integer_value==2
             self.driver_gate_at=time.monotonic()
         except Exception:self.driver_gate_verified=False
 
     def tick(self):
         now = time.monotonic()
+        self.poll_driver_reset(now)
         v, w = self.core.tick(now, graph_ok=self.graph_ok())
+        if self.driver_watchdog_required and not self.driver_watchdog.motion_ready(now):
+            v,w=0.,0.
+            if self.core.fault is None:self.core.fail('driver watchdog locked or stale: '+str((self.driver_watchdog.state or {}).get('reason')))
         if self.core.mode=='return':
             try:self.raw_tracker.current(now,self.get_clock().now().nanoseconds/1e9)
             except ValueError as e:v,w=self.core.fail(str(e))
@@ -197,11 +212,13 @@ class ArbiterNode(Node):
         state = String()
         state.data = json.dumps(dict(owner=self.core.owner, sequence=self.core.sequence,
             mode=self.core.mode, fault=self.core.fault, commissioned=self.commissioned,
-            return_speed_m_s=self.policy.return_speed,feedback_speed_limit_m_s=self.policy.feedback_speed_limit,full_trial_max_route_m=self.policy.trial_max_route_m,full_trial_max_time_s=self.policy.trial_max_time_s,full_trial_consumed=self.limiter.full_trial_consumed,output_sequence=self.output_sequence,output_monotonic_s=published_at,output_ros_stamp=published_ros,
+            return_start_mode=self.policy.start_mode,return_speed_m_s=self.policy.return_speed,feedback_speed_limit_m_s=self.policy.feedback_speed_limit,full_trial_max_route_m=self.policy.trial_max_route_m,full_trial_max_time_s=self.policy.trial_max_time_s,full_trial_consumed=self.limiter.full_trial_consumed,output_sequence=self.output_sequence,output_monotonic_s=published_at,output_ros_stamp=published_ros,
             output_v_m_s=float(v),output_w_rad_s=float(w),authority_sequence=self.core.sequence,
+            run_session=(self.core.packet or {}).get("run_session"),run_sequence=(self.core.packet or {}).get("run_sequence"),run_state=(self.core.packet or {}).get("run_state"),
             trial_id=(self.core.packet or {}).get("trial_id"),held=(self.core.packet or {}).get("held",False),
             instance_id=self.instance_id,release_profile=self.policy.profile,release_errors=self.policy.errors,
-            driver_gate_verified=self.driver_gate_verified,
+            graph_ready=self.graph_ready,graph_reason=self.graph_reason,driver_gate_verified=self.driver_gate_verified,driver_watchdog_required=self.driver_watchdog_required,
+            driver_watchdog_state=self.driver_watchdog.state,driver_watchdog_ready=self.driver_watchdog.motion_ready(now),driver_reset_pending=self.driver_reset_pending is not None,
             driver_identity=dict(process=self.driver_process,sink_gid=self.driver_gid) if self.driver_process and self.driver_gid else None,
             localizer_identity=dict(process=self.localizer_process,tf_gid=self.localizer_gid) if self.localizer_process else None,
             raw_source_identity=self.raw_source_identity,raw_source_key=self.raw_tracker.source_key,raw_epoch=self.raw_tracker.epoch,

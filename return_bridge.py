@@ -34,6 +34,7 @@ class ReturnBridge:
         self.used_revalidations=set()
         self.raw_tracker=RawTracker();self.known_raw_arbiter_epoch=None
         self.reset_arbiter = False
+        self.stop_reset_pending = None
         self.odom_frame_valid = False
         self.odom_frame = None
         self.odom_source_stamp = None
@@ -48,7 +49,7 @@ class ReturnBridge:
             with self.lock:
                 instance=data.get('instance_id')
                 if self.known_arbiter_instance is not None and instance!=self.known_arbiter_instance:
-                    self.software_stop=True;self.manual=False;self.manual_target=(0.,0.)
+                    self.software_stop=True;self.stop_reset_pending=None;self.reset_arbiter=False;self.manual=False;self.manual_target=(0.,0.)
                     self.commands.put(('cancel',()))
                     if self.return_runtime:self.return_state=self.return_runtime.stop('独立仲裁重启，禁止恢复旧任务')
                 if data.get('raw_source_identity'):self.raw_tracker.bind(data['raw_source_identity'])
@@ -64,6 +65,25 @@ class ReturnBridge:
                     self.event('return_arbiter_output',status=data,received_monotonic_s=self.arbiter_at,received_ros_stamp=self.get_clock().now().nanoseconds/1e9)
                 self.last_diagnostic_mode=data.get('mode')
                 if data.get('fault') and data.get('commissioned') is True:self.software_stop=True
+                pending=self.stop_reset_pending
+                if pending is not None:
+                    elapsed=self.arbiter_at-pending['requested_at']
+                    if instance!=pending['instance_id'] or not 0<=elapsed<=2.:
+                        self.stop_reset_pending=None;self.reset_arbiter=False
+                        self.event('software_stop_reset_failed',reason='仲裁重启或解除确认超时',automatic_resume=False)
+                    elif pending['sequence'] is not None and data.get('authority_sequence',-1)>=pending['sequence']:
+                        if (data.get('owner')==self.control_owner and data.get('mode')=='stop' and
+                                not data.get('fault') and data.get('graph_ready') is True and
+                                data.get('output_v_m_s')==0. and data.get('output_w_rad_s')==0.):
+                            self.stop_reset_pending=None;self.software_stop=False
+                            self.event('software_stop_released',automatic_resume=False,acknowledged_sequence=data['authority_sequence'])
+                        else:
+                            self.stop_reset_pending=None
+                            self.event('software_stop_reset_failed',reason=data.get('fault') or data.get('graph_reason') or '仲裁未确认零速停止',automatic_resume=False)
+                signature=(data.get('fault'),data.get('graph_ready'),data.get('graph_reason'))
+                if signature!=getattr(self,'last_arbiter_guard_signature',None):
+                    self.last_arbiter_guard_signature=signature
+                    self.event('arbiter_guard_state',fault=data.get('fault'),graph_ready=data.get('graph_ready'),graph_reason=data.get('graph_reason'))
         except (ValueError, TypeError):
             with self.lock: self.arbiter_state = {}; self.arbiter_at = None
 
@@ -85,6 +105,34 @@ class ReturnBridge:
             if held: self.return_ever_held = True
             if self.return_runtime and self.return_ever_held:
                 self.return_runtime.heartbeat(time.monotonic(), held)
+
+    def start_return(self):
+        """Operator click creates one immutable run session; timer never starts it."""
+        with self.lock:
+            runtime=self.return_runtime
+            if not isinstance(runtime,RawReturnRuntime) or runtime.activation_mode!='click':
+                raise ValueError('尚未准备单击返程，或仲裁版本不匹配')
+            if runtime.phase in ('stopped','complete'):raise ValueError('返程已停止，不能重新启动旧会话')
+            if runtime.run_session is not None:return runtime.run_session
+            now=time.monotonic()
+            if runtime.phase!='ready' or self.software_stop or self.docking_hold:
+                raise ValueError('返程已停止或停车锁定；需要重新准备')
+            if self.gui_at is None or not 0<=now-self.gui_at<=.25:
+                raise ValueError('界面心跳过期，不能启动')
+            if self.arbiter_at is None or not 0<=now-self.arbiter_at<=.25 or self.arbiter_state.get('fault'):
+                raise ValueError('独立仲裁未就绪，不能启动')
+            state=self._snapshot(now);state['busy']=self.busy or self.server_active
+            runtime.check_coordinates(state,now,starting=True)
+            session=uuid.uuid4().hex
+            runtime.start_run(now,session)
+            self.event('return_run_started',run_session=session,trial_id=self.return_trial_id,automatic_resume=False)
+            return session
+
+    def return_keepalive(self,session):
+        with self.lock:
+            runtime=self.return_runtime
+            if not runtime or runtime.activation_mode!='click':return False
+            return runtime.run_heartbeat(time.monotonic(),session)
 
     def stop_return(self, reason):
         with self.lock:
@@ -111,8 +159,8 @@ class ReturnBridge:
             document = MapDocument.load(map_path)
             if document.fingerprint != plan['map_sha256']:
                 raise ValueError('地图文件已改变，请重新记录去程')
-        now = time.monotonic()
         with self.lock:
+            now = time.monotonic()
             self.return_guard()
             state = self._snapshot(now)
             if (self.software_stop or self.docking_hold or state['busy'] or self.manual or
@@ -140,7 +188,7 @@ class ReturnBridge:
                 max_time_s=3. if short_test else length/.03+15.,
                 max_distance_m=.15 if short_test else length+.20,
                 controller_id='pose-aware-supervised-return-v1')
-            runtime = RawReturnRuntime(plan, conditions, store_path,feedback_speed_limit_m_s=self.arbiter_state.get('feedback_speed_limit_m_s')) if raw else ReturnRuntime(plan, conditions, store_path)
+            runtime = RawReturnRuntime(plan, conditions, store_path,feedback_speed_limit_m_s=self.arbiter_state.get('feedback_speed_limit_m_s'),activation_mode=self.arbiter_state.get('return_start_mode','hold')) if raw else ReturnRuntime(plan, conditions, store_path)
             if not raw and saved_grid_digest(map_path) != runtime.anchor['map_grid_sha']:
                 raise ValueError('实际地图内容与保存地图不一致')
             runtime.check_coordinates(state, now, starting=True)
@@ -160,9 +208,12 @@ class ReturnBridge:
                    detects_new_obstacles=False)
 
     def control_tick(self):
-        now = time.monotonic()
         with self.lock:
+            now = time.monotonic()
             mode, v, w = 'stop', 0., 0.
+            if self.stop_reset_pending is not None and not 0<=now-self.stop_reset_pending['requested_at']<=2.:
+                self.stop_reset_pending=None;self.reset_arbiter=False
+                self.event('software_stop_reset_failed',reason='解除确认超时，保持停车锁定',automatic_resume=False)
             gui_fresh = self.gui_at is not None and 0 <= now-self.gui_at <= .25
             state = self._snapshot(now)
             runtime = self.return_runtime
@@ -176,7 +227,7 @@ class ReturnBridge:
                             self.return_state = runtime.stop('地图文件在返程期间改变')
                     except (OSError, ValueError, KeyError) as error:
                         self.return_state = runtime.stop('地图不可读：'+str(error))
-                if runtime.runner.phase == 'ready' and not self.return_ever_held:
+                if runtime.runner.phase == 'ready' and not (runtime.run_session if isinstance(runtime,RawReturnRuntime) and runtime.activation_mode=='click' else self.return_ever_held):
                     if now-self.return_prepared_at > 30.:
                         self.return_state = runtime.stop('准备超时，请重新核对现场')
                 elif runtime.runner.phase not in ('stopped', 'complete'):
@@ -214,14 +265,21 @@ class ReturnBridge:
             packet = dict(owner=self.control_owner, sequence=self.control_sequence, mode=mode,
                           v=v, w=w, stamp=self.get_clock().now().nanoseconds/1e9,
                           reset=self.reset_arbiter,
+                          reset_request_id=self.stop_reset_pending.get("request_id") if self.stop_reset_pending else None,
                           instance_id=self.return_arbiter_instance if mode=='return' else self.arbiter_state.get('instance_id'),
                           trial_id=self.return_trial_id,cycle_id=self.return_state.get('cycle_id') or (runtime.plan['cycle_id'] if runtime else None),
                           goal_id=self.return_state.get('goal_id') or (runtime.plan['goal_id'] if runtime else None),
                           route_length_m=sum(math.dist(a[:2],b[:2]) for a,b in zip(runtime.plan['poses'],runtime.plan['poses'][1:])) if runtime else None,
+                          activation_mode=runtime.activation_mode if isinstance(runtime,RawReturnRuntime) else 'hold',
+                          run_state='running' if isinstance(runtime,RawReturnRuntime) and runtime.run_session and runtime.phase not in ('stopped','complete') else 'inactive',
+                          run_session=runtime.run_session if isinstance(runtime,RawReturnRuntime) else None,
+                          run_sequence=runtime.run_sequence if isinstance(runtime,RawReturnRuntime) else 0,
                           held=bool(self.return_held),site_confirmed=bool(runtime is not None),short_test=self.return_short_test,
                           coordinate_mode=SOURCE if isinstance(runtime,RawReturnRuntime) else None,
                           raw_source_key=runtime.plan['scope']['source_key'] if isinstance(runtime,RawReturnRuntime) else None,
                           raw_epoch=runtime.plan['scope']['arbiter_raw_epoch'] if isinstance(runtime,RawReturnRuntime) else None)
+            if self.reset_arbiter and self.stop_reset_pending is not None:
+                self.stop_reset_pending['sequence']=self.control_sequence
             self.reset_arbiter = False
             if self.manual_stop_pending:
                 self.manual_stop_pending = False

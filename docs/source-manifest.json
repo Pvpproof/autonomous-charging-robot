@@ -1,22 +1,22 @@
 {
-  "source": "Read-only snapshot of user-accepted hold-to-run raw-odom return; runtime data excluded",
+  "source": "Read-only verified snapshot of installed user-accepted click-to-start raw-odometry return; runtime data and authorization excluded",
   "files": [
     {
       "file": "raw_odom_mode.py",
-      "live_sha256": "ab90760810b96af8ee211366648f9193bf4428ba066dc00ec4cfcf70e50d638e",
-      "published_sha256": "ab90760810b96af8ee211366648f9193bf4428ba066dc00ec4cfcf70e50d638e",
+      "live_sha256": "2ce92b6420bf084d6560705df4298e3c1af53bb85fd22c5dfe1482902244a4b8",
+      "published_sha256": "2ce92b6420bf084d6560705df4298e3c1af53bb85fd22c5dfe1482902244a4b8",
       "modified_for_publication": false
     },
     {
       "file": "release_policy.py",
-      "live_sha256": "27bbfe8414e475e5cada1d110fd510549dd35db5a7bc24b0de0706b0a47ef142",
-      "published_sha256": "27bbfe8414e475e5cada1d110fd510549dd35db5a7bc24b0de0706b0a47ef142",
+      "live_sha256": "e68cae3940c70370726d94fd5939d72396c261334b559e272e5d1cf2f06ee3a3",
+      "published_sha256": "e68cae3940c70370726d94fd5939d72396c261334b559e272e5d1cf2f06ee3a3",
       "modified_for_publication": false
     },
     {
       "file": "return_hold_pad.py",
-      "live_sha256": "eff1d3b9752fa40f3f2300f7700fb695bcff0074e6d51c4f922e32db495a49c2",
-      "published_sha256": "eff1d3b9752fa40f3f2300f7700fb695bcff0074e6d51c4f922e32db495a49c2",
+      "live_sha256": "d7d7a5e397e169333787c8373fce6bc53d27552633a94cf5fad78b091b76eebb",
+      "published_sha256": "d7d7a5e397e169333787c8373fce6bc53d27552633a94cf5fad78b091b76eebb",
       "modified_for_publication": false
     },
     {
@@ -69,9 +69,10 @@
     },
     {
       "file": "control_arbiter_node.py",
-      "live_sha256": "d6a4028db26f9410fb15cced428a7174908e60edfb332410018e51fdb856557a",
-      "published_sha256": "549e0429c01217976f145ed00b19cc369035c5f39a96df2ab3f5f3fd5c66061e",
-      "modified_for_publication": true
+      "live_sha256": "e22554d9e77c06456cecd43b862392742efcdc10ffb52a4d62d90b6a98a53319",
+      "published_sha256": "7e2900535cede4ff85feb51688316a0a66cc18080891857fb3cd6d23a206e554",
+      "modified_for_publication": true,
+      "publication_change": "Remove one extra blank line at EOF; executable statements unchanged"
     },
     {
       "file": "teleop.py",
@@ -87,8 +88,8 @@
     },
     {
       "file": "app.py",
-      "live_sha256": "987fc7fdb1d7d961adaf79cbf3a6e9ea7adcbd826d5f9bd961e391977c6aa364",
-      "published_sha256": "987fc7fdb1d7d961adaf79cbf3a6e9ea7adcbd826d5f9bd961e391977c6aa364",
+      "live_sha256": "5c4553e2c57fe612e17cd9f17d4c72fd3b68a731cf00adbd28200fe1f0f0599a",
+      "published_sha256": "5c4553e2c57fe612e17cd9f17d4c72fd3b68a731cf00adbd28200fe1f0f0599a",
       "modified_for_publication": false
     },
     {
@@ -147,8 +148,8 @@
     },
     {
       "file": "ros_bridge.py",
-      "live_sha256": "60008fc8c24c05d72e623ba04ab9478ee057cf688fa6c8ccdede0720868a9169",
-      "published_sha256": "60008fc8c24c05d72e623ba04ab9478ee057cf688fa6c8ccdede0720868a9169",
+      "live_sha256": "231880308d6721a6964e534738add557d8074f64a19defcfa1d0c03f431de145",
+      "published_sha256": "231880308d6721a6964e534738add557d8074f64a19defcfa1d0c03f431de145",
       "modified_for_publication": false
     },
     {
@@ -159,14 +160,32 @@
     },
     {
       "file": "return_bridge.py",
-      "live_sha256": "ca15e8b8940e054e46cb8400ff9a0bcf021df7030e74ec41730362c997169faa",
-      "published_sha256": "ca15e8b8940e054e46cb8400ff9a0bcf021df7030e74ec41730362c997169faa",
+      "live_sha256": "f241800f04400e63481d617a1d3c0a8fefbcc4c3a572a33d61e6e143b600ed1b",
+      "published_sha256": "f241800f04400e63481d617a1d3c0a8fefbcc4c3a572a33d61e6e143b600ed1b",
       "modified_for_publication": false
     },
     {
       "file": "offline_reverse.py",
       "live_sha256": "7d3b07654b8f8a813654573c21727c1393ae9cd9bc60d490cab319bfa7a0e6e4",
       "published_sha256": "7d3b07654b8f8a813654573c21727c1393ae9cd9bc60d490cab319bfa7a0e6e4",
+      "modified_for_publication": false
+    },
+    {
+      "file": "run_lease.py",
+      "live_sha256": "732e77b21a2e18711fe06e64ed8e7276aa15f81a8fd1a2bb9c455824d6d2e3f4",
+      "published_sha256": "732e77b21a2e18711fe06e64ed8e7276aa15f81a8fd1a2bb9c455824d6d2e3f4",
+      "modified_for_publication": false
+    },
+    {
+      "file": "driver_watchdog_client.py",
+      "live_sha256": "0e5d3d3b809978113995f11479c9a53b74f5f7e0a31acf90d08fd34e6457fb94",
+      "published_sha256": "0e5d3d3b809978113995f11479c9a53b74f5f7e0a31acf90d08fd34e6457fb94",
+      "modified_for_publication": false
+    },
+    {
+      "file": "driver_watchdog_bridge.py",
+      "live_sha256": "31d18946d404630ea5e7b48dee6497611baf54f1ca98128999a8a9db9d3fb5b9",
+      "published_sha256": "31d18946d404630ea5e7b48dee6497611baf54f1ca98128999a8a9db9d3fb5b9",
       "modified_for_publication": false
     }
   ],
@@ -186,5 +205,16 @@
     "startup requires locally built native relay",
     "default disabled configuration without site authorizations",
     "synthetic tests only; captured-route fixtures excluded"
-  ]
+  ],
+  "driver_contract_version": 2,
+  "driver_publication": "Project-owned components only: native/driver-watchdog/docs/EXPORT_MANIFEST.json; manufacturer source, contextual patch and binary excluded",
+  "runtime_configuration_published": false,
+  "public_configuration": "disabled; click interaction; all site acknowledgements false; no trial authorization",
+  "tests": {
+    "local_cases": 120,
+    "ros_integration_cases": 41,
+    "watchdog_ctest_cases": 1,
+    "watchdog_internal_assertions": 59,
+    "field_motion_by_agent": false
+  }
 }

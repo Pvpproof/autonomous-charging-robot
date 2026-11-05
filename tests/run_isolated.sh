@@ -15,4 +15,6 @@ export QT_QPA_PLATFORM=offscreen
 export XDG_RUNTIME_DIR=/tmp/runtime-return
 export PYTHONDONTWRITEBYTECODE=1
 export PYTHONPATH="$PWD:$PWD/tests:${PYTHONPATH:-}"
-exec /usr/bin/python3 tests/test_ros_raw.py "$@"
+for suite in test_ros_raw.py test_ros_oneclick.py test_ros_driver_reset.py; do
+    /usr/bin/python3 "tests/$suite" "$@"
+done

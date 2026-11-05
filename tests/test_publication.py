@@ -60,6 +60,10 @@ class PublicationConfigurationTests(unittest.TestCase):
     def test_published_configuration_remains_uncommissioned(self):
         config = json.loads((ROOT/'config/return_commissioning.json').read_text())
         self.assertIs(config['commissioned'], False)
+        self.assertEqual(config['profile'], 'disabled')
+        self.assertEqual(config['return_start_mode'], 'click')
+        self.assertNotIn('full_trial_authorization', config)
+        self.assertTrue(all(value is False for value in config['site_authorization'].values()))
         self.assertFalse((ROOT/'config/nav2_ackermann.yaml').exists())
 
 

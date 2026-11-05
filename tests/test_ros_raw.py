@@ -23,7 +23,7 @@ class RawIntegration(unittest.TestCase):
   for t in ['odom','scan','tf','tf_static','map']:args+=['-r','/'+t+':='+NS+'/'+t]
   for t in ['authority','status','legacy_zero','raw_odometry']:args+=['-r','/charging_control/'+t+':='+NS+'/'+t]
   args+=['-r','/navigate_to_pose/_action/status:='+NS+'/nav_status','-r','/navigate_to_pose:='+NS+'/navigate_to_pose','-r','/initialpose:='+NS+'/initialpose']
-  self.bridge=Bridge(ros_args=args);trial_config=None
+  self.bridge=Bridge(ros_args=args);trial_config=getattr(self,'make_test_config',lambda:None)()
   if self._testMethodName in ('test_one_full_trial_claim_is_persistent_and_cannot_resume','test_feedback025_keeps_target015_and_rejects_excess','test_feedback040_keeps_target015_and_rejects_excess'):
    trial_config=full_config();trial_config['full_trial_authorization']['authorization_id']=uuid.uuid4().hex
   if self._testMethodName=='test_feedback025_keeps_target015_and_rejects_excess':trial_config['feedback_speed_limit_m_s']=.25

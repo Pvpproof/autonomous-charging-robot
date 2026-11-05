@@ -81,7 +81,7 @@ class Bridge(ReturnBridge, Node):
 
     def emergency_stop(self):
         with self.lock:
-            self.software_stop=True;self.manual=False;self.manual_target=(0.,0.)
+            self.software_stop=True;self.stop_reset_pending=None;self.reset_arbiter=False;self.manual=False;self.manual_target=(0.,0.)
             self.manual_stop_pending=False;self.cancel_requested=True
             self.manual_pub.publish(Twist())
         self.control_tick()
@@ -94,10 +94,16 @@ class Bridge(ReturnBridge, Node):
             if time.monotonic()-self.odom_time>1.:raise ValueError('里程计未更新，无法确认车辆已停稳')
             if abs(self.velocity[0])>.01 or abs(self.velocity[1])>.02:raise ValueError('里程计仍显示运动，请先确认车辆停稳')
             if self.stop_observation.duration(self.stop_observation.first)<2.:raise ValueError('需连续停稳两秒再解除')
-            self.software_stop=False;self.manual=False;self.manual_target=(0.,0.)
+            if self.stop_reset_pending is not None:raise ValueError('正在等待仲裁确认解除，请勿重复点击')
+            now=time.monotonic();a=self.arbiter_state
+            if self.arbiter_at is None or not 0<=now-self.arbiter_at<=.25:raise ValueError('独立仲裁反馈未就绪，保持停车锁定')
+            if not a.get('instance_id') or a.get('graph_ready') is not True:
+                raise ValueError('控制链尚未就绪：'+str(a.get('graph_reason') or '等待驱动与控制节点'))
+            self.software_stop=True;self.manual=False;self.manual_target=(0.,0.)
             self.return_runtime=None;self.reset_arbiter=True
+            self.stop_reset_pending=dict(instance_id=a['instance_id'],requested_at=now,sequence=None,request_id=self.control_owner+'-'+str(self.control_sequence+1))
             if self.raw_tracker.error:self.raw_tracker.reset()
-        self.event('software_stop_released',automatic_resume=False)
+        self.event('software_stop_reset_requested',automatic_resume=False)
 
     def enable_manual(self):
         with self.lock:
@@ -359,7 +365,7 @@ class Bridge(ReturnBridge, Node):
             scan_hz=(len(times)-1)/(times[-1]-times[0]) if len(times)>1 and times[-1]>times[0] else 0.,
             odom_age=max(now-self.odom_time,self.get_clock().now().nanoseconds/1e9-self.odom_source_stamp) if self.odom_source_stamp is not None else math.inf,velocity=self.velocity,scan_world=list(self.scan_world),
             path=list(self.path),nodes=list(self.nodes),graph_ready=self.graph_ready,initial_ready=self.initial_ready,nav_ready=self.nav_ready,
-            software_stop=self.software_stop,busy=self.busy or self.server_active or self.return_active(),manual=self.manual,manual_stop_pending=self.manual_stop_pending,
+            software_stop=self.software_stop,stop_reset_pending=bool(self.stop_reset_pending),busy=self.busy or self.server_active or self.return_active(),manual=self.manual,manual_stop_pending=self.manual_stop_pending,
             status=self.status,distance=self.distance,goal_status=self.goal_status,goal_target=self.goal_target,
             cancel_requested=self.cancel_requested,docking_hold=self.docking_hold,
             stationary_s=self.stop_observation.duration(self.goal_finished_at),stationary_samples=self.stop_observation.samples,

@@ -20,7 +20,7 @@ from chassis_route import ChassisSession
 from raw_odom_mode import RawChassisSession,SOURCE
 from navigation_status import navigation_reasons,button_status
 from session_revalidation import load_source
-from return_hold_pad import HoldPad
+from return_hold_pad import ReturnStartPad
 
 ROOT=Path(__file__).resolve().parent
 
@@ -161,7 +161,7 @@ class Window(W.QMainWindow):
         self.return_button=W.QPushButton('准备沿实测轨迹返程');self.return_button.clicked.connect(self.prepare_return);self.return_button.setEnabled(False);nl.addWidget(self.return_button)
         self.import_return_button=self.button('旧地图轨迹不可用于原始里程模式',self.import_return_route,nl);self.import_return_button.setEnabled(False)
         self.return_short=W.QCheckBox('首次短测：最多 3 秒 / 实测 0.15 米');self.return_short.setChecked(True);nl.addWidget(self.return_short)
-        self.return_hold=HoldPad(self);self.return_hold.held_changed.connect(self.return_held_changed);self.return_hold.setEnabled(False);nl.addWidget(self.return_hold)
+        self.return_run_session=None;self.return_hold=ReturnStartPad(self);self.return_hold.start_requested.connect(self.start_return);self.return_hold.cancel_requested.connect(self.stop_return);self.return_hold.setEnabled(False);nl.addWidget(self.return_hold)
         self.return_stop=W.QPushButton('停止返程');self.return_stop.clicked.connect(self.stop_return);nl.addWidget(self.return_stop)
         self.return_note=W.QLabel('人工持续监护，无后向自动避障。记录路径无法发现新进入的障碍。');self.return_note.setWordWrap(True);nl.addWidget(self.return_note)
         self.cancel_button=self.button('取消导航',self.cancel_navigation,nl)
@@ -400,7 +400,7 @@ class Window(W.QMainWindow):
         if not self.confirm('确认车辆已经停稳、现场可以继续操作，解除软件停车锁定？\n解除后不会自动恢复键盘操控或导航任务。'):return
         try:self.bridge.release_stop()
         except ValueError as error:self.error(str(error));return
-        self.latest['software_stop']=False;self.update_navigation_ui()
+        self.latest=self.bridge.snapshot();self.log('已请求解除停车锁定，等待底盘与仲裁零速确认；不会自动恢复任务');self.update_navigation_ui()
 
     def application_state(self,state):
         if state!=QtCore.Qt.ApplicationActive:self.keyboard.disarm('窗口失去激活')
@@ -424,7 +424,7 @@ class Window(W.QMainWindow):
     def manual_heartbeat(self):
         if self.bridge:
             self.bridge.gui_heartbeat(self.document.fingerprint if self.navigation_map_matches() else None)
-            if self.return_hold.held:self.bridge.return_heartbeat(True)
+            if self.return_run_session:self.bridge.return_keepalive(self.return_run_session)
         if not self.keyboard.armed:return
         if self.latest.get('odom_age',math.inf)>1:
             self.keyboard.disarm('底盘反馈已中断');return
@@ -641,20 +641,26 @@ class Window(W.QMainWindow):
         if self.docking_guard():return
         try:
             plan=self.imported_return_plan or self.chassis_session.return_candidate()
-            if not self.confirm('按同会话原始里程轨迹闭环倒车，保持原车身朝向。地图仅用于去程导航。轮滑或被推动无法靠这套里程保证识别。\n请现场逐项确认：人员持续监护、通道清空、机械臂和枪头收拢、线缆无牵拉、实体断电按钮可及，其他遥控已交接。\n没有后向自动避障；记录轨迹无法发现新进入的障碍。\n'+('短测：0.05 m/s，最多3秒或实测0.15米，先到即请求停车。' if self.return_short.isChecked() else '完整返程：{:.2f} m/s，按住运行；全程保持现场监护。'.format(self.latest.get('arbiter',{}).get('return_speed_m_s',.05)))):return
+            if not self.confirm('按同会话原始里程轨迹闭环倒车，保持原车身朝向。地图仅用于去程导航。轮滑或被推动无法靠这套里程保证识别。\n请现场逐项确认：人员持续监护、通道清空、机械臂和枪头收拢、线缆无牵拉、实体断电按钮可及，其他遥控已交接。\n没有后向自动避障；记录轨迹无法发现新进入的障碍。\n'+('短测：0.05 m/s，最多3秒或实测0.15米，先到即请求停车。' if self.return_short.isChecked() else '完整返程：{:.2f} m/s，点击启动，点击停止返程取消；全程保持现场监护。'.format(self.latest.get('arbiter',{}).get('return_speed_m_s',.05)))):return
             confirmations={name:True for name in ('operator_present','route_cleared','physical_stop_ready',
                 'arm_stowed','exclusive_control_confirmed','no_rear_detection_acknowledged')}
             self.bridge.prepare_return(plan,self.start_store().path,self.document.yaml_path,
                 confirmations,short_test=self.return_short.isChecked())
-            self.log('返程已准备，尚未运动；按住才开始')
+            self.return_run_session=None
+            self.log('返程已准备，尚未运动；点击启动才开始')
             self.latest=self.bridge.snapshot();self.update_return_ui()
         except (OSError,ValueError,KeyError,TypeError) as error:self.error('不能准备返程：'+str(error))
 
-    def return_held_changed(self,held):
-        if self.bridge:self.bridge.return_heartbeat(held)
+    def start_return(self):
+        if not self.bridge:return
+        try:
+            self.return_run_session=self.bridge.start_return()
+            self.log('已请求启动返程；停止、急停或故障后不自动续行')
+        except (ValueError,TypeError) as error:
+            self.return_hold.set_running(False);self.error('不能启动返程：'+str(error))
 
     def stop_return(self):
-        self.return_hold.set_held(False)
+        self.return_run_session=None;self.return_hold.set_running(False)
         if self.bridge:self.bridge.stop_return('操作员停止返程')
         self.log('已请求停止返程，不自动恢复')
 
@@ -678,14 +684,16 @@ class Window(W.QMainWindow):
         if full_trial:self.return_short.setChecked(False)
         self.return_short.setEnabled(not active and not short_only and not full_trial)
         self.import_return_button.setEnabled(False)
-        self.return_hold.setEnabled(active)
+        self.return_hold.setEnabled(active and arbiter.get('return_start_mode')=='click')
+        if not active:self.return_run_session=None
+        self.return_hold.set_running(bool(self.return_run_session))
         self.return_stop.setEnabled(active)
-        labels={'idle':'未准备','ready':'已准备，等待按住','running':'正在沿实测轨迹倒车',
+        labels={'idle':'未准备','ready':'已准备，等待点击启动','running':'正在沿实测轨迹倒车',
             'goal_wait_still':'已到记录起点，等待实测停稳','complete':'已回到本轮里程起点并停稳',
             'stopped':'返程已停止，需重新核查'}
         text=labels.get(state.get('phase'),'未准备')
         if state.get('reason'):text+='：'+str(state['reason'])
-        if full_trial:text+='\n一次完整试验 · {:.2f} m/s · 松开停车；运行后本次授权不再复用。'.format(arbiter.get('return_speed_m_s',.05))
+        if full_trial:text+='\n一次完整试验 · {:.2f} m/s · 单击启动 / 点击停止取消；运行后本次授权不再复用。'.format(arbiter.get('return_speed_m_s',.05))
         if not arbiter.get('commissioned'):text+='\n尚未完成现场验收，实车输出禁用。'
         if self.latest.get('raw_odom_error'):text+='\n原始里程未就绪：'+str(self.latest['raw_odom_error'])
         self.return_button.setToolTip(text)
@@ -703,13 +711,15 @@ class Window(W.QMainWindow):
         busy=self.latest.get('busy',False)
         stopped=self.latest.get('software_stop',False)
         manual=self.keyboard.armed or self.latest.get('manual',False) or self.latest.get('manual_stop_pending',False)
-        self.release_stop_button.setEnabled(stopped and not self.offline)
+        reset_pending=bool(self.latest.get('stop_reset_pending'))
+        self.release_stop_button.setEnabled(stopped and not self.offline and not reset_pending)
         self.manual_button.setEnabled(not self.offline and not stopped and self.latest.get('odom_age',math.inf)<=1 and not busy and not self.keyboard.armed)
         if stopped:
             v,w=self.latest.get('velocity',(0.,0.))
             observed=self.latest.get('odom_age',math.inf)<=1 and abs(v)<=.01 and abs(w)<=.02
             self.stop_note.setText('软件停车已锁定 · '+('里程计显示静止，请现场确认' if observed else '尚未确认停稳，请现场检查；必要时使用实体急停')+'\n持续发送零速度；解除后不会自动恢复任务。')
-        else:self.stop_note.setText('底盘软件停车：立即发零速度、取消导航并锁定操控。\n不控制机械臂；不能替代实体急停。')
+        if reset_pending:self.stop_note.setText('软件停车保持锁定 · 正在等待解除确认，请勿重复点击。\n底盘与仲裁确认前不允许运动，确认后也不自动恢复任务。')
+        elif not stopped:self.stop_note.setText('底盘软件停车：立即发零速度、取消导航并锁定操控。\n不控制机械臂；不能替代实体急停。')
         localized=matching and self.latest.get('pose_age',math.inf)<=1.
         initial_ready=matching and self.latest.get('initial_ready',False)
         ready=localized and self.latest.get('nav_ready',False) and self.latest.get('scan_age',math.inf)<=1 and self.latest.get('odom_age',math.inf)<=1

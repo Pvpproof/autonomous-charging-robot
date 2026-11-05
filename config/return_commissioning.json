@@ -16,5 +16,6 @@
     "arm_stowed": false,
     "other_controls_handed_over": false
   },
-  "full_route_acceptance_receipt": null
+  "full_route_acceptance_receipt": null,
+  "return_start_mode": "click"
 }

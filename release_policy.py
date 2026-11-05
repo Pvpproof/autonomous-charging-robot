@@ -1,4 +1,5 @@
 """Independent output release policy. Limits do not depend on panel checkboxes."""
+from run_lease import RunLeaseGate
 import math,struct
 
 
@@ -16,6 +17,8 @@ class ReleasePolicy:
         self.profile=config.get('profile','disabled')
         self.isolated_test=isolated_test
         self.errors=[]
+        self.start_mode=config.get('return_start_mode','hold')
+        if self.start_mode not in ('hold','click'):self.errors.append('unsupported return start mode')
         self.return_speed=config.get('return_speed_m_s',.05)
         if type(self.return_speed) not in (int,float) or self.return_speed not in (.05,.10,.15):
             self.errors.append('unsupported return speed');self.return_speed=.05
@@ -73,6 +76,7 @@ class TrialLimiter:
     def __init__(self,policy):
         self.policy=policy;self.max_speed=policy.return_speed;self.claim_trial=None;self.claimed=False;self.full_trial_consumed=False;self.active_route_length=None
         self.fault=None
+        self.run_lease=RunLeaseGate()
         self.used=set()
         self.active=None
         self.started_at=None
@@ -86,6 +90,7 @@ class TrialLimiter:
 
     def reset(self,*,quiet,explicit_reset):
         if not quiet or not explicit_reset:return False
+        self.run_lease.close()
         self.fault=None;self.active=None;self.started_at=None;self.last_tick=None
         self.last_odom=None;self.distance=0.
         # A panel or arbiter reset must never make a consumed trial reusable.
@@ -95,12 +100,18 @@ class TrialLimiter:
         if not self.policy.enabled:return 0.,0.
         if self.fault:return 0.,0.
         if mode!='return':
+            self.run_lease.close()
             self.active=None;self.started_at=None;self.last_tick=None;self.last_odom=None
             return command
         if not isinstance(packet,dict):return self.fail('invalid trial packet')
         key=tuple(packet.get(k) for k in ('owner','trial_id','cycle_id','goal_id'))
         if not all(isinstance(k,str) and k for k in key):return self.fail('return trial identity missing')
-        if packet.get('held') is not True or packet.get('site_confirmed') is not True:
+        if packet.get('site_confirmed') is not True:return self.fail('return site confirmation absent')
+        if self.policy.start_mode=='click':
+            if packet.get('activation_mode')!='click':return self.fail('explicit click mode required')
+            try:self.run_lease.check(packet,now)
+            except ValueError as e:return self.fail(str(e))
+        elif packet.get('activation_mode','hold')!='hold' or packet.get('held') is not True:
             return self.fail('return hold/site confirmation absent')
         if self.policy.profile=='short_only' and packet.get('short_test') is not True:
             return self.fail('short_only rejects full-route requests')

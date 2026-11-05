@@ -1,0 +1,44 @@
+{
+  "scope": "project-authored watchdog components and independent synthetic PTY test",
+  "overall_license": "not selected by project owner; no license invented",
+  "manufacturer_source_included": false,
+  "manufacturer_patch_included": false,
+  "binary_or_field_evidence_included": false,
+  "export_files": [
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "fbdc4678a0164998e4a9e7486295450d342f0d3e15948bedc4125fb694986244",
+      "bytes": 603
+    },
+    {
+      "path": "README.md",
+      "sha256": "c8e669cc3d8962ab69aae33a208674a8cb8fc300e353445dbe726f7b1a1347f4",
+      "bytes": 1195
+    },
+    {
+      "path": "docs/INTEGRATION.md",
+      "sha256": "fd59cea644925e8d5615279125c72a9248bb01d626cfe1d2c4e9c30682d0df7c",
+      "bytes": 5296
+    },
+    {
+      "path": "docs/PUBLICATION_BOUNDARY.md",
+      "sha256": "8e3bf2f75b9b3e44cc4250338d4040336f865acfbd7835082d3413f3db7d5c76",
+      "bytes": 1154
+    },
+    {
+      "path": "include/charging_robot/bounded_serial_tx.hpp",
+      "sha256": "645515a9c64e95a0bfe8499b1f3d44c0d678c07aa7e99b18a6113efbf4ecc99d",
+      "bytes": 1490
+    },
+    {
+      "path": "include/charging_robot/command_watchdog.hpp",
+      "sha256": "40fd773c5dfc70e84ad06b0bca2eea138e75f27c3a93fcca7127d17d354c9c6c",
+      "bytes": 4543
+    },
+    {
+      "path": "tests/driver_watchdog_test.cpp",
+      "sha256": "13bccb223e6e25dc6c76f39c4f86be1d81f01abfcf444e71599dd8ab1ba0351d",
+      "bytes": 6298
+    }
+  ]
+}

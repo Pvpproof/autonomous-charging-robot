@@ -62,6 +62,7 @@ class Simulation(Node):
         if self.gui:
             self.bridge.gui_heartbeat(self.map_sha)
             if self.held:self.bridge.return_heartbeat(True)
+            if getattr(self,'run_session',None) and getattr(self,'keepalive',True):self.bridge.return_keepalive(self.run_session)
         stamp=self.get_clock().now().to_msg()
         if self.emit_odom:
             m=Odometry();m.header.stamp=stamp;m.header.frame_id='odom_combined';m.child_frame_id='base_footprint'
