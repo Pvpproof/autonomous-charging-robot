@@ -7,6 +7,7 @@ class Arbiter:
     MODES = ('stop', 'navigation', 'manual', 'return')
 
     def __init__(self):
+        self.return_speed=.05
         self.owner = None
         self.sequence = -1
         self.packet_at = None
@@ -60,7 +61,7 @@ class Arbiter:
                 if mode != 'stop' or not self.quiet(now) or v != 0 or w != 0:
                     raise ValueError('reset requires fresh continuous standstill')
                 self.fault = None
-            if mode == 'return' and (v > 0 or abs(v) > .05 or abs(w) > abs(v)/1.78+1e-9):
+            if mode == 'return' and (v > 0 or abs(v) > self.return_speed or abs(w) > abs(v)/1.78+1e-9):
                 raise ValueError('return command exceeds independent envelope')
             if mode == 'manual' and (abs(v) > .3 or abs(w) > abs(v)/1.78+1e-9):
                 raise ValueError('manual command exceeds envelope')
@@ -78,6 +79,8 @@ class Arbiter:
             self.fail(str(error))
 
     def navigation(self, v, w, now):
+        if self.mode=='return' and (abs(v)>.001 or abs(w)>.001):
+            self.fail('navigation velocity during return');return
         if not all(math.isfinite(x) for x in (v, w, now)):
             self.fail('invalid navigation velocity'); return
         self.nav, self.nav_at = (v, w), now

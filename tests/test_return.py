@@ -76,6 +76,11 @@ class RuntimeTests(unittest.TestCase):
         r=self.build();r.heartbeat(10.,True)
         out=r.tick(snapshot(odom_pose=(.31,0.,0.),map_to_odom=(.69,0.,0.)),10.,owns_control=True)
         self.assertIn('漂移',out['reason'])
+    def test_future_alignment_correction_stops_before_effective_tf_changes(self):
+        r=self.build();self.start(r);r.heartbeat(10.05,True)
+        out=r.tick(snapshot(10.05,latest_map_to_odom=(.69,0.,0.)),10.05,owns_control=True)
+        self.assertEqual(r.runner.phase,'stopped');self.assertEqual(out['v'],0.)
+        self.assertIn('最新地图校正',out['reason'])
     def test_session_map_and_frame_failures(self):
         for change in [dict(localization_epoch='new'),dict(map_sha256='new'),dict(map_grid_sha='new'),
                        dict(odom_frame='odom'),dict(odom_frame_valid=False),dict(alignment_age=.26)]:

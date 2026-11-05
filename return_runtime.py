@@ -1,10 +1,40 @@
 """Feedback return state machine. No ROS, hardware, or automatic frame alignment."""
 import copy
 import math
+from pathlib import Path
+import yaml
 from chassis_route import observe
 from route_cycle import CycleError, StartStore, near
 from supervised_draft import SupervisedDraft
 from pose_aware_reverse import PoseAwareReversePursuit
+
+
+def read_alignment_tolerance(path):
+    """Read the existing AMCL validity horizon; never change navigation parameters."""
+    try:
+        data=yaml.safe_load(Path(path).read_bytes())
+        tolerance=data['amcl']['ros__parameters']['transform_tolerance']
+        if type(tolerance) in (int,float) and math.isfinite(tolerance) and tolerance>=0:
+            return float(tolerance)
+    except (OSError,ValueError,KeyError,TypeError):
+        pass
+    return None
+
+
+def alignment_timing(ros_now,valid_until,received_age,tolerance):
+    """AMCL stamps TF at laser measurement time + transform_tolerance.
+
+    A future validity horizon is not a future sensor measurement. Receipt
+    freshness and inferred measurement freshness are checked independently.
+    """
+    if (tolerance is None or not all(math.isfinite(x) for x in
+            (ros_now,valid_until,received_age,tolerance)) or tolerance<0 or received_age<0):
+        return math.inf,False,math.inf
+    source_age=ros_now-(valid_until-tolerance)
+    clock_valid=source_age>=-.05
+    age=max(0.,source_age,received_age) if clock_valid else math.inf
+    return age,clock_valid,source_age
+
 
 
 def compose(a, b):
@@ -35,7 +65,8 @@ def coordinate_sample(snapshot, now):
     if not isinstance(stamp, (int, float)) or not math.isfinite(stamp):
         raise CycleError('定位测量时间无效')
     return dict(source_stamp=stamp, map_grid_sha=snapshot['map_grid_sha'],pose=list(snapshot['pose']),
-                odom_pose=list(snapshot['odom_pose']), map_to_odom=list(snapshot['map_to_odom']))
+                odom_pose=list(snapshot['odom_pose']), map_to_odom=list(snapshot['map_to_odom']),
+                odom_source_stamp=snapshot.get('odom_source_stamp',stamp),observed_w_rad_s=snapshot['velocity'][1])
 
 
 def check_plan(plan):
@@ -95,7 +126,19 @@ class ReturnRuntime:
             raise CycleError('当前加载地图与记录地图不同')
         if snapshot.get('localization_epoch') != self.plan['localization_epoch']:
             raise CycleError('定位会话已变化；旧坐标不能自动恢复')
+        from session_revalidation import validate_binding,runtime_identity
+        if self.plan.get('prepared_runtime_identity') is not None and runtime_identity(snapshot)!=self.plan['prepared_runtime_identity']:
+            raise CycleError('准备后控制链进程身份改变')
+        adopted=validate_binding(self.plan,snapshot,now,starting=starting)
+        if adopted is not None:self.anchor=adopted
         point = coordinate_sample(snapshot, now)
+        # Check an announced AMCL correction before its future validity horizon.
+        latest=snapshot.get('latest_map_to_odom')
+        if latest is not None:
+            if len(latest)!=3 or not all(math.isfinite(v) for v in latest):
+                raise CycleError('最新地图校正无效')
+            if not near(latest,self.anchor['map_to_odom'],.08,.05):
+                raise CycleError('最新地图校正相对记录停点跳变，停止返程')
         if point['map_grid_sha'] != self.anchor['map_grid_sha']:
             raise CycleError('实际地图消息内容与记录不同')
         # Never translate/rotate a stored path to hide an unexplained discrepancy.
@@ -109,7 +152,8 @@ class ReturnRuntime:
             old = self.last_coordinate
             if point['source_stamp'] < old['source_stamp']:
                 raise CycleError('坐标测量时间倒退')
-            if point['source_stamp'] == old['source_stamp'] and point != old:
+            identity_keys=('source_stamp','pose','odom_pose','map_to_odom','map_grid_sha')
+            if point['source_stamp'] == old['source_stamp'] and any(point[k]!=old[k] for k in identity_keys):
                 raise CycleError('相同时间戳的坐标发生变化')
             if point['source_stamp'] > old['source_stamp']:
                 dt = point['source_stamp']-old['source_stamp']

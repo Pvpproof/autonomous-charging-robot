@@ -17,6 +17,9 @@ from docking_state import readiness, goal_error
 from power_status import power_text
 from route_cycle import StartStore, CycleError
 from chassis_route import ChassisSession
+from raw_odom_mode import RawChassisSession,SOURCE
+from navigation_status import navigation_reasons,button_status
+from session_revalidation import load_source
 from return_hold_pad import HoldPad
 
 ROOT=Path(__file__).resolve().parent
@@ -31,6 +34,7 @@ class Window(W.QMainWindow):
         self.nav_output_buffer=''
         self.cleanup=None;self.allow_close=False
         self.docking_active=False;self.docking_process=None;self.chassis_session=None
+        self.imported_return_plan=None
         self.document=None;self.stations=None;self.target=None;self.free_goal=None;self.live_seq=-1;self.latest={}
         self.pending_goal=None;self.active_map=None;self.last_state=None;self.latest_map_seen=0
         self.form_dirty=False;self.loading_fields=False;self.editing_index=-1
@@ -151,9 +155,11 @@ class Window(W.QMainWindow):
         self.goal_button=self.button('在地图选择导航目标',lambda:self.tool('goal'),nl)
         self.free_go_button=self.button('导航到选定目标',self.navigate_free,nl,True)
         self.go_button=self.button('前往选中预停靠位',self.navigate,nl,True)
-        self.record_route=W.QCheckBox('记录实际去程（自动倒车尚未启用）');nl.addWidget(self.record_route)
-        self.route_note=W.QLabel('先保存起点参考，再勾选记录并导航；不调用机械臂。');self.route_note.setWordWrap(True);nl.addWidget(self.route_note)
+        self.go_status=W.QLabel();self.go_status.setWordWrap(True);nl.addWidget(self.go_status)
+        self.record_route=W.QCheckBox('记录实际去程（同会话底盘原始里程）');nl.addWidget(self.record_route)
+        self.route_note=W.QLabel('定位后勾选记录并导航；返程使用本轮原始里程，不套地图起点参考。');self.route_note.setWordWrap(True);nl.addWidget(self.route_note)
         self.return_button=W.QPushButton('准备沿实测轨迹返程');self.return_button.clicked.connect(self.prepare_return);self.return_button.setEnabled(False);nl.addWidget(self.return_button)
+        self.import_return_button=self.button('旧地图轨迹不可用于原始里程模式',self.import_return_route,nl);self.import_return_button.setEnabled(False)
         self.return_short=W.QCheckBox('首次短测：最多 3 秒 / 实测 0.15 米');self.return_short.setChecked(True);nl.addWidget(self.return_short)
         self.return_hold=HoldPad(self);self.return_hold.held_changed.connect(self.return_held_changed);self.return_hold.setEnabled(False);nl.addWidget(self.return_hold)
         self.return_stop=W.QPushButton('停止返程');self.return_stop.clicked.connect(self.stop_return);nl.addWidget(self.return_stop)
@@ -577,12 +583,13 @@ class Window(W.QMainWindow):
         if self.latest.get('busy'):self.error('已有导航任务，请先取消或等待完成。');return
         if not self.confirm('前往“{}”？\nX {:.2f} m，Y {:.2f} m，朝向 {:.1f}°\n确认定位正确、底盘通道畅通、工具已收拢。'.format(label,pose[0],pose[1],math.degrees(pose[2]))):return
         request_id=None
+        self.imported_return_plan=None
         if self.chassis_session:
             self.chassis_session.stop('新导航请求，旧记录不自动恢复',time.monotonic());self.chassis_session=None
         if self.record_route.isChecked():
             self.latest=self.bridge.snapshot()
             try:
-                self.chassis_session=ChassisSession(self.document.fingerprint,self.start_store().path,self.logdir,self.latest,time.monotonic())
+                self.chassis_session=RawChassisSession(self.document.fingerprint,self.start_store().path,self.logdir,self.latest,time.monotonic(),self.bridge.raw_samples_since)
                 request_id=self.chassis_session.goal_id
             except (OSError,ValueError,KeyError) as error:self.error('无法开始实际轨迹记录：'+str(error));return
         try:self.bridge.request_goal(pose,request_id=request_id)
@@ -603,14 +610,38 @@ class Window(W.QMainWindow):
             self.route_note.setText(session.status())
         except (OSError,ValueError,KeyError) as error:
             session.core.stop_or_take_over('记录失败：'+str(error));self.route_note.setText(session.status())
+        if session.core.phase=='blocked' and isinstance(session,RawChassisSession) and not getattr(session,'stop_requested',False):
+            session.stop_requested=True
+            if self.bridge:self.bridge.emergency_stop()
+            self.log('原始去程记录失败，已请求停车：'+str(session.block_reason))
         self.update_return_ui()
 
+    def import_return_route(self):
+        self.error('原始里程模式必须同面板、同里程会话重新录去程，不能导入旧地图轨迹。');return
+        if self.offline or not self.bridge or not self.document:return
+        if self.docking_guard():return
+        selected,_=W.QFileDialog.getOpenFileName(self,'选择原去程记录 cycle.json',str(ROOT/'logs'),'去程记录 (cycle.json)')
+        if not selected:return
+        try:
+            source=load_source(Path(selected).parent,self.document.yaml_path)
+            old=source['plan']
+            if not self.confirm('将原轨迹几何保留，并绑定当前的新会话。\n来源轮次 '+old['cycle_id']+'\n请独立核实：车辆确在原记录停点附近、地标/激光与地图重合、通道清空、机构收拢、人员持续监护，物理断电由现场人员负责。\n不会平移旧路线、不会自动移动；重验后30秒内准备。'):return
+            confirmations={key:True for key in ('at_recorded_stop_verified','landmark_alignment_checked',
+                'operator_present','route_cleared','arm_stowed','physical_stop_user_managed')}
+            self.imported_return_plan=self.bridge.revalidate_saved_route(Path(selected).parent,self.document.yaml_path,confirmations)
+            receipt=self.logdir/('revalidated-'+self.imported_return_plan['cycle_id']+'.json')
+            write_json(receipt,self.imported_return_plan)
+            self.log('旧轨迹已显式重验，尚未执行',source_cycle_id=old['cycle_id'],new_cycle_id=self.imported_return_plan['cycle_id'],receipt=str(receipt))
+            self.latest=self.bridge.snapshot();self.update_return_ui()
+        except (OSError,ValueError,KeyError,TypeError) as error:
+            self.imported_return_plan=None;self.error('旧轨迹重验失败：'+str(error))
+
     def prepare_return(self):
-        if self.offline or not self.bridge or not self.chassis_session:return
+        if self.offline or not self.bridge or (not self.chassis_session and not self.imported_return_plan):return
         if self.docking_guard():return
         try:
-            plan=self.chassis_session.return_candidate()
-            if not self.confirm('按实际轨迹倒车返回，保持原车身朝向。\n请现场逐项确认：人员持续监护、通道清空、机械臂和枪头收拢、线缆无牵拉、实体断电按钮可及，其他遥控已交接。\n没有后向自动避障；记录轨迹无法发现新进入的障碍。\n'+('短测：0.05 m/s，最多3秒或实测0.15米，先到即请求停车。' if self.return_short.isChecked() else '完整返程：0.05 m/s，按住运行；全程保持现场监护。')):return
+            plan=self.imported_return_plan or self.chassis_session.return_candidate()
+            if not self.confirm('按同会话原始里程轨迹闭环倒车，保持原车身朝向。地图仅用于去程导航。轮滑或被推动无法靠这套里程保证识别。\n请现场逐项确认：人员持续监护、通道清空、机械臂和枪头收拢、线缆无牵拉、实体断电按钮可及，其他遥控已交接。\n没有后向自动避障；记录轨迹无法发现新进入的障碍。\n'+('短测：0.05 m/s，最多3秒或实测0.15米，先到即请求停车。' if self.return_short.isChecked() else '完整返程：{:.2f} m/s，按住运行；全程保持现场监护。'.format(self.latest.get('arbiter',{}).get('return_speed_m_s',.05)))):return
             confirmations={name:True for name in ('operator_present','route_cleared','physical_stop_ready',
                 'arm_stowed','exclusive_control_confirmed','no_rear_detection_acknowledged')}
             self.bridge.prepare_return(plan,self.start_store().path,self.document.yaml_path,
@@ -631,23 +662,34 @@ class Window(W.QMainWindow):
         state=self.latest.get('return_state',{})
         active=self.latest.get('return_active',False)
         arbiter=self.latest.get('arbiter',{})
-        eligible=(not self.offline and self.chassis_session is not None and
-            self.chassis_session.core.phase=='outbound_stopped' and self.navigation_map_matches() and
+        eligible=(not self.offline and (self.imported_return_plan is not None or (self.chassis_session is not None and
+            self.chassis_session.core.phase=='outbound_stopped')) and
             not active and not self.latest.get('busy') and not self.latest.get('software_stop') and
             not self.latest.get('manual') and not self.docking_active and not self.cleanup and
             self.latest.get('arbiter_age',math.inf)<=.25 and arbiter.get('commissioned') is True and
-            not arbiter.get('fault') and arbiter.get('mode')=='stop')
+            not arbiter.get('fault') and arbiter.get('mode')=='stop' and
+            not (arbiter.get('release_profile')=='supervised_trial' and arbiter.get('full_trial_consumed')) and
+            arbiter.get('raw_odom_ready') is True and self.latest.get('raw_odom') is not None and
+            not self.latest.get('raw_odom_error'))
         self.return_button.setEnabled(eligible)
-        self.return_short.setEnabled(not active)
+        short_only=arbiter.get('release_profile')=='short_only'
+        full_trial=arbiter.get('release_profile')=='supervised_trial'
+        if short_only:self.return_short.setChecked(True)
+        if full_trial:self.return_short.setChecked(False)
+        self.return_short.setEnabled(not active and not short_only and not full_trial)
+        self.import_return_button.setEnabled(False)
         self.return_hold.setEnabled(active)
         self.return_stop.setEnabled(active)
         labels={'idle':'未准备','ready':'已准备，等待按住','running':'正在沿实测轨迹倒车',
-            'goal_wait_still':'已到记录起点，等待实测停稳','complete':'实测返程完成，已保存实际停点',
+            'goal_wait_still':'已到记录起点，等待实测停稳','complete':'已回到本轮里程起点并停稳',
             'stopped':'返程已停止，需重新核查'}
         text=labels.get(state.get('phase'),'未准备')
         if state.get('reason'):text+='：'+str(state['reason'])
+        if full_trial:text+='\n一次完整试验 · {:.2f} m/s · 松开停车；运行后本次授权不再复用。'.format(arbiter.get('return_speed_m_s',.05))
         if not arbiter.get('commissioned'):text+='\n尚未完成现场验收，实车输出禁用。'
-        self.return_note.setText(text+'\n人工持续监护，无后向自动避障；轨迹不能发现新增障碍。')
+        if self.latest.get('raw_odom_error'):text+='\n原始里程未就绪：'+str(self.latest['raw_odom_error'])
+        self.return_button.setToolTip(text)
+        self.return_note.setText(text+'\n同会话原始里程闭环；轮滑无独立位置验证。人工持续监护，无后向自动避障。')
         if active:
             for button in (self.manual_button,self.connect_button,self.disconnect_button,self.nav_button,
                 self.mapping_button,self.initial_button,self.apply_initial_button,self.go_button,
@@ -701,9 +743,24 @@ class Window(W.QMainWindow):
         self.free_go_button.setEnabled(can_go and self.free_goal is not None)
         i=self.list.currentRow()
         self.go_button.setEnabled(can_go and self.stations is not None and i>=0 and self.stations.points[i]['pre_dock'] is not None)
-        for button in (self.free_go_button,self.go_button):button.setToolTip('需定位、雷达和导航就绪，并选择目标；不影响地图编辑' if not button.isEnabled() else '确认后才会发送导航目标')
+        self.refresh_go_status()
 
         self.update_docking_ui()
+
+    def refresh_go_status(self):
+        reasons=navigation_reasons(self.latest,offline=self.offline,loaded=self.document is not None,
+            matching=self.navigation_map_matches(),mode=self.mode,cleanup=bool(self.cleanup),
+            docking=self.docking_active,manual=self.keyboard.armed or self.latest.get('manual',False) or
+            self.latest.get('manual_stop_pending',False),backend_failure=self.backend_failure)
+        free=list(reasons)
+        if self.free_goal is None:free.append('请先在地图选择目标位置和朝向')
+        station=list(reasons);i=self.list.currentRow()
+        if self.stations is None or i<0:station.append('请先选择一个充电点')
+        elif self.stations.points[i]['pre_dock'] is None:station.append('选中充电点尚未设置预停靠位')
+        free_text=button_status(self.free_go_button.isEnabled(),free)
+        station_text=button_status(self.go_button.isEnabled(),station)
+        self.free_go_button.setToolTip(free_text);self.go_button.setToolTip(station_text)
+        self.go_status.setText('选定目标：'+free_text+'\n预停靠位：'+station_text)
 
     def docking_guard(self):
         if self.docking_active:

@@ -1,10 +1,11 @@
 """Offline kinematic experiment only. No ROS, sockets or device API.
 
-Returns numerical control values; this module performs no device I/O.
-The supervised return candidate uses these helpers, without hardware validation.
+Returns numbers for simulation; no executable robot adapter exists here.
 """
 import bisect
+import json
 import math
+from pathlib import Path
 
 
 def wrap(angle):return math.atan2(math.sin(angle),math.cos(angle))
@@ -74,3 +75,36 @@ def experiment(name,curvature,feedback=True):
         ideal=(ideal[0]+v*math.cos(ideal[2])*dt,ideal[1]+v*math.sin(ideal[2])*dt,
                wrap(ideal[2]+w*dt))
     raise ValueError(name+': no convergence')
+
+
+def audit():
+    # Matches the READ source expression sign(wz)*vx/min_turning_r.
+    vx,wz,radius=-.1,.2,1.5
+    legacy_wz=math.copysign(1.,wz)*vx/radius
+    sign_preserving_wz=math.copysign(min(abs(wz),abs(vx)/radius),wz)
+    assert legacy_wz<0<sign_preserving_wz
+    # Driver publishes [-pi/2,+pi/2], historical base->laser rotation is identity.
+    # All finite rays in that interval have x_base >= laser_x (0.386m).
+    coverage={}
+    for name,x,y in [('front',1.,0.),('rear',-1.,0.),('rear_left',-1.,.5)]:
+        angle=math.atan2(y+.00182,x-.386)
+        coverage[name]=abs(angle)<=math.pi/2
+    assert coverage==dict(front=True,rear=False,rear_left=False)
+    cases=[('straight',lambda s:0.),('left_arc',lambda s:1/3),
+           ('right_arc',lambda s:-1/3),('s_bend',lambda s:.3*math.sin(s*math.pi/2))]
+    results=[experiment(name,k) for name,k in cases]
+    assert all(r['endpoint_error_m']<.04 and r['yaw_error_rad']<.05 for r in results)
+    reference=experiment('straight_without_actual_feedback',lambda s:0.,False)
+    assert reference['endpoint_error_m']>results[0]['endpoint_error_m']
+    return dict(offline_only=True,source_constraint_example=dict(vx=vx,wz_requested=wz,
+        min_turning_radius=radius,source_formula_output_wz=legacy_wz,
+        sign_preserving_limit_wz=sign_preserving_wz,binary_behavior_verified=False),
+        configured_ray_visibility=coverage,physical_coverage_verified=False,
+        simulations=results,without_actual_feedback=reference,
+        no_collision_or_dynamics_model=True)
+
+
+if __name__=='__main__':
+    result=audit()
+    (Path(__file__).parent/'offline-results.json').write_text(json.dumps(result,indent=2)+'\n')
+    print(json.dumps(result,indent=2))

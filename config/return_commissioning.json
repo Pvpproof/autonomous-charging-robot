@@ -1,1 +1,20 @@
-{"commissioned": false, "reason": "待现场核验输出交接、下位机失联停车与短距离试验；本文件不构成硬件证明"}
+{
+  "schema_version": 2,
+  "profile": "disabled",
+  "commissioned": false,
+  "deployment_id": "public-source-example",
+  "return_coordinate_mode": "raw_driver_odom_v1",
+  "return_speed_m_s": 0.15,
+  "feedback_speed_limit_m_s": 0.4,
+  "physical_stop_evidence": {
+    "user_confirmed": false,
+    "agent_tested": false
+  },
+  "site_authorization": {
+    "operator_present": false,
+    "route_cleared": false,
+    "arm_stowed": false,
+    "other_controls_handed_over": false
+  },
+  "full_route_acceptance_receipt": null
+}

@@ -1,170 +1,190 @@
 {
-  "source": "Completed isolated return candidate, 2026-11-05; not deployed or hardware validated",
+  "source": "Read-only snapshot of user-accepted hold-to-run raw-odom return; runtime data excluded",
   "files": [
     {
-      "file": "app.py",
-      "source_sha256": "6bc87dab840b5380242117fa807cb044948ab64c4813007ad38894b6e7e21cf8",
-      "published_sha256": "6bc87dab840b5380242117fa807cb044948ab64c4813007ad38894b6e7e21cf8",
+      "file": "raw_odom_mode.py",
+      "live_sha256": "ab90760810b96af8ee211366648f9193bf4428ba066dc00ec4cfcf70e50d638e",
+      "published_sha256": "ab90760810b96af8ee211366648f9193bf4428ba066dc00ec4cfcf70e50d638e",
       "modified_for_publication": false
     },
     {
-      "file": "canvas.py",
-      "source_sha256": "1911428c96a86e36f3a68ed834d7b3f0c48b63eb488487b57a1ae6edd47504ad",
-      "published_sha256": "1911428c96a86e36f3a68ed834d7b3f0c48b63eb488487b57a1ae6edd47504ad",
-      "modified_for_publication": false
-    },
-    {
-      "file": "chassis_route.py",
-      "source_sha256": "ee91e3780361f473196f6618046a6d3ba171a79a46ccbf258b083ee03d0c24cf",
-      "published_sha256": "ee91e3780361f473196f6618046a6d3ba171a79a46ccbf258b083ee03d0c24cf",
-      "modified_for_publication": false
-    },
-    {
-      "file": "control_arbiter.py",
-      "source_sha256": "10f7517f00387d11bdd7cf1c65d5e4f67301130c7941a094d4cdb62c21258162",
-      "published_sha256": "10f7517f00387d11bdd7cf1c65d5e4f67301130c7941a094d4cdb62c21258162",
-      "modified_for_publication": false
-    },
-    {
-      "file": "control_arbiter_node.py",
-      "source_sha256": "c89277346e0a218947daa1277723f00bb2c5f4e726bfa44f1b751dfa90fb31ad",
-      "published_sha256": "c89277346e0a218947daa1277723f00bb2c5f4e726bfa44f1b751dfa90fb31ad",
-      "modified_for_publication": false
-    },
-    {
-      "file": "docking_console.py",
-      "source_sha256": "dc0d403f86b1cb8c3e0725099bcd04e4b371706fd4a774c81e17113922f8c4bc",
-      "published_sha256": "ed5a7a5b66430240f99466b58231f3b1443cc8b8a7a37b803853b5b1d3c81a21",
-      "modified_for_publication": true
-    },
-    {
-      "file": "docking_state.py",
-      "source_sha256": "4fe1bb4a948c7edc3b0f99b5df2f32aec787a021bec34b1321221ffae60b5697",
-      "published_sha256": "4fe1bb4a948c7edc3b0f99b5df2f32aec787a021bec34b1321221ffae60b5697",
-      "modified_for_publication": false
-    },
-    {
-      "file": "model.py",
-      "source_sha256": "7ce890b35cd69893fe3983f496392d9e7ff338c044ddf9118ffcd60e1df03eb4",
-      "published_sha256": "7ce890b35cd69893fe3983f496392d9e7ff338c044ddf9118ffcd60e1df03eb4",
-      "modified_for_publication": false
-    },
-    {
-      "file": "navigation.launch.py",
-      "source_sha256": "65b27b34bca3e920bb3409231aa6f863c1d7f6ce96a0efd97077d86fb53efcb7",
-      "published_sha256": "f7206779926f931d8304855c1338159fef452488b05b3662fbb6a7ffeeef9371",
-      "modified_for_publication": true
-    },
-    {
-      "file": "offline_reverse.py",
-      "source_sha256": "7d3b07654b8f8a813654573c21727c1393ae9cd9bc60d490cab319bfa7a0e6e4",
-      "published_sha256": "00d6fd93544a60ca0869baa5b649363747f2c88bb8188ef6693edd2df416c002",
-      "modified_for_publication": true
-    },
-    {
-      "file": "pose_aware_reverse.py",
-      "source_sha256": "823cb98dc69206b2dac407af7500ed6ca664f0110a072680431c9e9bd2add66b",
-      "published_sha256": "5cecd47149fe1c1246c2cfb7248e95da25d6d6ecd35c2753ca2f42a75c1b18e4",
-      "modified_for_publication": true
-    },
-    {
-      "file": "power_status.py",
-      "source_sha256": "871a34c0ece7656ee7ca1f51cfcf3c7f148a11138c686863b61d8c6b2a2e3622",
-      "published_sha256": "871a34c0ece7656ee7ca1f51cfcf3c7f148a11138c686863b61d8c6b2a2e3622",
-      "modified_for_publication": false
-    },
-    {
-      "file": "process_control.py",
-      "source_sha256": "e0f4a520e510c4bb32b9af663ef3e7f457b7c0e2310a7dbedddec972b7902bf8",
-      "published_sha256": "e0f4a520e510c4bb32b9af663ef3e7f457b7c0e2310a7dbedddec972b7902bf8",
-      "modified_for_publication": false
-    },
-    {
-      "file": "return_bridge.py",
-      "source_sha256": "cf7e81c0f4554271bdbb4904df1fae4490a3cd6d3b152e1b195aa604658a4f61",
-      "published_sha256": "cf7e81c0f4554271bdbb4904df1fae4490a3cd6d3b152e1b195aa604658a4f61",
+      "file": "release_policy.py",
+      "live_sha256": "27bbfe8414e475e5cada1d110fd510549dd35db5a7bc24b0de0706b0a47ef142",
+      "published_sha256": "27bbfe8414e475e5cada1d110fd510549dd35db5a7bc24b0de0706b0a47ef142",
       "modified_for_publication": false
     },
     {
       "file": "return_hold_pad.py",
-      "source_sha256": "eff1d3b9752fa40f3f2300f7700fb695bcff0074e6d51c4f922e32db495a49c2",
+      "live_sha256": "eff1d3b9752fa40f3f2300f7700fb695bcff0074e6d51c4f922e32db495a49c2",
       "published_sha256": "eff1d3b9752fa40f3f2300f7700fb695bcff0074e6d51c4f922e32db495a49c2",
       "modified_for_publication": false
     },
     {
-      "file": "return_map.py",
-      "source_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
+      "file": "navigation.launch.py",
+      "live_sha256": "5ddbe4f4300dd121bdcf97007d7c0172e396cafb0194593c2860b6c9eb97f6bd",
+      "published_sha256": "310bebe3a4cb61db54cd28ab7ad45e0c4a166f579c99a92ca4c451c264360ed0",
+      "modified_for_publication": true
+    },
+    {
+      "file": "docking_console.py",
+      "live_sha256": "dc0d403f86b1cb8c3e0725099bcd04e4b371706fd4a774c81e17113922f8c4bc",
+      "published_sha256": "ed5a7a5b66430240f99466b58231f3b1443cc8b8a7a37b803853b5b1d3c81a21",
+      "modified_for_publication": true
+    },
+    {
+      "file": "runtime_provenance.py",
+      "live_sha256": "d870b6df5f669db25ee43dcf65212e0aa5a2f4976710020dcf729e9a0adf7d69",
+      "published_sha256": "d870b6df5f669db25ee43dcf65212e0aa5a2f4976710020dcf729e9a0adf7d69",
+      "modified_for_publication": false
+    },
+    {
+      "file": "passive_map.py",
+      "live_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
       "published_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
       "modified_for_publication": false
     },
     {
-      "file": "return_runtime.py",
-      "source_sha256": "63d6e91c7e9392130397297411739c0961694936b79be0c9534c2e63aafdd3c3",
-      "published_sha256": "63d6e91c7e9392130397297411739c0961694936b79be0c9534c2e63aafdd3c3",
-      "modified_for_publication": false
-    },
-    {
-      "file": "ros_bridge.py",
-      "source_sha256": "68e74db6a716ea3ce3953085d833b5f50042f34dd4126ec81965bf47e8a635f0",
-      "published_sha256": "68e74db6a716ea3ce3953085d833b5f50042f34dd4126ec81965bf47e8a635f0",
-      "modified_for_publication": false
-    },
-    {
-      "file": "route_cycle.py",
-      "source_sha256": "08d4fa898d50148a3ed44c48a1551a794d49dde8b48c38322f52890a9af12a20",
-      "published_sha256": "08d4fa898d50148a3ed44c48a1551a794d49dde8b48c38322f52890a9af12a20",
-      "modified_for_publication": false
-    },
-    {
       "file": "supervised_draft.py",
-      "source_sha256": "51c6e92ee8255067c1ff213c83fabdc693d202a8b547e4a48c5ce52b300a60d9",
+      "live_sha256": "51c6e92ee8255067c1ff213c83fabdc693d202a8b547e4a48c5ce52b300a60d9",
       "published_sha256": "51c6e92ee8255067c1ff213c83fabdc693d202a8b547e4a48c5ce52b300a60d9",
       "modified_for_publication": false
     },
     {
+      "file": "control_arbiter.py",
+      "live_sha256": "e1b4483614ed82ca18839de0a2b2f415112cf6615605fb70b0dddcc37d9c423e",
+      "published_sha256": "e1b4483614ed82ca18839de0a2b2f415112cf6615605fb70b0dddcc37d9c423e",
+      "modified_for_publication": false
+    },
+    {
+      "file": "process_control.py",
+      "live_sha256": "e0f4a520e510c4bb32b9af663ef3e7f457b7c0e2310a7dbedddec972b7902bf8",
+      "published_sha256": "e0f4a520e510c4bb32b9af663ef3e7f457b7c0e2310a7dbedddec972b7902bf8",
+      "modified_for_publication": false
+    },
+    {
+      "file": "pose_aware_reverse.py",
+      "live_sha256": "823cb98dc69206b2dac407af7500ed6ca664f0110a072680431c9e9bd2add66b",
+      "published_sha256": "823cb98dc69206b2dac407af7500ed6ca664f0110a072680431c9e9bd2add66b",
+      "modified_for_publication": false
+    },
+    {
+      "file": "control_arbiter_node.py",
+      "live_sha256": "d6a4028db26f9410fb15cced428a7174908e60edfb332410018e51fdb856557a",
+      "published_sha256": "549e0429c01217976f145ed00b19cc369035c5f39a96df2ab3f5f3fd5c66061e",
+      "modified_for_publication": true
+    },
+    {
       "file": "teleop.py",
-      "source_sha256": "c417acc850e621758bc6662c1c41c3548adc0c6402a6b97bfad76072e00b159c",
+      "live_sha256": "c417acc850e621758bc6662c1c41c3548adc0c6402a6b97bfad76072e00b159c",
       "published_sha256": "c417acc850e621758bc6662c1c41c3548adc0c6402a6b97bfad76072e00b159c",
       "modified_for_publication": false
     },
     {
-      "file": "tests/test_launch.py",
-      "source_sha256": "c6aad9dcda3d032f5d972aacb50a8d79a1a8d3d2212d8fe3c92580e3e4dec02a",
-      "published_sha256": "c6aad9dcda3d032f5d972aacb50a8d79a1a8d3d2212d8fe3c92580e3e4dec02a",
+      "file": "docking_state.py",
+      "live_sha256": "4fe1bb4a948c7edc3b0f99b5df2f32aec787a021bec34b1321221ffae60b5697",
+      "published_sha256": "4fe1bb4a948c7edc3b0f99b5df2f32aec787a021bec34b1321221ffae60b5697",
       "modified_for_publication": false
     },
     {
-      "file": "tests/test_panel.py",
-      "source_sha256": "b25a55859c5a0e84487ce79a49bafd11a40a2bdb8ae09a72cb3c65c9cb490f0d",
-      "published_sha256": "b25a55859c5a0e84487ce79a49bafd11a40a2bdb8ae09a72cb3c65c9cb490f0d",
+      "file": "app.py",
+      "live_sha256": "987fc7fdb1d7d961adaf79cbf3a6e9ea7adcbd826d5f9bd961e391977c6aa364",
+      "published_sha256": "987fc7fdb1d7d961adaf79cbf3a6e9ea7adcbd826d5f9bd961e391977c6aa364",
       "modified_for_publication": false
     },
     {
-      "file": "tests/test_recording.py",
-      "source_sha256": "7c11d20c2002bf670db35455030ef7303c86f8d9b5263a2fa6d6bf0936ef57f8",
-      "published_sha256": "7c11d20c2002bf670db35455030ef7303c86f8d9b5263a2fa6d6bf0936ef57f8",
+      "file": "navigation_status.py",
+      "live_sha256": "3402c8e841d8108554a0309c58bb3f6857562f99a3c31ad666aed51f8f390c1a",
+      "published_sha256": "3402c8e841d8108554a0309c58bb3f6857562f99a3c31ad666aed51f8f390c1a",
       "modified_for_publication": false
     },
     {
-      "file": "tests/test_return.py",
-      "source_sha256": "9c17b5f8f6344b77532f08b8948676516e67aa5bd3796f3c3fbef85c489f79ff",
-      "published_sha256": "9c17b5f8f6344b77532f08b8948676516e67aa5bd3796f3c3fbef85c489f79ff",
-      "modified_for_publication": false
-    },
-    {
-      "file": "tests/test_ros_isolated.py",
-      "source_sha256": "6a47e8b123a1216c8b604b4b33b6340c2d256e2b742e42dbe963d378ed1dd749",
-      "published_sha256": "75536443e613b631693c6553cf123cca53b25871efd2e99d580c2cc7e34376bb",
+      "file": "passive_coordinates.py",
+      "live_sha256": "863ef0610ec9dd1f3901eb101a760201e9cd46f8c19d9c4d7ceb62e1eed918fe",
+      "published_sha256": "6b10100edfcdc399fab99829f73cd6035d8ad1b4d1bc478198ffa282e1e77def",
       "modified_for_publication": true
+    },
+    {
+      "file": "route_cycle.py",
+      "live_sha256": "08d4fa898d50148a3ed44c48a1551a794d49dde8b48c38322f52890a9af12a20",
+      "published_sha256": "08d4fa898d50148a3ed44c48a1551a794d49dde8b48c38322f52890a9af12a20",
+      "modified_for_publication": false
+    },
+    {
+      "file": "return_map.py",
+      "live_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
+      "published_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
+      "modified_for_publication": false
+    },
+    {
+      "file": "power_status.py",
+      "live_sha256": "871a34c0ece7656ee7ca1f51cfcf3c7f148a11138c686863b61d8c6b2a2e3622",
+      "published_sha256": "871a34c0ece7656ee7ca1f51cfcf3c7f148a11138c686863b61d8c6b2a2e3622",
+      "modified_for_publication": false
+    },
+    {
+      "file": "chassis_route.py",
+      "live_sha256": "062b28483cc2046eb12f21459c808e8354c05c6e6bd80f7a86efc8007ccf8f13",
+      "published_sha256": "062b28483cc2046eb12f21459c808e8354c05c6e6bd80f7a86efc8007ccf8f13",
+      "modified_for_publication": false
+    },
+    {
+      "file": "model.py",
+      "live_sha256": "7ce890b35cd69893fe3983f496392d9e7ff338c044ddf9118ffcd60e1df03eb4",
+      "published_sha256": "7ce890b35cd69893fe3983f496392d9e7ff338c044ddf9118ffcd60e1df03eb4",
+      "modified_for_publication": false
+    },
+    {
+      "file": "return_runtime.py",
+      "live_sha256": "a2ad31d3d939cc83f81fcd8d6fa8e2fd80d6d507c5dc9d72922af24920fba7f8",
+      "published_sha256": "a2ad31d3d939cc83f81fcd8d6fa8e2fd80d6d507c5dc9d72922af24920fba7f8",
+      "modified_for_publication": false
+    },
+    {
+      "file": "session_revalidation.py",
+      "live_sha256": "c5a08949e13cf3b223501f08dd191aa8bb6fae19996f2e1f1a63a08543fe2958",
+      "published_sha256": "c5a08949e13cf3b223501f08dd191aa8bb6fae19996f2e1f1a63a08543fe2958",
+      "modified_for_publication": false
+    },
+    {
+      "file": "ros_bridge.py",
+      "live_sha256": "60008fc8c24c05d72e623ba04ab9478ee057cf688fa6c8ccdede0720868a9169",
+      "published_sha256": "60008fc8c24c05d72e623ba04ab9478ee057cf688fa6c8ccdede0720868a9169",
+      "modified_for_publication": false
+    },
+    {
+      "file": "canvas.py",
+      "live_sha256": "1911428c96a86e36f3a68ed834d7b3f0c48b63eb488487b57a1ae6edd47504ad",
+      "published_sha256": "1911428c96a86e36f3a68ed834d7b3f0c48b63eb488487b57a1ae6edd47504ad",
+      "modified_for_publication": false
+    },
+    {
+      "file": "return_bridge.py",
+      "live_sha256": "ca15e8b8940e054e46cb8400ff9a0bcf021df7030e74ec41730362c997169faa",
+      "published_sha256": "ca15e8b8940e054e46cb8400ff9a0bcf021df7030e74ec41730362c997169faa",
+      "modified_for_publication": false
+    },
+    {
+      "file": "offline_reverse.py",
+      "live_sha256": "7d3b07654b8f8a813654573c21727c1393ae9cd9bc60d490cab319bfa7a0e6e4",
+      "published_sha256": "7d3b07654b8f8a813654573c21727c1393ae9cd9bc60d490cab319bfa7a0e6e4",
+      "modified_for_publication": false
     }
   ],
-  "publication_changes": {
-    "docking_console.py": "Replace embedded device account path with local environment override/current-user path",
-    "navigation.launch.py": "Require explicit local Nav2 parameters; reject documentation placeholder",
-    "offline_reverse.py": "Remove historical device-coverage audit and automatic result-file entry point",
-    "pose_aware_reverse.py": "Clarify numerical helper is used by candidate, without hardware validation",
-    "tests/test_ros_isolated.py": "Use explicit fail-closed isolation errors, including under Python optimization",
-    "start.sh": "New portable launcher; offline path skips robot workspace; live requires explicit setup",
-    "config/return_commissioning.json": "Preserve candidate default false; no operational lock or device state included"
-  }
+  "additional_project_sources": [
+    {
+      "file": "native/raw_odom_relay.cpp",
+      "sha256": "41c3fb32707ec365405e28e69816a2b6d89696c57f1b94f4ce30ebcd2aa17834"
+    },
+    {
+      "file": "native/CMakeLists.txt",
+      "sha256": "4a8f1e29c5b5c962cdc2341657498d20f29768ceff7976fb8156585bac3bb16c"
+    }
+  ],
+  "publication_adapters": [
+    "external docking command path retained from previous public version",
+    "navigation parameters and gated driver prefix supplied explicitly via environment",
+    "startup requires locally built native relay",
+    "default disabled configuration without site authorizations",
+    "synthetic tests only; captured-route fixtures excluded"
+  ]
 }

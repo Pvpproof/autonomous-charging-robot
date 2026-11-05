@@ -8,7 +8,7 @@ from unittest.mock import Mock
 
 class IsolationGuardTests(unittest.TestCase):
     def guard(self, *, reference='host', current='private', interfaces=('lo',), devices=False):
-        source = Path(__file__).with_name('test_ros_isolated.py').read_text()
+        source = Path(__file__).with_name('legacy_ros_harness.py').read_text()
         function = next(node for node in ast.parse(source).body
                         if isinstance(node, ast.FunctionDef) and node.name == 'isolation')
         module = ast.Module(body=[function], type_ignores=[])

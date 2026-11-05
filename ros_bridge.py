@@ -28,7 +28,9 @@ from ament_index_python.packages import get_package_share_directory
 
 
 from return_bridge import ReturnBridge
+from runtime_provenance import panel_identity
 from return_map import grid_digest
+from return_runtime import read_alignment_tolerance,alignment_timing
 
 
 class Bridge(ReturnBridge, Node):
@@ -50,6 +52,7 @@ class Bridge(ReturnBridge, Node):
         self.manual=False; self.manual_target=(0.,0.); self.manual_stamp=0.
         self.manual_stop_pending=False; self.server_active=False;self.software_stop=False
         self.init_return()
+        self.alignment_tolerance=read_alignment_tolerance(Path(__file__).parent/'config/nav2_ackermann.yaml')
         # Legacy zero requests are routed to a disconnected input; the arbiter owns chassis output.
         self.manual_pub=self.create_publisher(Twist,'/charging_control/legacy_zero',1)
         self.create_subscription(GoalStatusArray,'/navigate_to_pose/_action/status',self.nav_status,
@@ -61,6 +64,8 @@ class Bridge(ReturnBridge, Node):
         self.create_subscription(OccupancyGrid,'/map',self.on_map,mapq)
         self.create_subscription(LaserScan,'/scan',self.on_scan,qos_profile_sensor_data)
         self.create_subscription(Odometry,'/odom',self.on_odom,qos_profile_sensor_data)
+        from std_msgs.msg import String
+        self.create_subscription(String,'/charging_control/raw_odometry',self.on_raw_odom,10)
         self.create_subscription(Float32,'/PowerVoltage',self.on_power,qos_profile_sensor_data)
         self.create_subscription(Float32,'/PowerVoltage48V',self.on_power48,qos_profile_sensor_data)
         self.create_subscription(NavPath,'/plan',self.on_path,10)
@@ -91,6 +96,7 @@ class Bridge(ReturnBridge, Node):
             if self.stop_observation.duration(self.stop_observation.first)<2.:raise ValueError('需连续停稳两秒再解除')
             self.software_stop=False;self.manual=False;self.manual_target=(0.,0.)
             self.return_runtime=None;self.reset_arbiter=True
+            if self.raw_tracker.error:self.raw_tracker.reset()
         self.event('software_stop_released',automatic_resume=False)
 
     def enable_manual(self):
@@ -183,9 +189,12 @@ class Bridge(ReturnBridge, Node):
                     now=time.monotonic()
                     if getattr(self,'alignment_stamp',None)!=alignment_stamp:
                         self.alignment_stamp=alignment_stamp;self.alignment_received_at=now
+                    adjusted_age,clock_valid,source_age=alignment_timing(
+                        self.get_clock().now().nanoseconds/1e9,alignment_stamp,now-self.alignment_received_at,self.alignment_tolerance)
                     self.paired_pose=dict(odom_pose=planar(odom_tf),map_to_odom=planar(alignment),
-                        odom_tf_age=age,alignment_age=max(0.,alignment_age,now-self.alignment_received_at),
-                        paired_at=now,alignment_future_valid=alignment_age>=-.6)
+                        latest_map_to_odom=planar(raw_alignment),
+                        odom_tf_age=age,alignment_age=adjusted_age,alignment_source_age=source_age,
+                        paired_at=now,alignment_future_valid=clock_valid)
 
                     self.pose=(t.transform.translation.x,t.transform.translation.y,yaw_of(t.transform.rotation))
                     stamp=t.header.stamp.sec+t.header.stamp.nanosec/1e9
@@ -337,8 +346,10 @@ class Bridge(ReturnBridge, Node):
             paired['odom_tf_age']+=elapsed;paired['alignment_age']+=elapsed
             if not paired.pop('alignment_future_valid'):paired['alignment_age']=math.inf
         return dict(**paired,odom_frame=self.odom_frame,base_frame='base_footprint',
-            odom_frame_valid=self.odom_frame_valid,map_sha256=self.gui_map_sha,map_grid_sha=getattr(self,'map_grid_sha',None),
+            odom_frame_valid=self.odom_frame_valid,odom_source_stamp=self.odom_source_stamp,map_sha256=self.gui_map_sha,map_grid_sha=getattr(self,'map_grid_sha',None),
             return_state=dict(self.return_state),return_active=self.return_active(),
+            **self.raw_snapshot(now),
+            runtime_identity=panel_identity(self.localization_epoch,self.arbiter_state),
             arbiter=dict(self.arbiter_state),arbiter_age=now-self.arbiter_at if self.arbiter_at else math.inf,
             navigation_id=self.navigation_id,localization_epoch=self.localization_epoch,
             pose_stamp=self.pose_stamp,pose_received_at=self.pose_received_at,
@@ -363,3 +374,23 @@ class Bridge(ReturnBridge, Node):
         self.manual_tick()
         self.ros_executor.shutdown(timeout_sec=2);self.thread.join(timeout=2)
         self.destroy_node();rclpy.shutdown()
+
+    def on_raw_odom(self,message):
+        import json
+        from raw_odom_mode import diagnostic
+        with self.lock:
+            try:
+                data=json.loads(message.data)
+                if data.get('error'):raise ValueError(data['error'])
+                if self.raw_tracker.identity is None:return
+                if data['relay_instance']!=self.raw_tracker.identity.get('relay_instance'):raise ValueError('原始封装会话改变')
+                self.raw_tracker.update(data['pose'],data['velocity'],data['source_stamp'],time.monotonic(),
+                    self.get_clock().now().nanoseconds/1e9,data['frame'],data['child'],data['publisher_gid'])
+                if self.return_runtime is not None:self.event('return_raw_feedback',sample=self.raw_tracker.latest,relay_sequence=data.get('relay_sequence'),relay_instance=data.get('relay_instance'),relay_received_ros=data.get('relay_received_ros'))
+            except (ValueError,KeyError,TypeError) as e:
+                first=self.raw_tracker.error is None or self.raw_tracker.rejection is None
+                if self.raw_tracker.rejection is None:self.raw_tracker.rejection={'reason':str(e),'envelope':diagnostic(locals().get('data')), 'raw_epoch':self.raw_tracker.epoch}
+                self.raw_tracker.error=str(e)
+                if first or not getattr(self,'raw_rejection_reported',None)==self.raw_tracker.epoch:
+                    self.event('raw_odometry_rejected',rejection=self.raw_tracker.rejection);self.raw_rejection_reported=self.raw_tracker.epoch
+                if self.return_active():self.software_stop=True;self.return_state=self.return_runtime.stop(str(e))

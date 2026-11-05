@@ -47,3 +47,8 @@ htmlcov/
 
 # Do not broadly ignore JSON or YAML: reviewed synthetic examples may be useful.
 # Ignore rules do not remove already tracked data and do not replace review.
+
+# External gated driver and locally built relay
+/driver-overlay/
+/raw-odom-tools/
+/native/build/

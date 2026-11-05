@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The caller must first establish private network/PID/IPC/user namespaces,
 # a read-only host root and a private /dev without robot serial devices.
-# test_ros_isolated.py checks isolation before creating any ROS nodes.
+# test_ros_raw.py checks isolation before creating any ROS nodes.
 set -eo pipefail
 cd "$(dirname "$0")/.."
 source /opt/ros/humble/setup.bash
@@ -15,4 +15,4 @@ export QT_QPA_PLATFORM=offscreen
 export XDG_RUNTIME_DIR=/tmp/runtime-return
 export PYTHONDONTWRITEBYTECODE=1
 export PYTHONPATH="$PWD:$PWD/tests:${PYTHONPATH:-}"
-exec /usr/bin/python3 tests/test_ros_isolated.py "$@"
+exec /usr/bin/python3 tests/test_ros_raw.py "$@"

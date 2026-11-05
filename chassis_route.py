@@ -22,6 +22,8 @@ def observe(s,map_sha):
 
 class ChassisSession:
     def __init__(self,map_sha,start_path,logdir,snapshot,now):
+        from return_runtime import coordinate_sample
+        coordinate_sample(snapshot,now)
         self.coordinate_samples=[]
         self.coordinate_snapshot=snapshot
         self.coordinate_error=None
@@ -107,7 +109,8 @@ class ChassisSession:
         names={'outbound':'记录实际去程','arrival_check':'导航成功，继续记录至停稳',
                'outbound_stopped':'去程记录已完成；自动返程尚未启用',
                'blocked':'记录已失效：'+str(c.block_reason)}
-        return names.get(c.phase,c.phase)+'\n实测轨迹 {} 点；不调用机械臂。'.format(len(c.trace))
+        pair_note=('配对失效：'+self.coordinate_error) if self.coordinate_error else '坐标配对 {} 点'.format(len(self.coordinate_samples))
+        return names.get(c.phase,c.phase)+'\n实测轨迹 {} 点；{}；不调用机械臂。'.format(len(c.trace),pair_note)
 
 
 class ReturnMonitor:

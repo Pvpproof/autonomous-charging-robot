@@ -1,0 +1,262 @@
+"""Raw driver odometry is a scoped integrator, never the identically named EKF TF.
+No ROS, device, network or automatic recovery. Sensor-consistency is not slip detection.
+"""
+import copy,hashlib,json,math,uuid
+from collections import deque
+from release_policy import feedback_speed_exceeded
+from pathlib import Path
+from route_cycle import CycleError,near
+from pose_aware_reverse import PoseAwareReversePursuit
+from offline_reverse import wrap
+
+SOURCE='raw_driver_odom_measurements_v1'
+def key(value):return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()
+def distance(a,b):return math.dist(a[:2],b[:2])
+def finite(v):return isinstance(v,(int,float)) and not isinstance(v,bool) and math.isfinite(v)
+
+# Preserve the original global speed envelope. Per-message w/v is ill-conditioned
+# near zero speed; certify the measured path over every interval instead.
+MIN_RETURN_RADIUS=1.78
+RAW_MAX_LINEAR=.6
+RAW_MAX_ANGULAR=RAW_MAX_LINEAR/MIN_RETURN_RADIUS+.05
+# Existing tracker yaw integration discrepancy tolerance, reused once for the
+# whole path (not accumulated per sample and not an asserted sensor accuracy).
+HEADING_OBSERVATION_BUDGET=.015
+
+class HeadingCone:
+    """All intervals: |delta unwrapped yaw| <= arc/R + fixed observation budget.
+
+    Running min/max make this O(n), including zero-length rotations. The fixed
+    budget does not grow when samples, time or control direction are changed.
+    """
+    def __init__(self):
+        self.last=None;self.arc=0.;self.yaw=0.;self.low=0.;self.high=0.
+    def update(self,pose):
+        if self.last is None:self.last=list(pose);return None
+        self.arc+=distance(pose,self.last);self.yaw+=wrap(pose[2]-self.last[2])
+        lower=self.yaw-self.arc/MIN_RETURN_RADIUS
+        upper=self.yaw+self.arc/MIN_RETURN_RADIUS
+        excess=max(lower-self.low,self.high-upper)
+        self.last=list(pose)
+        if excess>HEADING_OBSERVATION_BUDGET+1e-9:
+            return dict(code='path_heading_cone',arc_m=self.arc,unwrapped_yaw_rad=self.yaw,
+                        excess_rad=excess,budget_rad=HEADING_OBSERVATION_BUDGET,
+                        min_radius_m=MIN_RETURN_RADIUS,pose=list(pose))
+        self.low=min(self.low,lower);self.high=max(self.high,upper)
+        return None
+
+def diagnostic(value):
+    # Rejected non-finite or malformed input must still be valid JSON evidence.
+    if isinstance(value,float) and not math.isfinite(value):return repr(value)
+    if isinstance(value,dict):return {str(k):diagnostic(v) for k,v in value.items()}
+    if isinstance(value,(list,tuple)):return [diagnostic(v) for v in value]
+    if value is None or isinstance(value,(str,int,float,bool)):return value
+    return repr(value)
+
+class RawTracker:
+    def __init__(self):
+        self.identity=None;self.source_key=None;self.epoch=uuid.uuid4().hex;self.error=None;self.latest=None;self.sequence=0;self.history=deque(maxlen=6000);self.still_since=None;self.still_samples=0;self.rejection=None;self.pending=None
+    def fail(self,text):
+        self.error=text;self.still_since=None;self.still_samples=0
+        if self.rejection is None:self.rejection=dict(reason=text,raw_epoch=self.epoch,source_key=self.source_key,input=diagnostic(self.pending),last_valid=diagnostic(copy.deepcopy(self.latest)))
+        raise CycleError(text)
+    def bind(self,identity):
+        if not identity:return
+        digest=key(identity)
+        if self.source_key and digest!=self.source_key:
+            self.error='原始里程发布端/驱动身份改变；需停车显式复位并重新录制'
+        self.identity=copy.deepcopy(identity);self.source_key=digest
+    def reset(self):
+        self.epoch=uuid.uuid4().hex;self.error=None;self.latest=None;self.history.clear();self.still_since=None;self.still_samples=0;self.rejection=None;self.pending=None
+    def update(self,pose,velocity,stamp,received,ros_now,frame,child,publisher_gid):
+        if self.error:raise CycleError(self.error)
+        if not self.identity:return None
+        self.pending=dict(pose=pose,velocity=velocity,source_stamp=stamp,received_at=received,ros_now=ros_now,frame=frame,child=child,publisher_gid=publisher_gid)
+        if publisher_gid!=self.identity['publisher_gid']:return self.fail('原始里程消息发布端不符')
+        if frame!='odom_combined' or child!='base_footprint':return self.fail('原始里程帧不符')
+        if len(pose)!=3 or len(velocity)!=3 or not all(finite(x) for x in (*pose,*velocity,stamp,received,ros_now)):return self.fail('原始里程含无效数值')
+        if not 0<=ros_now-stamp<=.25:return self.fail('原始里程源时间过期或倒退')
+        if abs(velocity[0])>RAW_MAX_LINEAR:return self.fail('原始里程纵向速度异常')
+        if abs(velocity[1])>.01:return self.fail('原始里程侧向速度异常')
+        if abs(velocity[2])>RAW_MAX_ANGULAR:return self.fail('原始里程绝对角速度异常')
+        old=self.latest
+        if old:
+            dt=stamp-old['source_stamp'];dr=received-old['received_at']
+            if not 0<dt<=.25 or not 0<dr<=.25:return self.fail('原始里程重复、倒序或失联；旧轨迹失效')
+            expected=abs(velocity[0])*dt
+            if distance(pose,old['pose'])>.6*dt+.01:return self.fail('原始里程位移跳变/重置')
+            dx=velocity[0]*math.cos(old['pose'][2])*dt;dy=velocity[0]*math.sin(old['pose'][2])*dt
+            if math.hypot(pose[0]-old['pose'][0]-dx,pose[1]-old['pose'][1]-dy)>.02+expected*.15:return self.fail('原始位移与速度积分不一致')
+            if abs(wrap(pose[2]-old['pose'][2]-velocity[2]*dt))>.015+abs(velocity[2]*dt)*.2:return self.fail('原始航向跳变/重置')
+        quiet=abs(velocity[0])<=.01 and abs(velocity[2])<=.02
+        if quiet:
+            if self.still_since is None:self.still_since=received
+            self.still_samples+=1
+        else:self.still_since=None;self.still_samples=0
+        self.sequence+=1
+        sample=dict(sequence=self.sequence,source=SOURCE,source_key=self.source_key,raw_epoch=self.epoch,source_stamp=stamp,received_at=received,pose=list(pose),velocity=list(velocity),published_frame=frame,child_frame=child,publisher_gid=publisher_gid)
+        self.latest=sample;self.history.append(sample);self.pending=None;return sample
+    def current(self,now,ros_now):
+        if self.error:raise CycleError(self.error)
+        if not self.latest:raise CycleError('尚未取得经发布端验证的原始里程')
+        if not 0<=now-self.latest['received_at']<=.25 or not 0<=ros_now-self.latest['source_stamp']<=.25:raise CycleError('原始里程反馈过期')
+        return copy.deepcopy(self.latest)
+    def since(self,sequence):
+        if self.error:raise CycleError(self.error)
+        if self.history and sequence<self.history[0]['sequence']-1:raise CycleError('原始里程记录缓存溢出')
+        return copy.deepcopy([s for s in self.history if s['sequence']>sequence])
+
+def scope(snapshot):
+    v=snapshot.get('raw_odom');a=snapshot.get('arbiter',{})
+    if not isinstance(v,dict) or snapshot.get('raw_odom_error'):raise CycleError(snapshot.get('raw_odom_error') or '原始里程未就绪')
+    if (not a.get('raw_odom_ready') or a.get('raw_source_key')!=v['source_key'] or not a.get('raw_epoch') or not a.get('instance_id')):raise CycleError('独立仲裁未验证同一原始里程源')
+    return dict(source_key=v['source_key'],panel_raw_epoch=v['raw_epoch'],arbiter_raw_epoch=a['raw_epoch'],arbiter_instance=a['instance_id'],panel_owner=snapshot['control_owner'])
+
+def sample_now(snapshot,now):
+    s=snapshot.get('raw_odom')
+    if snapshot.get('raw_odom_error') or not s:raise CycleError(snapshot.get('raw_odom_error') or '缺少原始里程')
+    if not 0<=now-s['received_at']<=.25 or not 0<=snapshot['ros_now']-s['source_stamp']<=.25:raise CycleError('原始里程过期')
+    return s
+
+def check_raw_plan(plan):
+    if plan.get('source')!=SOURCE or plan.get('reverse_only') is not True or plan.get('executable') is not False:raise CycleError('不是本模式原始里程候选')
+    pts=plan.get('raw_samples',[])
+    if len(pts)<3:raise CycleError('原始轨迹不足')
+    reverse=[];last=None;cone=HeadingCone()
+    for s in pts:
+        if s['source_key']!=plan['scope']['source_key'] or s['raw_epoch']!=plan['scope']['panel_raw_epoch']:raise CycleError('轨迹混入其他原始会话')
+        if not all(finite(x) for x in (*s['pose'],*s['velocity'],s['source_stamp'],s['received_at'])):raise CycleError('轨迹数值无效')
+        if s['velocity'][0]<-.01:raise CycleError('去程含倒车，不能纯倒车返回')
+        violation=cone.update(s['pose'])
+        if violation:raise CycleError('去程累计航向/路径曲率不支持受限返程：'+json.dumps(violation,ensure_ascii=False))
+        if last and (s['sequence']!=last['sequence']+1 or not 0<s['source_stamp']-last['source_stamp']<=.25):raise CycleError('轨迹缺失、倒序或间断')
+        if not reverse or s['pose']!=reverse[-1]:reverse.append(s['pose'])
+        last=s
+    reverse=list(reversed(reverse))
+    if reverse!=plan['poses'] or key(pts)!=plan['samples_sha256']:raise CycleError('轨迹几何或样本被修改')
+    if sum(distance(a,b) for a,b in zip(reverse,reverse[1:]))<.05:raise CycleError('轨迹长度不足')
+    for a,b in zip(reverse,reverse[1:]):
+        if (b[0]-a[0])*math.cos(a[2])+(b[1]-a[1])*math.sin(a[2])>.01:raise CycleError('原始去程方向不支持纯倒车')
+
+class RawChassisSession:
+    def __init__(self,map_sha,start_path,logdir,snapshot,now,provider):
+        self.core=self;self.phase='outbound';self.block_reason=None;self.cycle_id=uuid.uuid4().hex;self.goal_id=uuid.uuid4().hex;self.return_goal_id=uuid.uuid4().hex;self.candidate_attempted=False;self.map_sha=map_sha;self.provider=provider
+        self.scope=scope(snapshot);s=sample_now(snapshot,now);self.cone=HeadingCone();self.cone.update(s['pose']);self.rejection=None;self.rejection_written=False
+        if snapshot.get('software_stop') or snapshot.get('manual') or snapshot.get('busy') or snapshot.get('docking_hold'):raise CycleError('控制权尚未交接')
+        if snapshot.get('raw_stationary_s',0)<2 or snapshot.get('raw_stationary_samples',0)<3:raise CycleError('原始反馈尚未连续停稳2秒')
+        self.samples=[copy.deepcopy(s)];self.cursor=s['sequence'];self.arrived_at=None;self.written=0;self.last_save=now;self.last_phase=None
+        self.directory=Path(logdir)/('raw-chassis-'+self.cycle_id);self.directory.mkdir();self.save(now)
+    def stop(self,reason,now):
+        if self.phase!='blocked':self.phase='blocked';self.block_reason=reason
+        self.save(now)
+    def stop_or_take_over(self,reason):
+        if self.phase!='blocked':self.phase='blocked';self.block_reason=reason
+    def update(self,snapshot,map_sha,now):
+        if self.phase not in ('outbound','arrival_check'):return
+        try:
+            if scope(snapshot)!=self.scope:raise CycleError('原始里程/控制会话变化，重新录制')
+            sample_now(snapshot,now)
+            if snapshot.get('software_stop') or snapshot.get('manual') or snapshot.get('manual_stop_pending') or snapshot.get('docking_hold'):raise CycleError('记录期间停车/操控接管')
+            for s in self.provider(self.cursor):
+                if s['sequence']!=self.cursor+1:raise CycleError('原始记录缺样')
+                if s['velocity'][0]<-.01:raise CycleError('去程出现倒车')
+                self.samples.append(s);self.cursor=s['sequence']
+                violation=self.cone.update(s['pose'])
+                if violation:
+                    self.rejection=dict(reason='去程累计航向/路径曲率不支持受限返程',geometry=violation,input=copy.deepcopy(s))
+                    raise CycleError(self.rejection['reason'])
+            if snapshot.get('goal_status') in (4,5,6) and snapshot.get('navigation_id')==self.goal_id:
+                if snapshot['goal_status']!=4:raise CycleError('去程导航未成功')
+                self.arrived_at=snapshot.get('goal_finished_at');self.phase='arrival_check'
+            if self.phase=='arrival_check' and self.arrived_at is not None:
+                quiet_since=snapshot.get('raw_stationary_since')
+                if quiet_since is not None and now-max(quiet_since,self.arrived_at)>=2 and snapshot.get('raw_stationary_samples',0)>=3:
+                    tail=[p for p in self.samples if p['received_at']>=now-2.]
+                    if tail and max(distance(p['pose'],tail[0]['pose']) for p in tail)>.01:raise CycleError('停稳尾段原始位姿不稳定')
+                    self.phase='outbound_stopped'
+        except (ValueError,KeyError) as e:
+            self.phase='blocked';self.block_reason=str(e)
+            if self.rejection is None:self.rejection=copy.deepcopy(snapshot.get('raw_odom_rejection') or snapshot.get('arbiter',{}).get('raw_odom_rejection') or dict(reason=str(e)))
+        self.save(now)
+    def save(self,now):
+        if self.rejection is not None and not self.rejection_written:
+            (self.directory/'first-rejection.json').write_text(json.dumps(diagnostic(self.rejection),ensure_ascii=False,indent=2,allow_nan=False)+'\n');self.rejection_written=True
+        with (self.directory/'actual-raw-trace.jsonl').open('a') as f:
+            for s in self.samples[self.written:]:f.write(json.dumps(s)+'\n')
+        self.written=len(self.samples)
+        if self.last_phase!=self.phase or now-self.last_save>=5:
+            data=dict(schema_version=1,source=SOURCE,cycle_id=self.cycle_id,goal_id=self.goal_id,phase=self.phase,block_reason=self.block_reason,rejection=self.rejection,scope=self.scope,samples=self.samples,map_sha_for_navigation_only=self.map_sha,return_execution_enabled=False)
+            tmp=self.directory/'cycle.tmp';tmp.write_text(json.dumps(data,indent=2)+'\n');tmp.replace(self.directory/'cycle.json');self.last_phase=self.phase;self.last_save=now
+    def return_candidate(self):
+        self.candidate_attempted=True
+        if self.phase!='outbound_stopped':raise CycleError('原始去程未完成并停稳')
+        poses=[]
+        for s in reversed(self.samples):
+            if not poses or s['pose']!=poses[-1]:poses.append(s['pose'])
+        plan=dict(schema_version=1,source=SOURCE,frame_id='session_scoped_raw_driver_integrator',published_frame='odom_combined',cycle_id=self.cycle_id,goal_id=self.return_goal_id,scope=self.scope,raw_samples=self.samples,poses=poses,reverse_only=True,executable=False,map_sha_for_navigation_only=self.map_sha,samples_sha256=key(self.samples))
+        check_raw_plan(plan);(self.directory/'return-candidate.json').write_text(json.dumps(plan,indent=2)+'\n');return copy.deepcopy(plan)
+    def status(self):return {'outbound':'记录同会话原始里程去程','arrival_check':'导航成功，等待原始反馈停稳','outbound_stopped':'原始去程记录完成；可核验受控短测','blocked':'记录失效：'+str(self.block_reason)}.get(self.phase,self.phase)+'\n原始样本 {} 点；地图仅用于去程导航。'.format(len(self.samples))
+
+class RawReturnRuntime:
+    def __init__(self,plan,conditions,store_path,*,feedback_speed_limit_m_s=None):
+        conditions.require();check_raw_plan(plan);
+        if conditions.speed_limit_m_s not in (.05,.10,.15) or conditions.minimum_radius_m<1.78:raise CycleError("返程速度/转弯半径配置不支持")
+        self.plan=copy.deepcopy(plan);self.c=conditions;self.runner=self;self.phase='ready';self.reason=None;self.started=None;self.heartbeat_at=None;self.held=False;self.last=None;self.distance=0.;self.progress=0.;self.last_progress=None;self.progress_anchor=0.;self.goal_at=None;self.stop_anchor=None;self.receipt=Path(store_path).parent/('raw-return-'+plan['cycle_id']+'.json')
+        if self.receipt.exists():raise CycleError('本轮原始返程已完成，不允许重复覆盖')
+        self.feedback_speed_limit=conditions.speed_limit_m_s*1.2 if feedback_speed_limit_m_s is None else feedback_speed_limit_m_s
+        if type(self.feedback_speed_limit) not in (int,float) or not math.isfinite(self.feedback_speed_limit) or not conditions.speed_limit_m_s<=self.feedback_speed_limit<=.40:raise CycleError('反馈速度停车边界配置无效')
+        self.follower=PoseAwareReversePursuit(self.plan['poses'],self.c.speed_limit_m_s,1.78);self.cone=HeadingCone()
+    def result(self,v=0.,w=0.):return dict(phase=self.phase,reason=self.reason,v=v,w=w,cycle_id=self.plan['cycle_id'],goal_id=self.plan['goal_id'],coordinate_mode=SOURCE,measured_distance_m=self.distance,progress_m=self.progress)
+    def stop(self,reason):self.phase='stopped';self.reason=reason;return self.result()
+    def heartbeat(self,now,held):
+        if self.phase in ('stopped','complete'):return
+        self.held=bool(held);self.heartbeat_at=now
+        if not held:self.stop('松手停车；不自动恢复')
+    def check_coordinates(self,snapshot,now,starting=False):
+        if scope(snapshot)!=self.plan['scope']:raise CycleError('原始里程/发布端/控制会话已变化；不得套旧轨迹')
+        p=sample_now(snapshot,now)
+        if snapshot.get('software_stop') or snapshot.get('manual') or snapshot.get('manual_stop_pending') or snapshot.get('docking_hold') or snapshot.get('busy') or snapshot.get('cancel_requested'):raise CycleError('控制权/停车锁定异常')
+        if not 0<=snapshot.get('scan_age',float('inf'))<=.25:raise CycleError('雷达反馈过期（不代表后向避障）')
+        if starting and not near(p['pose'],self.plan['raw_samples'][-1]['pose'],.10,.10):raise CycleError('当前原始位姿与本会话实测停点不符')
+        if p['velocity'][0]>.01 or feedback_speed_exceeded(p['velocity'][0],self.feedback_speed_limit):raise CycleError('原始返程实测速度异常')
+        return p
+    def tick(self,snapshot,now,owns_control):
+        try:
+            p=self.check_coordinates(snapshot,now,starting=self.started is None)
+            if self.cone.update(p['pose']):raise CycleError('返程实测累计航向/路径曲率异常')
+            if not self.held or self.heartbeat_at is None or not 0<=now-self.heartbeat_at<=.25:raise CycleError('保持运行心跳丢失')
+            if self.started is None:
+                if snapshot.get('raw_stationary_s',0)<2:raise CycleError('尚未实测停稳')
+                self.started=now;self.phase='running';self.last_progress=now
+            if not owns_control:return self.result() # Zero-only acquisition handshake; independent arbiter requires standstill.
+            if self.last:
+                dt=p['source_stamp']-self.last['source_stamp']
+                if dt<0 or now-self.last_tick>.25:raise CycleError('返程控制/测量时序异常')
+                if dt>0:
+                    step=distance(p['pose'],self.last['pose'])
+                    if dt>.25 or step>self.c.speed_limit_m_s*dt+.025:raise CycleError('返程原始位姿跳变/失联')
+                    self.distance+=step
+            self.last=copy.deepcopy(p);self.last_tick=now
+            if now-self.started>=self.c.max_time_s or self.distance>=self.c.max_distance_m:raise CycleError('达到本次短测边界')
+            if self.phase=='goal_wait_still':
+                if not near(p['pose'],self.plan['poses'][-1],.04,.05):raise CycleError('到点后原始位姿离开容差')
+                if snapshot.get('raw_stationary_since') is not None and now-max(snapshot['raw_stationary_since'],self.goal_at)>=2:
+                    self.phase='complete';self.receipt.write_text(json.dumps(dict(source=SOURCE,scope=self.plan['scope'],actual_raw_stop=p,physical_docking_verified=False,hardware_tested=False),indent=2)+'\n')
+                return self.result()
+            choices=[];lengths=self.follower.s
+            for i,(a,b) in enumerate(zip(self.plan['poses'],self.plan['poses'][1:])):
+                length=lengths[i+1]-lengths[i]
+                if length<1e-8:continue
+                t=max(0.,min(1.,((p['pose'][0]-a[0])*(b[0]-a[0])+(p['pose'][1]-a[1])*(b[1]-a[1]))/length**2));progress=lengths[i]+t*length
+                if self.progress-.03<=progress<=self.progress+.15:
+                    xy=[a[0]+t*(b[0]-a[0]),a[1]+t*(b[1]-a[1])];heading=a[2]+t*wrap(b[2]-a[2]);choices.append((distance(p['pose'],xy),progress,abs(wrap(p['pose'][2]-heading))))
+            if not choices:raise CycleError('原始轨迹没有连续可达投影')
+            cross,progress,yaw=min(choices)
+            if cross>.10 or yaw>.10:raise CycleError('原始轨迹横向/朝向误差超限')
+            self.progress=max(self.progress,progress)
+            if self.progress>self.progress_anchor+.005:self.last_progress=now;self.progress_anchor=self.progress
+            if now-self.last_progress>2:raise CycleError('倒车持续无原始里程进展，停车')
+            v,w,done,_=self.follower.control(p['pose'])
+            if done:self.phase='goal_wait_still';self.goal_at=now;return self.result()
+            return self.result(v,w)
+        except (ValueError,KeyError,TypeError) as e:return self.stop(str(e))

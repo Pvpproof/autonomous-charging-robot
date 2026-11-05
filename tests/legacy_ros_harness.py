@@ -1,5 +1,7 @@
 """Real Bridge/TF/ROS/arbiter, synthetic vehicle, private network/device namespace."""
 import json
+from dataclasses import replace
+import copy
 import math
 import os
 from pathlib import Path
@@ -18,6 +20,7 @@ from sensor_msgs.msg import LaserScan
 from tf2_msgs.msg import TFMessage
 from action_msgs.msg import GoalStatusArray
 from control_arbiter_node import ArbiterNode
+from release_policy import ReleasePolicy,TrialLimiter
 from ros_bridge import Bridge
 from model import MapDocument
 from return_map import saved_grid_digest
@@ -38,12 +41,13 @@ def isolation():
         raise RuntimeError('Robot serial devices must be absent from the private test namespace')
 
 
+
 class Simulation(Node):
     def __init__(self,bridge):
         super().__init__('controller_server',enable_rosout=False)
         self.bridge=bridge;self.x=1.;self.v=self.w=0.;self.y=self.yaw=0.
         self.held=False;self.gui=True;self.emit_odom=True;self.emit_tf=True
-        self.shift=0.;self.active=False;self.last=time.monotonic();self.commands=[]
+        self.travel_multiplier=1.;self.shift=0.;self.active=False;self.last=time.monotonic();self.commands=[]
         self.odom=self.create_publisher(Odometry,NS+'/odom',qos_profile_sensor_data)
         self.scan=self.create_publisher(LaserScan,NS+'/scan',qos_profile_sensor_data)
         self.tf=self.create_publisher(TFMessage,NS+'/tf',10)
@@ -53,20 +57,25 @@ class Simulation(Node):
         self.create_timer(.05,self.tick)
     def tick(self):
         now=time.monotonic();dt=now-self.last;self.last=now
-        self.x+=self.v*math.cos(self.yaw)*dt;self.y+=self.v*math.sin(self.yaw)*dt;self.yaw+=self.w*dt
+        if hasattr(self,'feedback_override'):self.v,self.w=self.feedback_override()
+        self.x+=self.v*math.cos(self.yaw)*dt*self.travel_multiplier;self.y+=self.v*math.sin(self.yaw)*dt*self.travel_multiplier;self.yaw+=self.w*dt
         if self.gui:
             self.bridge.gui_heartbeat(self.map_sha)
             if self.held:self.bridge.return_heartbeat(True)
         stamp=self.get_clock().now().to_msg()
         if self.emit_odom:
             m=Odometry();m.header.stamp=stamp;m.header.frame_id='odom_combined';m.child_frame_id='base_footprint'
-            m.twist.twist.linear.x=self.v;m.twist.twist.angular.z=self.w;self.odom.publish(m)
+            m.twist.twist.linear.x=self.v;m.twist.twist.angular.z=self.w
+            m.pose.pose.position.x=self.x;m.pose.pose.position.y=self.y
+            m.pose.pose.orientation.z=math.sin(self.yaw/2);m.pose.pose.orientation.w=math.cos(self.yaw/2)
+            self.odom.publish(m)
         scan=LaserScan();scan.header.stamp=stamp;scan.header.frame_id='laser';self.scan.publish(scan)
         if self.emit_tf:
             transforms=[]
             for parent,child,x,y,yaw in [('map','odom_combined',self.shift,0.,0.),
                     ('odom_combined','base_footprint',self.x,self.y,self.yaw)]:
-                tf=TransformStamped();tf.header.stamp=stamp;tf.header.frame_id=parent;tf.child_frame_id=child
+                tf=TransformStamped();tf.header.stamp=copy.deepcopy(stamp);tf.header.frame_id=parent;tf.child_frame_id=child
+                if parent=='map' and child=='odom_combined':tf.header.stamp.sec+=1
                 tf.transform.translation.x=x;tf.transform.translation.y=y
                 tf.transform.rotation.z=math.sin(yaw/2);tf.transform.rotation.w=math.cos(yaw/2);transforms.append(tf)
             self.tf.publish(TFMessage(transforms=transforms))
@@ -107,8 +116,10 @@ class Integration(unittest.TestCase):
         self.arbiter=ArbiterNode(isolated=True)
         self.sim=Simulation(self.bridge);self.sim.map_sha=MapDocument.load(self.map_path).fingerprint
         self.sink=Sink(self.sim)
+        self.behavior=Node('behavior_server',enable_rosout=False)
+        self.behavior_publishers=[self.behavior.create_publisher(Twist,NS+'/navigation',1) for _ in range(4)]
         self.executor=SingleThreadedExecutor()
-        for node in [self.arbiter,self.sim,self.sink]:self.executor.add_node(node)
+        for node in [self.arbiter,self.sim,self.sink,self.behavior]:self.executor.add_node(node)
         self.spin(2.8)
         self.assertTrue(self.arbiter.graph_ok())
         self.bridge.release_stop();self.spin(.35)
@@ -126,7 +137,7 @@ class Integration(unittest.TestCase):
         self.store=self.root/'start.json'
     def tearDown(self):
         self.sim.gui=False
-        for node in [self.sink,self.sim,self.arbiter]:
+        for node in [self.behavior,self.sink,self.sim,self.arbiter]:
             self.executor.remove_node(node);node.destroy_node()
         self.executor.shutdown();self.bridge.close();self.tmp.cleanup()
     def spin(self,seconds):
@@ -195,6 +206,55 @@ class Integration(unittest.TestCase):
             self.assertFalse(node.commissioned)
             node.core.mode='return';node.tick()
         finally:node.destroy_node()
+
+    def short_profile(self):
+        self.arbiter.policy=ReleasePolicy({'profile':'short_only'},isolated_test=True)
+        self.arbiter.limiter=TrialLimiter(self.arbiter.policy);self.arbiter.commissioned=True
+        self.spin(.15)
+    def test_short_only_rejects_full_route_request(self):
+        self.short_profile()
+        confirms={k:True for k in ['operator_present','route_cleared','physical_stop_ready','arm_stowed','exclusive_control_confirmed','no_rear_detection_acknowledged']}
+        with self.assertRaisesRegex(ValueError,'只允许短测'):
+            self.bridge.prepare_return(self.plan,self.store,self.map_path,confirms,short_test=False)
+        self.assertFalse(any(v<0 for _,v,w in self.sink.commands))
+    def test_independent_time_bound_survives_modified_producer_bounds(self):
+        self.short_profile();self.start()
+        self.bridge.return_runtime.runner.conditions=replace(self.bridge.return_runtime.runner.conditions,max_time_s=999.,max_distance_m=999.)
+        self.until(lambda:self.arbiter.limiter.fault is not None,4.)
+        self.assertIn('independent short trial limit',self.arbiter.limiter.fault)
+        self.spin(.15);self.assertEqual(self.sink.commands[-1][1:],(0.,0.))
+    def test_independent_distance_bound_stops_faster_than_three_seconds(self):
+        self.short_profile();self.start();started=time.monotonic();self.sim.travel_multiplier=2.
+        self.bridge.return_runtime.runner.conditions=replace(self.bridge.return_runtime.runner.conditions,max_time_s=999.,max_distance_m=999.)
+        self.until(lambda:self.arbiter.limiter.fault is not None,2.8)
+        self.assertIn('independent short trial limit',self.arbiter.limiter.fault)
+        self.assertLess(time.monotonic()-started,3.)
+    def test_arbiter_restart_does_not_resume_held_return(self):
+        self.start();old=self.arbiter.instance_id
+        self.executor.remove_node(self.arbiter);self.arbiter.destroy_node()
+        self.arbiter=ArbiterNode(isolated=True);self.executor.add_node(self.arbiter)
+        self.assertNotEqual(old,self.arbiter.instance_id)
+        self.until(lambda:self.bridge.software_stop,1.5);self.spin(.4)
+        self.assertEqual(self.sink.commands[-1][1:],(0.,0.));self.assertFalse(self.store.exists())
+    def test_explicit_import_binds_new_session_and_new_odom_anchor(self):
+        source=self.root/'historical';source.mkdir()
+        old=json.loads(json.dumps(self.plan));old['localization_epoch']='historical-epoch';old['cycle_id']='historical-cycle'
+        points=old['coordinate_samples']
+        for p in points:
+            p['odom_pose']=[p['pose'][0]+5.,p['pose'][1],p['pose'][2]];p['map_to_odom']=[-5.,0.,0.]
+            p['observed_w_rad_s']=0.;p['odom_source_stamp']=p['source_stamp']
+        for i in range(1,24):
+            point=json.loads(json.dumps(points[-1]));point['source_stamp']+=.1;point['odom_source_stamp']=point['source_stamp'];points.append(point)
+        trace=[dict(pose=p['pose'],source_stamp=p['source_stamp'],received_at=p['source_stamp'],observed_v_m_s=.05 if i<101 else 0.) for i,p in enumerate(points)]
+        cycle=dict(phase='outbound_stopped',cycle_id=old['cycle_id'],localization_epoch=old['localization_epoch'],map_sha256=old['map_sha256'],trace=trace,coordinate_samples=points,coordinate_error=None)
+        (source/'cycle.json').write_text(json.dumps(cycle));(source/'return-candidate.json').write_text(json.dumps(old))
+        (source/'actual-trace.jsonl').write_text(''.join(json.dumps(p)+'\n' for p in trace))
+        confirms={k:True for k in ['at_recorded_stop_verified','landmark_alignment_checked','operator_present','route_cleared','arm_stowed','physical_stop_user_managed']}
+        bound=self.bridge.revalidate_saved_route(source,self.map_path,confirms)
+        self.assertEqual(bound['poses'],old['poses']);self.assertNotEqual(bound['localization_epoch'],old['localization_epoch'])
+        self.assertAlmostEqual(bound['revalidation']['execution_anchor']['odom_pose'][0],1.,places=2)
+        self.plan=bound;self.start();self.sim.held=False;self.bridge.return_heartbeat(False);self.spin(.2)
+        self.assertEqual(self.sink.commands[-1][1:],(0.,0.))
 
     def test_map_file_change(self):
         self.start();self.map_path.write_text(self.map_path.read_text()+'\n# changed\n')

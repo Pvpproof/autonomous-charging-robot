@@ -1,8 +1,7 @@
 """Offline candidate: reverse pursuit with measured body-yaw feedback.
 
 Does not alter the recorded path or loosen ReturnMonitor's error thresholds.
-This numerical helper is used by the supervised return candidate.
-Its gains have not been validated on a physical vehicle.
+Not wired to ROS or a real vehicle. Gains require validation beyond this route.
 """
 import bisect
 from offline_reverse import ReversePursuit, wrap
