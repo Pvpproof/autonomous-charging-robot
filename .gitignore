@@ -1,0 +1,48 @@
+# Public repository: runtime data and device-specific files stay local.
+# Real-world data, runtime state and backups
+/logs/
+/maps/
+/rollback_*/
+/config/
+/SHA256SUMS
+*.log
+*.jsonl
+*.bag
+*.db3
+*.mcap
+*.bag.active
+
+# Credentials and machine-local settings
+.env
+.env.*
+!.env.example
+.ssh/
+.aws/
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+*credentials*
+*secrets*
+
+# Build, Python, editor and test output
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+build/
+install/
+log/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+
+# Do not broadly ignore JSON or YAML: reviewed synthetic examples may be useful.
+# Ignore rules do not remove already tracked data and do not replace review.
