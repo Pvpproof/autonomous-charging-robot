@@ -1,18 +1,27 @@
-# 依赖与发布范围
+# 依赖与许可核查
 
-本记录来自现有工作台的导入和调用关系，供后续发布源码时逐项复核。当前提交仅含项目文档及忽略规则，不分发下列软件包或其源码、二进制、配置。
+本仓库发布维护者已授权公开的项目自有 Python 源码、测试及文档；不包含第三方库、驱动源码、二进制或厂家参数副本。下表是 2026-11-05 对实际设备已安装包元数据的只读核查，不表示已完成全部依赖的法律兼容性判断，也不是完整依赖锁定文件。
 
-| 依赖 | 用途 | 本轮核实情况 |
-| --- | --- | --- |
-| ROS 2 Humble / rclpy / launch / launch_ros | ROS 节点、消息与启动编排 | 外部依赖；未在本轮核实安装版本及各包许可 |
-| Nav2 / nav2_msgs / nav2_bringup | 导航目标及导航启动 | 外部依赖；未在本轮核实安装版本及各包许可 |
-| PyQt5 | 桌面界面 | 外部依赖；未核实实际安装版本与适用许可，不推定可任意再分发 |
-| NumPy / Pillow / PyYAML | 数组、地图图像与 YAML | 外部依赖；未核实实际安装版本与许可文本 |
-| turn_on_ychd_robot | 底盘驱动 | 本机安装包许可字段为 `TODO: License declaration`，无法据此确定许可 |
-| ychd_robot_keyboard | 键盘方向映射接口 | 本机安装包许可字段为 `TODO: License declaration`，无法据此确定许可 |
-| ychd_nav2 | 厂家导航参数来源 | 本机安装包许可字段为 `TODO: License declaration`；参数副本排除发布 |
-| lslidar_driver | 雷达驱动 | 安装包声明 `GNU General Public License V3.0`；未复制或分发该包 |
-| slam_gmapping | 建图 | 外部依赖；未在本轮核实实际安装包许可 |
-| 外部 charge_robot 命令 | 人工对接流程 | 不属于当前候选源码目录，未复制或发布；不推定许可 |
+| 依赖 | 已安装版本 | 元数据中的许可声明 | 发布范围 |
+| --- | --- | --- | --- |
+| PyQt5 | 5.15.6 | GPL v3 | 外部 GUI 依赖，不复制分发 |
+| NumPy | 1.26.4 | BSD License 分类；元数据还包含 bundled libraries 的各自条款 | 外部依赖，不复制分发 |
+| Pillow | 12.0.0 | MIT-CMU（License-Expression） | 外部依赖，不复制分发 |
+| PyYAML | 6.0.3 | MIT | 外部依赖，不复制分发 |
+| rclpy | 3.3.19 | Apache License 2.0 | 外部 ROS 依赖 |
+| launch | 1.0.13 | Apache License 2.0 | 外部 ROS 依赖 |
+| launch_ros | 0.19.13 | Apache License 2.0 | 外部 ROS 依赖 |
+| nav2_bringup | 1.1.6 | Apache-2.0 | 外部导航依赖 |
+| nav2_msgs | 1.1.20 | Apache-2.0 | 外部消息依赖 |
+| slam_gmapping | 0.0.0 | CreativeCommons-by-nc-sa-2.0 | 非商业条款不能据“已安装”视为任意可再分发；不复制分发 |
+| turn_on_ychd_robot | 0.0.0 | TODO: License declaration | 无法确定许可；不复制分发 |
+| ychd_robot_keyboard | 0.0.0 | TODO: License declaration | 仅调用已安装方向映射接口，不复制其源码；许可待核实 |
+| ychd_nav2 | 0.0.0 | TODO: License declaration | 厂家参数副本排除，改为显式指定本地参数 |
+| lslidar_driver | 1.2.0 | GNU General Public License V3.0 | 不复制分发 |
+| 外部 charge_robot 工具 | 未核实 | 未核实 | 不包含；使用者需自行提供有权使用的工具 |
 
-后续分发源码前，应补齐适用版本、上游来源与许可文本。用户的项目公开授权不替代第三方许可条件。当前未因依赖关系而将整个项目自动指定为某一种许可证。
+工作台还使用 geometry_msgs、nav_msgs、sensor_msgs、std_msgs、action_msgs、tf2_ros、tf2_msgs、ament_index_python 等 ROS 包。本轮未逐项核实这些包的安装版本与许可文本，仓库不包含它们。
+
+元数据来源为本机 Python distribution metadata 与各 ROS 安装包的 package.xml。厂家包中占位许可声明不是有效许可证明。本轮未获取或验证缺失的上游授权，不把用户对自有项目的公开授权扩大到第三方材料。
+
+项目尚未选择整体开源许可证，未添加 LICENSE 或声称 MIT/Apache/GPL 兼容。特别是 PyQt5 的 GPL 声明、建图包的非商业条款及未明确的厂家许可，仍需在打包依赖、分发整套软件或商业部署前核实适用条件；本次公开不包含这些第三方材料。

@@ -3,7 +3,8 @@
 /logs/
 /maps/
 /rollback_*/
-/config/
+/config/*
+!/config/return_commissioning.json
 /SHA256SUMS
 *.log
 *.jsonl

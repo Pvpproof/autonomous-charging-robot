@@ -1,0 +1,5 @@
+# Documentation placeholder only: this is NOT a working Nav2 parameter profile.
+# Obtain a configuration you have permission to use, validate it for your robot,
+# and set CHARGING_NAV2_PARAMS to that local file. Do not use this placeholder
+# for navigation. No vendor parameters, calibration or site data are included.
+{}
