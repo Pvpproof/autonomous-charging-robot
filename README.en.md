@@ -1,10 +1,14 @@
 # Autonomous Charging Robot for GB/T Electric Vehicles
 
+**Arm sources partially included:** charge_robot, ICP, V3, arm simulation and planning applications are authored by Pvpproof. [arm_stack](arm_stack/README.md) contains 40 available historical source/display files and two inactive algorithm examples. Runtime modules and complete simulation assets remain missing; current field identity and deployability are not claimed.
+
 [中文](README.md) · [Architecture](docs/ARCHITECTURE.en.md) · [Deployment](docs/DEPLOYMENT.en.md) · [Testing](docs/TESTING.en.md)
 
 A robotics R&D project integrating mobile navigation, recorded-odometry return and arm docking tools in a PyQt5 / ROS 2 workstation. It demonstrates asynchronous control, state management, modular integration and fault diagnosis, with reusable components for further development.
 
 The title describes the application domain, not standards certification or a validated unattended electrical charging system. Thesis text, site maps, trajectories, calibration and vendor implementations are excluded.
+
+Added [eight traceable historical source files](arm_stack/recovered/README.md), including planning and bridges; completeness and current field identity remain unverified.
 
 ## Workflow
 
@@ -38,8 +42,30 @@ flowchart TB
   BASE --> RELAY[Raw odometry relay]
   RELAY --> REC
   UI --> TERM[Independent test / home terminals]
-  TERM --> ARM[External charge_robot / MoveIt / ICP / V3]
+  TERM --> ARM[Owned charge_robot / ICP / V3 with external MoveIt]
 ```
+
+## Arm and vision
+
+[arm_stack](arm_stack/README.md) contains project-owned test/home workflow, ICP point-cloud matching, V3 RGB PnP, feedback, camera alignment, gun prepose, Cartesian insertion planning and execution wrappers. Panel buttons still use a separately installed tool environment; this archive does not replace field software.
+
+There are 40 historical source/display files with differentiated provenance, plus five explicitly reconstructed files for file status/writing, model display and plan-only startup. This is not an accepted current hardware release. The owner selected 75 mm; public planning and execution policy now agree. Field files were not changed and the update is not field-tested.
+
+## Simulation and planning
+
+```mermaid
+flowchart LR
+  U[Explicit local URDF] --> M[Reconstructed model display]
+  J[Existing real or isolated test joint feedback] --> M
+  M --> V[RViz model and TF]
+  D[External DOBOT Nova2 MoveIt configuration] --> P[Plan-only entry: execution disabled]
+  P --> R[Plan for inspection]
+  G[Official Gazebo and virtual controllers] --> S[Isolated simulation pending setup and validation]
+```
+
+Model-display and plan-only wrappers are included; fake joint publishers, site calibration and a complete Gazebo project are not. Six official model/MoveIt files match historical field hashes, but the complete field revision, meshes and execution adapter still need verification. Pin external dependencies and preserve Dobot notices; see [upstream audit](arm_stack/DOBOT_DEPENDENCY.md).
+
+Source inspection and synthetic tests work without hardware when test dependencies are installed. Actual model/planning visualization requires the reviewed upstream stack. No RViz/MoveIt/Gazebo or hardware run was performed in this update. There are 61 passing targeted tests; these do not establish end-to-end simulation or hardware acceptance.
 
 ## Evidence and limits
 

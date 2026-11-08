@@ -1,0 +1,9 @@
+{
+  "fps": 15,
+  "verification_interval_s": 2.0,
+  "maximum_unverified_s": 6.0,
+  "maximum_recovery_reference_age_s": 8.0,
+  "worker_timeout_s": 12.0,
+  "correction_translation_m": 0.008,
+  "correction_rotation_deg": 8.0
+}

@@ -1,0 +1,94 @@
+{
+  "official_commit": "7807ef8fb31e8f86a76cd474a4a9cddffef6eca9",
+  "historical_inventory_date": "2026-10-29",
+  "rows": [
+    {
+      "file": "LICENSE",
+      "current_official_sha256": "a55351a1634b6cd46d2ca5555459a245761e11ac9956e3771faf343187cf2132",
+      "historical_sha256": [],
+      "matches_historical": null,
+      "declared_license": []
+    },
+    {
+      "file": "nova2_moveit/package.xml",
+      "current_official_sha256": "f7b31eede0676bd8f686bdb90071356392ff864bb03d0f1a88287eb9464b2ca8",
+      "historical_sha256": [],
+      "matches_historical": null,
+      "declared_license": [
+        "BSD"
+      ]
+    },
+    {
+      "file": "dobot_rviz/package.xml",
+      "current_official_sha256": "e1725fc71135c5ae492f1b9762ae225710446cd94ba1b129d68a52c181b0773f",
+      "historical_sha256": [],
+      "matches_historical": null,
+      "declared_license": [
+        "TODO: License declaration"
+      ]
+    },
+    {
+      "file": "cra_description/package.xml",
+      "current_official_sha256": "3c891ceacc864018b609dfc6f446d5efa9b963f9e272265c7152f4d80ef47750",
+      "historical_sha256": [],
+      "matches_historical": null,
+      "declared_license": [
+        "BSD"
+      ]
+    },
+    {
+      "file": "nova2_moveit/config/nova2_robot.srdf",
+      "current_official_sha256": "67a224efb9e32ca66ce4ddfb9e9fb0ea58f6727bdd959d7f3928374dd927a732",
+      "historical_sha256": [
+        "67a224efb9e32ca66ce4ddfb9e9fb0ea58f6727bdd959d7f3928374dd927a732"
+      ],
+      "matches_historical": true,
+      "declared_license": []
+    },
+    {
+      "file": "nova2_moveit/config/kinematics.yaml",
+      "current_official_sha256": "9e1fd6d9405240edcea8e522427ec77f3f483588933ad7a4cfcb50f8f8f8e0db",
+      "historical_sha256": [
+        "9e1fd6d9405240edcea8e522427ec77f3f483588933ad7a4cfcb50f8f8f8e0db"
+      ],
+      "matches_historical": true,
+      "declared_license": []
+    },
+    {
+      "file": "nova2_moveit/config/joint_limits.yaml",
+      "current_official_sha256": "64473c1527f3e019b5e5b92800386f8502bf11595eb15f4491bbabc32351484e",
+      "historical_sha256": [
+        "64473c1527f3e019b5e5b92800386f8502bf11595eb15f4491bbabc32351484e"
+      ],
+      "matches_historical": true,
+      "declared_license": []
+    },
+    {
+      "file": "nova2_moveit/config/nova2_robot.urdf.xacro",
+      "current_official_sha256": "b631a0f32bb1591562e26dff239e4083203f6e5b945d098ab074969fd5351ba7",
+      "historical_sha256": [
+        "b631a0f32bb1591562e26dff239e4083203f6e5b945d098ab074969fd5351ba7"
+      ],
+      "matches_historical": true,
+      "declared_license": []
+    },
+    {
+      "file": "nova2_moveit/config/nova2_robot.ros2_control.xacro",
+      "current_official_sha256": "a6e3a9c941b1b7205b2d7c50997c7748b6720062b5887caed9f7c21f9027a67b",
+      "historical_sha256": [
+        "a6e3a9c941b1b7205b2d7c50997c7748b6720062b5887caed9f7c21f9027a67b"
+      ],
+      "matches_historical": true,
+      "declared_license": []
+    },
+    {
+      "file": "dobot_rviz/urdf/nova2_robot.urdf",
+      "current_official_sha256": "8bb87a5cca0f215f0e4b996d32beffcc210f2bb31d9b6e28e058ea10997be652",
+      "historical_sha256": [
+        "8bb87a5cca0f215f0e4b996d32beffcc210f2bb31d9b6e28e058ea10997be652"
+      ],
+      "matches_historical": true,
+      "declared_license": []
+    }
+  ]
+}

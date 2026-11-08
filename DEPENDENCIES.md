@@ -1,5 +1,7 @@
 # 依赖与许可核查
 
+归属更正：用户确认 charge_robot 工具链、ICP、V3、机械臂仿真与路径规划应用均为 Pvpproof 自写。下文“外部”表示当前仓库未收录；不代表这些应用是第三方。其调用的 SDK、MoveIt、模型、相机驱动和专用标定仍需分别核查。当前补全状态见 [ARM_SOURCE_SCOPE](docs/ARM_SOURCE_SCOPE.md)。
+
 本仓库发布维护者已授权公开的项目自有 Python 源码、测试及文档；不包含第三方库、驱动源码、二进制或厂家参数副本。下表是 2026-11-05 对实际设备已安装包元数据的只读核查，不表示已完成全部依赖的法律兼容性判断，也不是完整依赖锁定文件。
 
 | 依赖 | 已安装版本 | 元数据中的许可声明 | 发布范围 |
@@ -18,7 +20,7 @@
 | ychd_robot_keyboard | 0.0.0 | TODO: License declaration | 仅调用已安装方向映射接口，不复制其源码；许可待核实 |
 | ychd_nav2 | 0.0.0 | TODO: License declaration | 厂家参数副本排除，改为显式指定本地参数 |
 | lslidar_driver | 1.2.0 | GNU General Public License V3.0 | 不复制分发 |
-| 外部 charge_robot 工具 | 未核实 | 未核实 | 不包含；使用者需自行提供有权使用的工具 |
+| 自有 charge_robot 工具链 | 最新版本待现场核对 | 用户确认自有；拟按项目 MIT 发布 | 当前待补齐，不是第三方 SDK |
 
 工作台还使用 geometry_msgs、nav_msgs、sensor_msgs、std_msgs、action_msgs、tf2_ros、tf2_msgs、ament_index_python 等 ROS 包。本轮未逐项核实这些包的安装版本与许可文本，仓库不包含它们。
 
@@ -32,3 +34,7 @@ Pvpproof 自有代码现采用 MIT，见 LICENSE 与 THIRD_PARTY_NOTICES.md；�
 
 
 本次新增的是项目自有独立工具面板、工具终端包装、进程域检查、导航显示选择及Nav2生命周期辅助模块。外部依赖还包括gnome-terminal和lifecycle_msgs；测试仅使用假的进程、发布器及状态。机械臂charge_robot、Nova2/MoveIt环境、ICP/PnP程序、厂家模型和相机/机械臂标定仍由使用者另行提供，不在本次源码同步中分发。此前依赖版本表是历史核查，本轮没有重新锁定全部依赖版本。
+
+机械臂源码补充：arm_stack 已加入可得自有历史源码。其外部导入还包括 OpenCV、Open3D、SciPy、RealSense Python SDK、MoveIt/control_msgs、Dobot 消息、moveit_configs_utils 等；本轮未重新锁定其版本或核实全部适用许可，不附带这些库、SDK 或模型。完整运行依赖与当前缺件见 [arm_stack](arm_stack/README.md)。
+
+DOBOT Nova2 模型/MoveIt 已完成固定上游提交与 6 项历史哈希比对，根许可 MIT、部分包元数据另有 BSD/TODO；具体边界见 [上游核对](arm_stack/DOBOT_DEPENDENCY.md)，未将厂家资产纳入自有 MIT。

@@ -1,5 +1,7 @@
 # Deployment
 
+charge_robot, ICP/V3 and the arm planning application are project-owned. Their latest files are pending import, not excluded as third-party implementations. Until dependency completeness is verified, configure them as a separate installation; this repository is not yet a complete arm deployment package.
+
 [中文](DEPLOYMENT.md)
 
 Use a ROS 2 Humble environment with PyQt5, NumPy, Pillow, PyYAML and gnome-terminal. Dependency versions in [DEPENDENCIES](../DEPENDENCIES.md) are historical observations, not a reproducible lockfile.

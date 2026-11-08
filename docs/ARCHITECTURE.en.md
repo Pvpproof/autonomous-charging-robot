@@ -1,5 +1,7 @@
 # Architecture and boundaries
 
+Pvpproof owns the arm workflow, ICP/V3 and planning application code. It remains separately stored pending current-source verification; MoveIt, vendor SDKs and models retain their own terms. [Import status](ARM_SOURCE_SCOPE.md).
+
 [中文](ARCHITECTURE.md)
 
 The README workflow represents user choices, not a mandatory sequence. Arm test/home outcomes do not erase a complete outbound record or authorize return. External tools keep their stage confirmations.

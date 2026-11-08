@@ -1,0 +1,111 @@
+{
+  "status": "historically traceable partial sources; not a complete runtime distribution",
+  "sources": [
+    {
+      "file": "plan_camera_pre_align_nearest_ik.py",
+      "historical_sha256": "f1437c5abfdd2e2752c517d7cd8617cea4cf61d9be6643cc86331cb92a1132a8",
+      "published_sha256": "6c9f439e92e71a41957a9d865757fb9980b6412b976267e6852bdfaee56a6d8e",
+      "evidence_date": "2026-10-28/29",
+      "evidence": "historical hash match in 5 retained records",
+      "current_field_verified": false,
+      "publication_change": "replace account-specific runtime/calibration paths with explicit environment configuration",
+      "local_imports": [
+        "plan_flow_guard",
+        "publication_paths",
+        "stable_pose_selection"
+      ]
+    },
+    {
+      "file": "plan_charging_gun_prepose.py",
+      "historical_sha256": "7b22afec916933b2884bd4d6bbf92fb392061904134b68c3dca9d7dce58d5f69",
+      "published_sha256": "96089966248fc35687ff1c6143670b5bc4bc113d048190b9b772cfabe02a659d",
+      "evidence_date": "2026-10-28/29",
+      "evidence": "historical hash match in 2 retained records",
+      "current_field_verified": false,
+      "publication_change": "replace account-specific runtime/calibration paths with explicit environment configuration",
+      "local_imports": [
+        "gun_pose_validation",
+        "publication_paths",
+        "stable_pose_selection"
+      ]
+    },
+    {
+      "file": "plan_flow_guard.py",
+      "historical_sha256": "860001b16d351f93933678fd2463ed316ebcb55f38b168127b3bfabfbdec9e57",
+      "published_sha256": "a4625ccbd26fd6e13da38bde708d7c129982d9ae82b60ef92923a321a0a2422c",
+      "evidence_date": "2026-10-28/29",
+      "evidence": "historical hash match in 2 retained records",
+      "current_field_verified": false,
+      "publication_change": "replace account-specific runtime/calibration paths with explicit environment configuration",
+      "local_imports": [
+        "gun_pose_validation",
+        "publication_paths"
+      ]
+    },
+    {
+      "file": "freeze_pnp_v3_target.py",
+      "historical_sha256": "179ce54b45ee17e04ba1dcab7b49b3e1d33b39489466a0a3c75b0b6b9b05f80e",
+      "published_sha256": "dc4022d531d46f75285c4c39a5105c4b01b87dfba823ab4f2d21ff388e1d920f",
+      "evidence_date": "2026-10-29",
+      "evidence": "historical hash match in 2 retained records",
+      "current_field_verified": false,
+      "publication_change": "replace account-specific runtime/calibration paths with explicit environment configuration",
+      "local_imports": [
+        "publication_paths",
+        "stable_pose_selection"
+      ]
+    },
+    {
+      "file": "plan_insertion_cartesian.py",
+      "historical_sha256": "de7ad54d1b725837560fb6c54d3c1a675796b0835276b391a4469e29b1d678bc",
+      "published_sha256": "3ec52c4ca9fe36ddcf65fb333b9fdbed23233e8273efd12dd326a5e10b7cb2c8",
+      "evidence_date": "2026-10-29",
+      "evidence": "historical hash match in 13 retained records",
+      "current_field_verified": false,
+      "publication_change": "none; owner explicitly selected 75 mm insertion policy on 2026-11-08; not deployed/field tested",
+      "local_imports": [
+        "insert_force",
+        "insertion_geometry",
+        "prepare_insertion_target"
+      ]
+    },
+    {
+      "file": "retract_inserted.py",
+      "historical_sha256": "cd179553c4628946716e32100a3b5324db217ea888a98e195673b23995301e4f",
+      "published_sha256": "cd179553c4628946716e32100a3b5324db217ea888a98e195673b23995301e4f",
+      "evidence_date": "2026-11-06",
+      "evidence": "historical hash match in 2 retained records",
+      "current_field_verified": false,
+      "publication_change": "none",
+      "local_imports": [
+        "insert_back"
+      ]
+    },
+    {
+      "file": "icp_cloud_bridge.py",
+      "historical_sha256": "00a67784239c9f0ab08deedc131f6ac6edf57596a106d5f3bb37af95d60d2073",
+      "published_sha256": "f986738642d1f156b3791dbd4f8f0bd0e792df2f4387fb62a87038006d09aa9b",
+      "evidence_date": "2026-11-03",
+      "evidence": "historical hash match in 1 retained records",
+      "current_field_verified": false,
+      "publication_change": "replace account-specific runtime/calibration paths with explicit environment configuration",
+      "local_imports": [
+        "publication_paths"
+      ]
+    },
+    {
+      "file": "pnp_v3_pose_bridge.py",
+      "historical_sha256": "c33d2c4bf3a2d6e1bb864fad5e8d4317842c8605c04503b6ecfaae0861f64a4d",
+      "published_sha256": "7a277d491ba3ddf34c252b696a0befcc2d9cff3bcdea8fb5aae3ec91b1447911",
+      "evidence_date": "2026-11-03",
+      "evidence": "historical hash match in 1 retained records",
+      "current_field_verified": false,
+      "publication_change": "replace account-specific runtime/calibration paths with explicit environment configuration",
+      "local_imports": [
+        "publication_paths"
+      ]
+    }
+  ],
+  "vendor_sources_included": false,
+  "calibration_data_included": false
+}

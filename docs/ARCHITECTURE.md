@@ -1,5 +1,7 @@
 # 架构与模块边界
 
+机械臂算法工具链由 Pvpproof 自写，当前仍独立存放，待最新源码核验后纳入；MoveIt、厂家 SDK 与模型的许可另行判断。[补全状态](ARM_SOURCE_SCOPE.md)。
+
 [English](ARCHITECTURE.en.md)
 
 README 的流程图描述用户选择，不代表强制流水线。机械臂 test/home 不清除完整去程记录，不以成功结果放行返程。外部工具仍逐段确认，面板不自动执行机械臂。
