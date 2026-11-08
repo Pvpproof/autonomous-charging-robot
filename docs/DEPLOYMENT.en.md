@@ -1,10 +1,10 @@
 # Deployment
 
-charge_robot, ICP/V3 and the arm planning application are project-owned. Their latest files are pending import, not excluded as third-party implementations. Until dependency completeness is verified, configure them as a separate installation; this repository is not yet a complete arm deployment package.
+Project-owned historical charge_robot, ICP/V3 and planning sources plus limited reconstructions are included in `arm_stack/`. Current field identity, dependency completeness and a unified runtime layout remain unverified; panel tools still use a separate installation. This is not a complete arm deployment package.
 
 [中文](DEPLOYMENT.md)
 
-Use a ROS 2 Humble environment with PyQt5, NumPy, Pillow, PyYAML and gnome-terminal. Dependency versions in [DEPENDENCIES](../DEPENDENCIES.md) are historical observations, not a reproducible lockfile.
+Use a ROS 2 Humble environment with PyQt5, NumPy, Pillow, PyYAML and gnome-terminal. Dependency versions in [DEPENDENCIES](DEPENDENCIES.md) are historical observations, not a reproducible lockfile.
 
 For a disconnected UI preview run `bash start.sh --offline`. Hardware use additionally requires externally supplied vendor drivers, reviewed navigation parameters, maps, calibration and the charge_robot toolchain. None are bundled.
 

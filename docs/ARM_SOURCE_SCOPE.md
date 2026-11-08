@@ -1,5 +1,7 @@
 # 机械臂源码补全 / Arm source import
 
+当前清单以 [arm_stack/README.md](../arm_stack/README.md) 为准。下文按阶段保留历史盘点；“未提交/未推送”和缺件描述仅指各阶段当时的状态。Current inventory is in arm_stack; earlier missing-item and uncommitted statements below are historical.
+
 用户确认 charge_robot 工具链、ICP、V3、机械臂仿真和路径规划应用均由 Pvpproof 编写。之前将“未收入仓库”与“第三方代码”混为一谈的说明已更正。用户自有代码拟按项目 MIT 发布，第三方 SDK、MoveIt 及厂家模型保持各自许可。
 
 The author confirms ownership of the arm workflow, ICP, V3, simulation and planning application code. “Not bundled” did not imply third-party ownership. Project-owned applications are intended for MIT publication; SDKs, MoveIt and vendor models retain their own terms.

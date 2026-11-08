@@ -17,3 +17,5 @@ ctest --test-dir /tmp/charging-watchdog-build --output-on-failure
 `run_isolated.sh` requires a separately prepared ROS sandbox and is not a normal local test. Do not run it on a connected field system. Historical [validation](VALIDATION.md) is not current hardware acceptance. Run targeted regressions for ordinary changes and the full local suite for cross-module relocation. Report measured software results without inventing physical performance.
 
 This reorganization passed 172 existing cases plus 4 compatibility cases (176 total). Native components were unchanged; native and ROS integration tests were not rerun.
+
+Run `bash tests/run_arm.sh` separately for arm archive and reconstruction checks (system Python and NumPy). It selects static/synthetic cases for hashes, V3 timing, 75 mm geometry and fake model-launch commands. See [test groups](../tests/README.md).

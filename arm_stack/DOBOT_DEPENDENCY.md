@@ -16,9 +16,9 @@ Root MIT is attributed to Dobot; some package manifests declare BSD or retain a 
 
 ## 实际缺口 / Remaining gaps
 
-官方源中有 Nova2 模型、MoveIt 配置及仿真入口，相关内容并非完全无来源。现缺的是现场使用的完整固定版本、修改差异、执行适配器和模型/网格依赖闭包，以及项目自己的 start_nova2_real_model.sh 等包装。当前缓存有消息/驱动构建产物与历史清单，但未找到完整模型仓库 checkout。不能用官方最新分支直接冒充现场版本。
+官方源中有 Nova2 模型、MoveIt 配置及仿真入口，相关内容并非完全无来源。现缺的是现场使用的完整固定版本、修改差异、执行适配器和模型/网格依赖闭包；项目自己的模型/纯规划包装现已有标记的重建版，原始版本仍待核对。当前缓存有消息/驱动构建产物与历史清单，但未找到完整模型仓库 checkout。不能用官方最新分支直接冒充现场版本。
 
-The upstream provides model/planning/simulation components. Still missing are the complete field revision, local modifications, execution adapter, complete mesh dependencies and project-specific wrappers. Cached build products and inventory are not a full checkout. This audit did not start simulation or hardware services.
+The upstream provides model/planning/simulation components. Still missing are the complete field revision, local modifications, execution adapter, complete mesh dependencies; project-specific wrappers now have explicitly reconstructed versions, while original behavior remains unverified. Cached build products and inventory are not a full checkout. This audit did not start simulation or hardware services.
 
 上游 README 推荐 feature/v4-optimization 分支，不能把本轮核对的 main SHA 当作该推荐分支；文档所述平台为 Ubuntu 22.04 / ROS 2 Humble，控制器版本要求需按所选分支再次核对。项目视觉 V3 是自有 RGB PnP 版本名称，不是 DOBOT SDK V3。
 

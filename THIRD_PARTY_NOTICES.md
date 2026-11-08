@@ -14,6 +14,6 @@ MIT covers Pvpproof-owned source, tests, native helpers and documentation. It do
 | 厂家底盘、雷达、Nova2、SDK、模型 | 不包含厂家源码、二进制或参数；部分许可未知。Vendor sources, binaries and parameters are excluded; some terms remain unresolved. |
 | charge_robot、ICP/PnP 应用与标定 | 可得历史应用源码已部分纳入 MIT；专用标定排除。Available historical application sources are partially included under MIT; site calibration stays excluded. |
 
-PyQt 官方许可说明：[Riverbank](https://www.riverbankcomputing.com/software/pyqt/intro)。项目 MIT 文本：[OSI](https://opensource.org/license/mit)。历史版本及逐项来源见 [DEPENDENCIES.md](DEPENDENCIES.md)。Commercial use or redistribution of a combined system requires reviewing the actual dependencies and their licenses.
+PyQt 官方许可说明：[Riverbank](https://www.riverbankcomputing.com/software/pyqt/intro)。项目 MIT 文本：[OSI](https://opensource.org/license/mit)。历史版本及逐项来源见 [DEPENDENCIES.md](docs/DEPENDENCIES.md)。Commercial use or redistribution of a combined system requires reviewing the actual dependencies and their licenses.
 
 本次未发现已跟踪自有源码内的第三方版权头；这不替代上游权属调查。后续引入第三方文件必须保留原许可并单独标识。论文正文、实拍数据和现场材料未纳入本次授权发布。

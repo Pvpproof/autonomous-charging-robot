@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="756" viewBox="0 0 1200 756" role="img" aria-labelledby="title desc">
+<title id="title">从到点导航，到视觉对接，再到轨迹返程</title><desc id="desc">公开研发副本 · 历史证据与当前验证范围. H: 历史实测 / 用户记录; O: 离线软件验证; P: 当前待实机复核; M: 缺项 / 待集成.</desc>
+<!-- Copyright (c) 2026 Pvpproof. Original project illustration, MIT. Edit both language versions together. -->
+<defs><style>text{font-family:DejaVu Sans,Noto Sans CJK SC,sans-serif}.heading{font-size:22px;font-weight:700;fill:#17283d}.body{font-size:15px;fill:#435469}.status{font-size:14px;font-weight:600}.wire{fill:none;stroke:#acbacb;stroke-width:2}</style></defs>
+<rect width="1200" height="756" rx="20" fill="#f4f7fb"/>
+<text x="32" y="45" font-size="28" font-weight="700" fill="#17283d">从到点导航，到视觉对接，再到轨迹返程</text>
+<text x="32" y="77" class="body">公开研发副本 · 历史证据与当前验证范围</text>
+<rect x="418" y="112" width="364" height="500" rx="26" fill="#eaf0f7" stroke="#dbe3ee"/>
+<g class="wire"><path d="M354 185 H388 L476 443"/><path d="M846 185 H812 L576 301"/><path d="M354 365 H430"/><path d="M846 365 H752 L673 322"/><path d="M354 545 H392 L473 477"/><path d="M846 545 H808 L727 477"/></g>
+<text x="600" y="153" text-anchor="middle" font-size="15" letter-spacing="2" fill="#5a6b80">模块化研发工作台</text>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M575 425 L557 354 L633 282 L692 323" stroke="#20374f" stroke-width="30"/>
+<path d="M575 425 L557 354 L633 282 L692 323" stroke="#718da8" stroke-width="17"/>
+<g fill="#dce8f3" stroke="#20374f" stroke-width="6"><circle cx="575" cy="425" r="20"/><circle cx="557" cy="354" r="17"/><circle cx="633" cy="282" r="15"/></g>
+<path d="M692 323 L715 337" stroke="#20374f" stroke-width="18"/>
+<path d="M715 337 L731 347" stroke="#16816a" stroke-width="11"/>
+<path d="M737 321 L737 365" stroke="#aa650b" stroke-width="5"/>
+<path d="M741 321 H755 V365 H741" stroke="#aa650b" stroke-width="3"/>
+</g>
+<rect x="542" y="302" width="48" height="24" rx="7" fill="#20374f"/>
+<circle cx="554" cy="314" r="6" fill="#63bba8"/><circle cx="576" cy="314" r="6" fill="#92b7e5"/>
+<path d="M566 326 V347" fill="none" stroke="#20374f" stroke-width="6"/>
+<rect x="469" y="428" width="257" height="64" rx="22" fill="#294663"/>
+<rect x="486" y="418" width="224" height="23" rx="10" fill="#718da8"/>
+<rect x="488" y="480" width="49" height="36" rx="13" fill="#17283d"/>
+<rect x="656" y="480" width="49" height="36" rx="13" fill="#17283d"/>
+<rect x="585" y="451" width="33" height="17" rx="5" fill="#92b7e5"/>
+<path d="M459 529 H739" stroke="#ced9e5" stroke-width="3"/>
+<text x="600" y="562" text-anchor="middle" class="heading">国标充电接口</text>
+<text x="600" y="590" text-anchor="middle" class="body">应用方向 · 非认证声明</text>
+<g><rect x="32" y="112" width="322" height="140" rx="14" fill="#fff" stroke="#dbe3ee"/><path d="M35 132 V232" stroke="#16816a" stroke-width="5"/><circle cx="59" cy="142" r="11" fill="#16816a"/><text x="59" y="147" text-anchor="middle" font-size="13" font-weight="700" fill="white">H</text><text x="79" y="150" class="heading">底盘与导航</text><text x="52" y="181" class="body">Nav2 · 地图与充电点</text><text x="52" y="206" class="body">完整去程记录；外部驱动与参数</text><text x="52" y="234" class="status" fill="#16816a">历史现场使用</text></g>
+<g><rect x="846" y="112" width="322" height="140" rx="14" fill="#fff" stroke="#dbe3ee"/><path d="M849 132 V232" stroke="#16816a" stroke-width="5"/><circle cx="873" cy="142" r="11" fill="#16816a"/><text x="873" y="147" text-anchor="middle" font-size="13" font-weight="700" fill="white">H</text><text x="893" y="150" class="heading">视觉定位</text><text x="866" y="181" class="body">ICP 粗定位 → V3 RGB PnP</text><text x="866" y="206" class="body">稳定目标；相机对齐与预备位</text><text x="866" y="234" class="status" fill="#16816a">历史分段执行日志</text></g>
+<g><rect x="32" y="292" width="322" height="140" rx="14" fill="#fff" stroke="#dbe3ee"/><path d="M35 312 V412" stroke="#346ac3" stroke-width="5"/><circle cx="59" cy="322" r="11" fill="#346ac3"/><text x="59" y="327" text-anchor="middle" font-size="13" font-weight="700" fill="white">O</text><text x="79" y="330" class="heading">控制与诊断</text><text x="52" y="361" class="body">PyQt5 · ROS 2 · 单一速度仲裁</text><text x="52" y="386" class="body">后台租约 · 取消状态 · 反馈新鲜度</text><text x="52" y="414" class="status" fill="#346ac3">合成数据与离线 Qt</text></g>
+<g><rect x="846" y="292" width="322" height="140" rx="14" fill="#fff" stroke="#dbe3ee"/><path d="M849 312 V412" stroke="#aa650b" stroke-width="5"/><circle cx="873" cy="322" r="11" fill="#aa650b"/><text x="873" y="327" text-anchor="middle" font-size="13" font-weight="700" fill="white">P</text><text x="893" y="330" class="heading">机械臂插接</text><text x="866" y="361" class="body">MoveIt · 目标冻结 · 笛卡尔规划</text><text x="866" y="386" class="body">每段人工确认；75 mm 策略未实测</text><text x="866" y="414" class="status" fill="#aa650b">历史插入曾超时</text></g>
+<g><rect x="32" y="472" width="322" height="140" rx="14" fill="#fff" stroke="#dbe3ee"/><path d="M35 492 V592" stroke="#aa650b" stroke-width="5"/><circle cx="59" cy="502" r="11" fill="#aa650b"/><text x="59" y="507" text-anchor="middle" font-size="13" font-weight="700" fill="white">P</text><text x="79" y="510" class="heading">轨迹返程</text><text x="52" y="541" class="body">原始里程 · 同会话倒序位姿闭环</text><text x="52" y="566" class="body">早期完整返程有用户成功报告</text><text x="52" y="594" class="status" fill="#aa650b">最新公开版本待复核</text></g>
+<g><rect x="846" y="472" width="322" height="140" rx="14" fill="#fff" stroke="#dbe3ee"/><path d="M849 492 V592" stroke="#6b7280" stroke-width="5"/><circle cx="873" cy="502" r="11" fill="#6b7280"/><text x="873" y="507" text-anchor="middle" font-size="13" font-weight="700" fill="white">M</text><text x="893" y="510" class="heading">模型与规划</text><text x="866" y="541" class="body">显式 URDF · MoveIt 纯规划入口</text><text x="866" y="566" class="body">包装已补；完整仿真与资产待验收</text><text x="866" y="594" class="status" fill="#6b7280">Gazebo / TF / 执行适配器未验收</text></g>
+<path d="M32 643 H1168" stroke="#dbe3ee"/>
+<circle cx="42" cy="679" r="10" fill="#16816a"/><text x="42" y="684" text-anchor="middle" font-size="12" font-weight="700" fill="white">H</text><text x="60" y="684" font-size="14" fill="#435469">历史实测 / 用户记录</text>
+<circle cx="350" cy="679" r="10" fill="#346ac3"/><text x="350" y="684" text-anchor="middle" font-size="12" font-weight="700" fill="white">O</text><text x="368" y="684" font-size="14" fill="#435469">离线软件验证</text>
+<circle cx="650" cy="679" r="10" fill="#aa650b"/><text x="650" y="684" text-anchor="middle" font-size="12" font-weight="700" fill="white">P</text><text x="668" y="684" font-size="14" fill="#435469">当前待实机复核</text>
+<circle cx="946" cy="679" r="10" fill="#6b7280"/><text x="946" y="684" text-anchor="middle" font-size="12" font-weight="700" fill="white">M</text><text x="964" y="684" font-size="14" fill="#435469">缺项 / 待集成</text>
+<text x="32" y="728" font-size="15" fill="#435469">绿色仅代表历史证据；当前公开副本未完成整机验收，锁止、电气连接与实际充电未验证。</text></svg>

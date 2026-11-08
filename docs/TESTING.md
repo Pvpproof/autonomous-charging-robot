@@ -23,3 +23,5 @@ ctest --test-dir /tmp/charging-watchdog-build --output-on-failure
 改动后优先运行相关测试；源码整体搬迁需完整跑本地套件。请报告环境、命令和结果，不将合成误差或软件通过率写成实车精度。
 
 本次目录整理验证：原有 172 项加 4 项兼容测试，共 176 项通过。原生组件未改变，本轮未重跑原生或 ROS 集成测试。
+
+机械臂归档与重建代码另用 `bash tests/run_arm.sh`（系统 Python 与 NumPy）检查；只运行静态/合成用例，包含来源哈希、V3 时序、75 mm 几何和假的模型启动命令。入口与测试分组见 [tests/README.md](../tests/README.md)。

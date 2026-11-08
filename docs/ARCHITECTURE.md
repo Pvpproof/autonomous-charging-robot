@@ -1,6 +1,6 @@
 # 架构与模块边界
 
-机械臂算法工具链由 Pvpproof 自写，当前仍独立存放，待最新源码核验后纳入；MoveIt、厂家 SDK 与模型的许可另行判断。[补全状态](ARM_SOURCE_SCOPE.md)。
+机械臂工作流、ICP/V3 与规划应用由 Pvpproof 自写，历史源码和有限重建版已收录在 `arm_stack/`；尚未统一为完整可部署环境，当前现场版本待核对。MoveIt、SDK 与厂家模型仍是外部依赖。[源码状态](ARM_SOURCE_SCOPE.md)。
 
 [English](ARCHITECTURE.en.md)
 

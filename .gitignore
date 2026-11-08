@@ -5,6 +5,7 @@
 /rollback_*/
 /config/*
 !/config/return_commissioning.json
+!/config/README.md
 /SHA256SUMS
 *.log
 *.jsonl

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="756" viewBox="0 0 1200 756" role="img" aria-labelledby="title desc">
+<title id="title">Navigate, localize, dock and return</title><desc id="desc">Public R&amp;D sources · historical evidence and current validation scope. H: Historical field / user report; O: Offline software checks; P: Hardware recheck pending; M: Missing / integration pending.</desc>
+<!-- Copyright (c) 2026 Pvpproof. Original project illustration, MIT. Edit both language versions together. -->
+<defs><style>text{font-family:DejaVu Sans,Noto Sans CJK SC,sans-serif}.heading{font-size:22px;font-weight:700;fill:#17283d}.body{font-size:15px;fill:#435469}.status{font-size:14px;font-weight:600}.wire{fill:none;stroke:#acbacb;stroke-width:2}</style></defs>
+<rect width="1200" height="756" rx="20" fill="#f4f7fb"/>
+<text x="32" y="45" font-size="28" font-weight="700" fill="#17283d">Navigate, localize, dock and return</text>
+<text x="32" y="77" class="body">Public R&amp;D sources · historical evidence and current validation scope</text>
+<rect x="418" y="112" width="364" height="500" rx="26" fill="#eaf0f7" stroke="#dbe3ee"/>
+<g class="wire"><path d="M354 185 H388 L476 443"/><path d="M846 185 H812 L576 301"/><path d="M354 365 H430"/><path d="M846 365 H752 L673 322"/><path d="M354 545 H392 L473 477"/><path d="M846 545 H808 L727 477"/></g>
+<text x="600" y="153" text-anchor="middle" font-size="15" letter-spacing="2" fill="#5a6b80">MODULAR R&amp;D PLATFORM</text>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M575 425 L557 354 L633 282 L692 323" stroke="#20374f" stroke-width="30"/>
+<path d="M575 425 L557 354 L633 282 L692 323" stroke="#718da8" stroke-width="17"/>
+<g fill="#dce8f3" stroke="#20374f" stroke-width="6"><circle cx="575" cy="425" r="20"/><circle cx="557" cy="354" r="17"/><circle cx="633" cy="282" r="15"/></g>
+<path d="M692 323 L715 337" stroke="#20374f" stroke-width="18"/>
+<path d="M715 337 L731 347" stroke="#16816a" stroke-width="11"/>
+<path d="M737 321 L737 365" stroke="#aa650b" stroke-width="5"/>
+<path d="M741 321 H755 V365 H741" stroke="#aa650b" stroke-width="3"/>
+</g>
+<rect x="542" y="302" width="48" height="24" rx="7" fill="#20374f"/>
+<circle cx="554" cy="314" r="6" fill="#63bba8"/><circle cx="576" cy="314" r="6" fill="#92b7e5"/>
+<path d="M566 326 V347" fill="none" stroke="#20374f" stroke-width="6"/>
+<rect x="469" y="428" width="257" height="64" rx="22" fill="#294663"/>
+<rect x="486" y="418" width="224" height="23" rx="10" fill="#718da8"/>
+<rect x="488" y="480" width="49" height="36" rx="13" fill="#17283d"/>
+<rect x="656" y="480" width="49" height="36" rx="13" fill="#17283d"/>
+<rect x="585" y="451" width="33" height="17" rx="5" fill="#92b7e5"/>
+<path d="M459 529 H739" stroke="#ced9e5" stroke-width="3"/>
+<text x="600" y="562" text-anchor="middle" class="heading">GB/T charging interface</text>
+<text x="600" y="590" text-anchor="middle" class="body">Application scope · not certification</text>
+<g><rect x="32" y="112" width="322" height="140" rx="14" fill="#fff" stroke="#dbe3ee"/><path d="M35 132 V232" stroke="#16816a" stroke-width="5"/><circle cx="59" cy="142" r="11" fill="#16816a"/><text x="59" y="147" text-anchor="middle" font-size="13" font-weight="700" fill="white">H</text><text x="79" y="150" class="heading">Base &amp; navigation</text><text x="52" y="181" class="body">Nav2 · maps &amp; charging targets</text><text x="52" y="206" class="body">Complete outbound recording</text><text x="52" y="234" class="status" fill="#16816a">Historical field use</text></g>
+<g><rect x="846" y="112" width="322" height="140" rx="14" fill="#fff" stroke="#dbe3ee"/><path d="M849 132 V232" stroke="#16816a" stroke-width="5"/><circle cx="873" cy="142" r="11" fill="#16816a"/><text x="873" y="147" text-anchor="middle" font-size="13" font-weight="700" fill="white">H</text><text x="893" y="150" class="heading">Visual localization</text><text x="866" y="181" class="body">Coarse ICP → V3 RGB PnP</text><text x="866" y="206" class="body">Stable alignment &amp; prepose targets</text><text x="866" y="234" class="status" fill="#16816a">Historical successful stage logs</text></g>
+<g><rect x="32" y="292" width="322" height="140" rx="14" fill="#fff" stroke="#dbe3ee"/><path d="M35 312 V412" stroke="#346ac3" stroke-width="5"/><circle cx="59" cy="322" r="11" fill="#346ac3"/><text x="59" y="327" text-anchor="middle" font-size="13" font-weight="700" fill="white">O</text><text x="79" y="330" class="heading">Control &amp; diagnostics</text><text x="52" y="361" class="body">PyQt5 · ROS 2 · velocity arbitration</text><text x="52" y="386" class="body">Leases · cancellation · fresh feedback</text><text x="52" y="414" class="status" fill="#346ac3">Synthetic data &amp; offline Qt</text></g>
+<g><rect x="846" y="292" width="322" height="140" rx="14" fill="#fff" stroke="#dbe3ee"/><path d="M849 312 V412" stroke="#aa650b" stroke-width="5"/><circle cx="873" cy="322" r="11" fill="#aa650b"/><text x="873" y="327" text-anchor="middle" font-size="13" font-weight="700" fill="white">P</text><text x="893" y="330" class="heading">Arm insertion</text><text x="866" y="361" class="body">MoveIt · frozen target · Cartesian path</text><text x="866" y="386" class="body">Stage confirmation · 75 mm untested</text><text x="866" y="414" class="status" fill="#aa650b">Historical insertion timed out</text></g>
+<g><rect x="32" y="472" width="322" height="140" rx="14" fill="#fff" stroke="#dbe3ee"/><path d="M35 492 V592" stroke="#aa650b" stroke-width="5"/><circle cx="59" cy="502" r="11" fill="#aa650b"/><text x="59" y="507" text-anchor="middle" font-size="13" font-weight="700" fill="white">P</text><text x="79" y="510" class="heading">Recorded-route return</text><text x="52" y="541" class="body">Raw odometry · reversed pose tracking</text><text x="52" y="566" class="body">Earlier full return reported by user</text><text x="52" y="594" class="status" fill="#aa650b">Current public revision pending</text></g>
+<g><rect x="846" y="472" width="322" height="140" rx="14" fill="#fff" stroke="#dbe3ee"/><path d="M849 492 V592" stroke="#6b7280" stroke-width="5"/><circle cx="873" cy="502" r="11" fill="#6b7280"/><text x="873" y="507" text-anchor="middle" font-size="13" font-weight="700" fill="white">M</text><text x="893" y="510" class="heading">Model &amp; planning</text><text x="866" y="541" class="body">Explicit URDF · plan-only MoveIt</text><text x="866" y="566" class="body">Wrappers included · full stack pending</text><text x="866" y="594" class="status" fill="#6b7280">Gazebo / TF / adapter unaccepted</text></g>
+<path d="M32 643 H1168" stroke="#dbe3ee"/>
+<circle cx="42" cy="679" r="10" fill="#16816a"/><text x="42" y="684" text-anchor="middle" font-size="12" font-weight="700" fill="white">H</text><text x="60" y="684" font-size="14" fill="#435469">Historical field / user report</text>
+<circle cx="350" cy="679" r="10" fill="#346ac3"/><text x="350" y="684" text-anchor="middle" font-size="12" font-weight="700" fill="white">O</text><text x="368" y="684" font-size="14" fill="#435469">Offline software checks</text>
+<circle cx="650" cy="679" r="10" fill="#aa650b"/><text x="650" y="684" text-anchor="middle" font-size="12" font-weight="700" fill="white">P</text><text x="668" y="684" font-size="14" fill="#435469">Hardware recheck pending</text>
+<circle cx="946" cy="679" r="10" fill="#6b7280"/><text x="946" y="684" text-anchor="middle" font-size="12" font-weight="700" fill="white">M</text><text x="964" y="684" font-size="14" fill="#435469">Missing / integration pending</text>
+<text x="32" y="728" font-size="15" fill="#435469">Historical evidence is not current acceptance. Locking, electrical connection and actual charging remain unverified.</text></svg>

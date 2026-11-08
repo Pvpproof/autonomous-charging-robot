@@ -1,6 +1,6 @@
 # Architecture and boundaries
 
-Pvpproof owns the arm workflow, ICP/V3 and planning application code. It remains separately stored pending current-source verification; MoveIt, vendor SDKs and models retain their own terms. [Import status](ARM_SOURCE_SCOPE.md).
+Pvpproof-owned historical arm workflow, ICP/V3 and planning sources plus limited reconstructions are included in `arm_stack/`. They are not a complete deployable environment; current field identity is unverified. MoveIt, SDKs and vendor models remain external. [Source status](ARM_SOURCE_SCOPE.md).
 
 [中文](ARCHITECTURE.md)
 

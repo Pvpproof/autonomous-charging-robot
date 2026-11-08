@@ -1,12 +1,12 @@
 # 部署与运行边界
 
-`charge_robot`、ICP/V3 与机械臂规划应用是作者自有源码，并非因第三方授权而排除。目前待补齐现场最新文件；在完整依赖闭包核对前，仍按独立安装工具配置入口，不能将本仓库当作完整机械臂部署包。
+`charge_robot`、ICP/V3 与机械臂规划应用是作者自有源码，历史版本与有限重建文件已收录在 `arm_stack/`。当前现场版本、依赖闭包及统一运行布局尚待核对，面板仍使用独立安装工具；本仓库不是完整机械臂部署包。
 
 [English](DEPLOYMENT.en.md)
 
 ## 技术环境
 
-工作台使用 ROS 2 Humble、PyQt5、NumPy、Pillow、PyYAML，独立工具终端还需要 gnome-terminal，并依赖特定底盘和雷达驱动、导航参数及外部对接工具。具体依赖和再分发边界见 [DEPENDENCIES.md](../DEPENDENCIES.md)。
+工作台使用 ROS 2 Humble、PyQt5、NumPy、Pillow、PyYAML，独立工具终端还需要 gnome-terminal，并依赖特定底盘和雷达驱动、导航参数及外部对接工具。具体依赖和再分发边界见 [DEPENDENCIES.md](DEPENDENCIES.md)。
 
 ## 离线预览与测试
 
