@@ -1,9 +1,9 @@
 import unittest,tempfile,math,copy
 from pathlib import Path
 from dataclasses import replace
-from release_policy import ReleasePolicy,TrialLimiter
-from control_arbiter import Arbiter
-from raw_odom_mode import RawReturnRuntime,distance,wrap
+from charging_robot.returning.release_policy import ReleasePolicy, TrialLimiter
+from charging_robot.control.control_arbiter import Arbiter
+from charging_robot.returning.raw_odom_mode import RawReturnRuntime, distance, wrap
 from test_release_policy import config,packet
 from test_raw_mode import make_plan,conditions,snap,update
 

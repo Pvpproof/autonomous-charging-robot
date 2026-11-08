@@ -1,7 +1,7 @@
 """Explain return availability from observations only; never issues commands."""
 import math
-from raw_odom_mode import scope,sample_now
-from route_cycle import near
+from charging_robot.returning.raw_odom_mode import scope, sample_now
+from charging_robot.returning.route_cycle import near
 
 
 def fresh(value,limit):

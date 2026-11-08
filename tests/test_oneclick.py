@@ -1,8 +1,8 @@
 import unittest,tempfile,copy
 from pathlib import Path
-from run_lease import RunLeaseGate
-from raw_odom_mode import RawReturnRuntime
-from release_policy import ReleasePolicy,TrialLimiter
+from charging_robot.control.run_lease import RunLeaseGate
+from charging_robot.returning.raw_odom_mode import RawReturnRuntime
+from charging_robot.returning.release_policy import ReleasePolicy, TrialLimiter
 from test_raw_mode import make_plan,conditions,snap,update
 from test_full_trial import full_config
 from test_release_policy import packet

@@ -10,6 +10,6 @@ class ClockOrderingTests(unittest.TestCase):
    def __enter__(self):clock[0]=now+.1;b.gui_at=now+.1
    def __exit__(self,*args):pass
   b.lock=Lock()
-  with patch('return_bridge.time.monotonic',side_effect=lambda:clock[0]):b.control_tick()
+  with patch('charging_robot.returning.return_bridge.time.monotonic',side_effect=lambda:clock[0]):b.control_tick()
   self.assertEqual(b.packets[-1]['mode'],'navigation');self.assertFalse(b.software_stop);self.assertFalse(any(n=='ui_update_delayed' for n,_ in b.events))
 if __name__=='__main__':unittest.main(verbosity=2)

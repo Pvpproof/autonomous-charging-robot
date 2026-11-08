@@ -6,15 +6,15 @@ import time
 import uuid
 from pathlib import Path
 from std_msgs.msg import String
-from return_runtime import ReturnRuntime
-from raw_odom_mode import RawTracker,RawReturnRuntime,SOURCE
-from model import MapDocument
-from return_map import saved_grid_digest
-from supervised_draft import TestConditions
-from session_revalidation import revalidate,runtime_identity
-from runtime_provenance import panel_identity
-from stop_recovery import motion_reset_reasons
-from control_causes import fault_detail
+from charging_robot.returning.return_runtime import ReturnRuntime
+from charging_robot.returning.raw_odom_mode import RawTracker, RawReturnRuntime, SOURCE
+from charging_robot.shared.model import MapDocument
+from charging_robot.returning.return_map import saved_grid_digest
+from charging_robot.returning.supervised_draft import TestConditions
+from charging_robot.returning.session_revalidation import revalidate, runtime_identity
+from charging_robot.returning.runtime_provenance import panel_identity
+from charging_robot.control.stop_recovery import motion_reset_reasons
+from charging_robot.control.control_causes import fault_detail
 
 
 class ReturnBridge:

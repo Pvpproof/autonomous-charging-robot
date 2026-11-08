@@ -52,3 +52,6 @@ htmlcov/
 /driver-overlay/
 /raw-odom-tools/
 /native/build/
+
+# Generated offline simulation results
+/offline-results.json

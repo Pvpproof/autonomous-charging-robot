@@ -1,6 +1,6 @@
 """Nav2 PAUSE I/O on the existing base Bridge node; never creates another node."""
 import time
-from nav2_pause import Nav2PauseGate
+from charging_robot.navigation.nav2_pause import Nav2PauseGate
 
 class Nav2PauseBridge:
     def init_nav2_pause(self):
@@ -9,7 +9,7 @@ class Nav2PauseBridge:
         self.nav2_pause_pending=[]
 
     def request_nav2_pause(self):
-        from arm_tools_guard import locked_base_ready
+        from charging_robot.arm.arm_tools_guard import locked_base_ready
         now=time.monotonic();state=self.snapshot()
         with self.lock:
             spec=self.nav2_pause_gate.request(now,base_locked=locked_base_ready(state,now))
@@ -23,7 +23,7 @@ class Nav2PauseBridge:
             self.nav2_pause_gate.cancel(reason);self.nav2_pause_pending=[]
 
     def tick_nav2_pause(self):
-        from arm_tools_guard import locked_base_ready
+        from charging_robot.arm.arm_tools_guard import locked_base_ready
         state=self.snapshot();now=time.monotonic();locked=locked_base_ready(state,now)
         with self.lock:
             gate=self.nav2_pause_gate

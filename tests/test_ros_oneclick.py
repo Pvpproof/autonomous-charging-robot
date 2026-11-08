@@ -57,7 +57,7 @@ class OneClickIntegration(RawIntegration):
   finally:bad.destroy_node()
  def test_click_arbiter_restart_never_resume(self):
   self.start();self.ex.remove_node(self.arbiter);self.arbiter.destroy_node()
-  from control_arbiter_node import ArbiterNode
+  from charging_robot.control.control_arbiter_node import ArbiterNode
   self.arbiter=ArbiterNode(isolated=True,test_config=self.test_trial_config);self.ex.add_node(self.arbiter)
   self.stopped();self.assertTrue(self.arbiter.limiter.full_trial_consumed)
  def test_click_relay_restart_never_resume(self):

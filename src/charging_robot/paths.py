@@ -1,0 +1,50 @@
+"""Stable repository paths, independent of module location."""
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+SOURCE_LAYOUT = {'app.py': 'src/charging_robot/ui/app.py',
+    'canvas.py': 'src/charging_robot/ui/canvas.py',
+    'teleop.py': 'src/charging_robot/ui/teleop.py',
+    'power_status.py': 'src/charging_robot/ui/power_status.py',
+    'navigation_status.py': 'src/charging_robot/ui/navigation_status.py',
+    'return_hold_pad.py': 'src/charging_robot/ui/return_hold_pad.py',
+    'arm_tools_ui.py': 'src/charging_robot/ui/arm_tools_ui.py',
+    'nav2_pause.py': 'src/charging_robot/navigation/nav2_pause.py',
+    'nav2_pause_bridge.py': 'src/charging_robot/navigation/nav2_pause_bridge.py',
+    'navigation_display.py': 'src/charging_robot/navigation/navigation_display.py',
+    'passive_coordinates.py': 'src/charging_robot/navigation/passive_coordinates.py',
+    'passive_map.py': 'src/charging_robot/navigation/passive_map.py',
+    'chassis_route.py': 'src/charging_robot/returning/chassis_route.py',
+    'raw_odom_mode.py': 'src/charging_robot/returning/raw_odom_mode.py',
+    'return_bridge.py': 'src/charging_robot/returning/return_bridge.py',
+    'return_runtime.py': 'src/charging_robot/returning/return_runtime.py',
+    'route_cycle.py': 'src/charging_robot/returning/route_cycle.py',
+    'return_readiness.py': 'src/charging_robot/returning/return_readiness.py',
+    'release_policy.py': 'src/charging_robot/returning/release_policy.py',
+    'session_revalidation.py': 'src/charging_robot/returning/session_revalidation.py',
+    'runtime_provenance.py': 'src/charging_robot/returning/runtime_provenance.py',
+    'supervised_draft.py': 'src/charging_robot/returning/supervised_draft.py',
+    'pose_aware_reverse.py': 'src/charging_robot/returning/pose_aware_reverse.py',
+    'offline_reverse.py': 'src/charging_robot/returning/offline_reverse.py',
+    'return_map.py': 'src/charging_robot/returning/return_map.py',
+    'arm_process_guard.py': 'src/charging_robot/arm/arm_process_guard.py',
+    'arm_tool_terminal.py': 'src/charging_robot/arm/arm_tool_terminal.py',
+    'arm_tools_bridge.py': 'src/charging_robot/arm/arm_tools_bridge.py',
+    'arm_tools_guard.py': 'src/charging_robot/arm/arm_tools_guard.py',
+    'docking_console.py': 'src/charging_robot/arm/docking_console.py',
+    'control_arbiter.py': 'src/charging_robot/control/control_arbiter.py',
+    'control_arbiter_node.py': 'src/charging_robot/control/control_arbiter_node.py',
+    'control_causes.py': 'src/charging_robot/control/control_causes.py',
+    'driver_watchdog_bridge.py': 'src/charging_robot/control/driver_watchdog_bridge.py',
+    'driver_watchdog_client.py': 'src/charging_robot/control/driver_watchdog_client.py',
+    'run_lease.py': 'src/charging_robot/control/run_lease.py',
+    'stop_recovery.py': 'src/charging_robot/control/stop_recovery.py',
+    'process_control.py': 'src/charging_robot/control/process_control.py',
+    'ros_bridge.py': 'src/charging_robot/control/ros_bridge.py',
+    'model.py': 'src/charging_robot/shared/model.py',
+    'docking_state.py': 'src/charging_robot/shared/docking_state.py',
+    'navigation.launch.py': 'src/charging_robot/navigation/navigation_launch.py'}
+
+def source_path(legacy_name):
+    """Resolve a documented pre-package source name for tooling."""
+    return PROJECT_ROOT / SOURCE_LAYOUT[legacy_name]

@@ -4,13 +4,13 @@ from pathlib import Path
 from unittest.mock import patch
 if 'std_msgs.msg' not in sys.modules:
  msgs=types.ModuleType('std_msgs.msg');msgs.String=type('String',(),{});package=types.ModuleType('std_msgs');package.msg=msgs;sys.modules['std_msgs']=package;sys.modules['std_msgs.msg']=msgs
-from return_bridge import ReturnBridge
-from stop_recovery import StopRecoveryBridge
-from arm_tools_bridge import ArmToolsBridge
+from charging_robot.returning.return_bridge import ReturnBridge
+from charging_robot.control.stop_recovery import StopRecoveryBridge
+from charging_robot.arm.arm_tools_bridge import ArmToolsBridge
 from test_raw_mode import snap
 from PyQt5 import QtCore,QtWidgets
-import app as panel
-import arm_tools_ui as tools
+import charging_robot.ui.app as panel
+import charging_robot.ui.arm_tools_ui as tools
 QT=QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
 def stopped():

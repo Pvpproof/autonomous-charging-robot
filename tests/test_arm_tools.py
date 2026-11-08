@@ -2,8 +2,8 @@
 import copy,importlib,json,os,signal,tempfile,types,unittest
 from pathlib import Path
 from unittest.mock import patch
-import navigation_display as displays
-import arm_tool_terminal as terminal
+import charging_robot.navigation.navigation_display as displays
+import charging_robot.arm.arm_tool_terminal as terminal
 class Clock:
  def __init__(self):self.t=10.
  def __call__(self):return self.t

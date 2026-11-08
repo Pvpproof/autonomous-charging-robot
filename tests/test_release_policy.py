@@ -1,5 +1,5 @@
 import math,unittest
-from release_policy import ReleasePolicy,TrialLimiter
+from charging_robot.returning.release_policy import ReleasePolicy, TrialLimiter
 
 def config(profile='short_only'):
  return dict(profile=profile,deployment_id='test-deployment',physical_stop_evidence={'user_confirmed':True,'agent_tested':False},

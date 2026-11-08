@@ -1,5 +1,5 @@
 """Independent output release policy. Limits do not depend on panel checkboxes."""
-from run_lease import RunLeaseGate
+from charging_robot.control.run_lease import RunLeaseGate
 import math,struct
 
 

@@ -1,5 +1,5 @@
 import unittest,copy
-from release_policy import ReleasePolicy,TrialLimiter
+from charging_robot.returning.release_policy import ReleasePolicy, TrialLimiter
 from test_release_policy import config,packet
 
 def full_config():

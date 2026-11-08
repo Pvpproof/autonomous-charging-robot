@@ -3,12 +3,12 @@ No ROS, device, network or automatic recovery. Sensor-consistency is not slip de
 """
 import copy,hashlib,json,math,uuid
 from collections import deque
-from release_policy import feedback_speed_exceeded
+from charging_robot.returning.release_policy import feedback_speed_exceeded
 from pathlib import Path
-from control_causes import recording_block_reason,control_evidence
-from route_cycle import CycleError,near
-from pose_aware_reverse import PoseAwareReversePursuit
-from offline_reverse import wrap
+from charging_robot.control.control_causes import recording_block_reason, control_evidence
+from charging_robot.returning.route_cycle import CycleError, near
+from charging_robot.returning.pose_aware_reverse import PoseAwareReversePursuit
+from charging_robot.returning.offline_reverse import wrap
 
 SOURCE='raw_driver_odom_measurements_v1'
 def key(value):return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()

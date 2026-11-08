@@ -3,10 +3,10 @@ from pathlib import Path
 import tempfile
 import unittest
 from types import SimpleNamespace as Obj
-from chassis_route import ChassisSession
-from route_cycle import StartStore
-from return_runtime import check_plan
-from return_map import saved_grid_digest, grid_digest
+from charging_robot.returning.chassis_route import ChassisSession
+from charging_robot.returning.route_cycle import StartStore
+from charging_robot.returning.return_runtime import check_plan
+from charging_robot.returning.return_map import saved_grid_digest, grid_digest
 from test_return import snapshot
 
 class RecordingTests(unittest.TestCase):

@@ -1,4 +1,5 @@
 """ROS I/O. Constructed only in online mode; no nodes are launched here."""
+from charging_robot.paths import PROJECT_ROOT
 import math
 import queue
 import threading
@@ -12,30 +13,30 @@ from rclpy.action import ActionClient
 from rclpy.qos import QoSProfile, DurabilityPolicy, ReliabilityPolicy, qos_profile_sensor_data
 from geometry_msgs.msg import PoseWithCovarianceStamped, Twist
 from std_msgs.msg import Float32
-from power_status import PowerStatus, Power48Status
+from charging_robot.ui.power_status import PowerStatus, Power48Status
 from action_msgs.msg import GoalStatusArray
 from action_msgs.srv import CancelGoal
 from ychd_robot_keyboard.ychd_keyboard import moveBindings as YCHD_BINDINGS
-from teleop import velocity, SPEEDS_M_S
+from charging_robot.ui.teleop import velocity, SPEEDS_M_S
 from nav_msgs.msg import OccupancyGrid, Odometry, Path as NavPath
 from sensor_msgs.msg import LaserScan
 from nav2_msgs.action import NavigateToPose
 from tf2_ros import Buffer, TransformListener, TransformException
-from model import yaw_of
-from docking_state import StopObservation, readiness
+from charging_robot.shared.model import yaw_of
+from charging_robot.shared.docking_state import StopObservation, readiness
 from pathlib import Path
 from ament_index_python.packages import get_package_share_directory
 
 
-from arm_tools_bridge import ArmToolsBridge
-from return_bridge import ReturnBridge
-from nav2_pause_bridge import Nav2PauseBridge
-from runtime_provenance import panel_identity
-from return_map import grid_digest
-from return_runtime import read_alignment_tolerance,alignment_timing
+from charging_robot.arm.arm_tools_bridge import ArmToolsBridge
+from charging_robot.returning.return_bridge import ReturnBridge
+from charging_robot.navigation.nav2_pause_bridge import Nav2PauseBridge
+from charging_robot.returning.runtime_provenance import panel_identity
+from charging_robot.returning.return_map import grid_digest
+from charging_robot.returning.return_runtime import read_alignment_tolerance, alignment_timing
 
 
-from stop_recovery import StopRecoveryBridge
+from charging_robot.control.stop_recovery import StopRecoveryBridge
 
 class Bridge(StopRecoveryBridge, ArmToolsBridge, Nav2PauseBridge, ReturnBridge, Node):
     def __init__(self,docking_hold=False, *, recovery_required=False, ros_args=None):
@@ -57,7 +58,7 @@ class Bridge(StopRecoveryBridge, ArmToolsBridge, Nav2PauseBridge, ReturnBridge, 
         self.manual=False; self.manual_target=(0.,0.); self.manual_stamp=0.
         self.manual_stop_pending=False; self.server_active=False;self.software_stop=False;self.motion_recovery_required=False
         self.init_return()
-        self.alignment_tolerance=read_alignment_tolerance(Path(__file__).parent/'config/nav2_ackermann.yaml')
+        self.alignment_tolerance=read_alignment_tolerance(PROJECT_ROOT/'config/nav2_ackermann.yaml')
         # Legacy zero requests are routed to a disconnected input; the arbiter owns chassis output.
         self.manual_pub=self.create_publisher(Twist,'/charging_control/legacy_zero',1)
         self.create_subscription(GoalStatusArray,'/navigate_to_pose/_action/status',self.nav_status,
@@ -374,7 +375,7 @@ class Bridge(StopRecoveryBridge, ArmToolsBridge, Nav2PauseBridge, ReturnBridge, 
 
     def on_raw_odom(self,message):
         import json
-        from raw_odom_mode import diagnostic
+        from charging_robot.returning.raw_odom_mode import diagnostic
         with self.lock:
             try:
                 data=json.loads(message.data)

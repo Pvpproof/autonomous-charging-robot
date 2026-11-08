@@ -5,9 +5,9 @@ import json
 import math
 from pathlib import Path
 import uuid
-from route_cycle import CycleError,near
-from model import MapDocument
-from return_map import saved_grid_digest
+from charging_robot.returning.route_cycle import CycleError, near
+from charging_robot.shared.model import MapDocument
+from charging_robot.returning.return_map import saved_grid_digest
 
 FILES=('cycle.json','actual-trace.jsonl','return-candidate.json')
 CONFIRMATIONS=('at_recorded_stop_verified','landmark_alignment_checked','operator_present',
@@ -22,7 +22,7 @@ def digest(value):return hashlib.sha256(canonical(value)).hexdigest()
 
 
 def load_source(directory,map_path):
-    from return_runtime import check_plan
+    from charging_robot.returning.return_runtime import check_plan
     directory=Path(directory).resolve()
     hashes={}
     for name in FILES:
@@ -75,7 +75,7 @@ def runtime_identity(snapshot):
 
 
 def revalidate(directory,map_path,snapshot,confirmations,now):
-    from return_runtime import coordinate_sample
+    from charging_robot.returning.return_runtime import coordinate_sample
     if not all(confirmations.get(k) is True for k in CONFIRMATIONS):
         raise CycleError('需要本轮现场位置、地标重合、监护和机构/通道确认')
     if snapshot.get('busy') or snapshot.get('manual') or snapshot.get('manual_stop_pending') or snapshot.get('docking_hold'):

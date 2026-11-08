@@ -1,16 +1,17 @@
 """Real source methods with fake ROS interfaces and offscreen UI. No devices."""
+from charging_robot.paths import source_path
 import ast,copy,json,tempfile,types,unittest,queue,time
 from pathlib import Path
 from unittest.mock import patch
 import _current_fixtures as fixture
 from test_raw_mode import make_plan,snap,update
 from _recording_helpers import session_fixture
-from control_causes import recording_block_reason
-import app
+from charging_robot.control.control_causes import recording_block_reason
+import charging_robot.ui.app as app
 ROOT=Path(__file__).resolve().parents[1]
 
 def methods(*names):
- tree=ast.parse((ROOT/'ros_bridge.py').read_text());c=next(n for n in tree.body if getattr(n,'name',None)=='Bridge');space=dict(time=time,Twist=lambda:object())
+ tree=ast.parse((source_path('ros_bridge.py')).read_text());c=next(n for n in tree.body if getattr(n,'name',None)=='Bridge');space=dict(time=time,Twist=lambda:object())
  for name in names:
   node=next(n for n in c.body if getattr(n,'name',None)==name);exec(compile(ast.Module(body=[node],type_ignores=[]),'<installed-'+name+'>','exec'),space)
  return space
@@ -21,7 +22,7 @@ class StopTests(unittest.TestCase):
   for name,method in methods('emergency_stop','enable_manual','request_goal','send_goal','accepted').items():
    if name in ('emergency_stop','enable_manual','request_goal','send_goal','accepted'):setattr(self.b,name,types.MethodType(method,self.b))
  def stop(self):
-  with patch('return_bridge.time.monotonic',return_value=self.now):self.b.emergency_stop()
+  with patch('charging_robot.returning.return_bridge.time.monotonic',return_value=self.now):self.b.emergency_stop()
  def test_stop_cancels_intent_without_creating_lock(self):
   self.b.busy=True;self.b.navigation_id='old';self.stop()
   self.assertFalse(self.b.software_stop);self.assertFalse(self.b.motion_recovery_required);self.assertTrue(self.b.cancel_requested);self.assertEqual(self.b.packets[-1]['mode'],'stop');self.assertEqual(self.b.commands.get_nowait(),('cancel',()))
@@ -29,18 +30,18 @@ class StopTests(unittest.TestCase):
   self.b.busy=True;self.b.navigation_id='old';self.stop()
   for _ in range(5):
    self.now+=.05;self.b.gui_at=self.now
-   with patch('return_bridge.time.monotonic',return_value=self.now):self.b.control_tick()
+   with patch('charging_robot.returning.return_bridge.time.monotonic',return_value=self.now):self.b.control_tick()
    self.assertEqual(self.b.packets[-1]['mode'],'stop')
  def test_explicit_new_manual_start_needs_no_unlock(self):
   self.stop();self.b.commands.get_nowait()
-  with patch('return_bridge.time.monotonic',return_value=self.now):self.b.enable_manual()
+  with patch('charging_robot.returning.return_bridge.time.monotonic',return_value=self.now):self.b.enable_manual()
   self.assertTrue(self.b.manual);self.assertFalse(self.b.cancel_requested);self.assertIsNone(self.b.stop_cause)
  def test_explicit_new_goal_needs_no_unlock_after_cancel_finished(self):
   self.stop();self.b.commands.get_nowait();self.b.request_goal((1.,0.,0.),'new')
   self.assertEqual(self.b.commands.get_nowait(),('goal',(1.,0.,0.,'new')));self.assertFalse(self.b.cancel_requested);self.assertFalse(self.b.software_stop)
  def test_completed_route_can_be_prepared_after_ordinary_stop_without_unlock(self):
   self.stop();confirm={n:True for n in ('operator_present','route_cleared','physical_stop_ready','arm_stowed','exclusive_control_confirmed','no_rear_detection_acknowledged')}
-  with tempfile.TemporaryDirectory() as tmp,patch('return_bridge.time.monotonic',return_value=self.now):self.b.prepare_return(self.plan,Path(tmp)/'start.json','/not-map',confirm,short_test=True)
+  with tempfile.TemporaryDirectory() as tmp,patch('charging_robot.returning.return_bridge.time.monotonic',return_value=self.now):self.b.prepare_return(self.plan,Path(tmp)/'start.json','/not-map',confirm,short_test=True)
   self.assertFalse(self.b.cancel_requested);self.assertIsNone(self.b.stop_cause);self.assertEqual(self.b.return_runtime.phase,'ready');self.assertIsNone(self.b.return_runtime.run_session)
  def test_queued_old_goal_cannot_dispatch_after_stop(self):
   self.b.busy=True;self.b.navigation_id='old';self.stop();self.b.send_goal(1,0,0,'old');self.assertFalse(self.b.busy);self.assertTrue(self.b.cancel_requested)
@@ -51,9 +52,9 @@ class StopTests(unittest.TestCase):
   self.b.latch_software_stop('arbiter_fault','真实控制故障',self.now);self.b.motion_recovery_required=True;self.stop()
   self.assertTrue(self.b.software_stop);self.assertTrue(self.b.motion_recovery_required);self.assertEqual(self.b.stop_cause['code'],'arbiter_fault')
  def test_arm_tool_release_does_not_require_extra_software_unlock(self):
-  with patch('arm_tools_bridge.time.monotonic',return_value=self.now):self.b.begin_independent_arm_hold()
+  with patch('charging_robot.arm.arm_tools_bridge.time.monotonic',return_value=self.now):self.b.begin_independent_arm_hold()
   self.assertTrue(self.b.docking_hold);self.assertFalse(self.b.software_stop)
-  with patch('arm_tools_bridge.time.monotonic',return_value=self.now):self.b.release_docking()
+  with patch('charging_robot.arm.arm_tools_bridge.time.monotonic',return_value=self.now):self.b.release_docking()
   self.assertFalse(self.b.docking_hold);self.assertFalse(self.b.software_stop);self.assertFalse(self.b.motion_recovery_required);self.assertTrue(self.b.cancel_requested)
  def test_recording_still_invalidates_when_cancel_requested_without_lock(self):
   with tempfile.TemporaryDirectory() as tmp:

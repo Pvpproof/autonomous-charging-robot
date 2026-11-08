@@ -6,11 +6,11 @@ from rclpy.node import Node
 from rclpy.executors import SingleThreadedExecutor
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
-from model import MapDocument
-from ros_bridge import Bridge
-from control_arbiter_node import ArbiterNode
-from raw_odom_mode import SOURCE,scope,key,RawChassisSession
-from release_policy import ReleasePolicy,TrialLimiter
+from charging_robot.shared.model import MapDocument
+from charging_robot.control.ros_bridge import Bridge
+from charging_robot.control.control_arbiter_node import ArbiterNode
+from charging_robot.returning.raw_odom_mode import SOURCE, scope, key, RawChassisSession
+from charging_robot.returning.release_policy import ReleasePolicy, TrialLimiter
 from test_full_trial import full_config
 import uuid
 from legacy_ros_harness import Simulation,Sink,isolation,NS

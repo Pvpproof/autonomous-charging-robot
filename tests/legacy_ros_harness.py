@@ -19,11 +19,11 @@ from nav_msgs.msg import Odometry, OccupancyGrid
 from sensor_msgs.msg import LaserScan
 from tf2_msgs.msg import TFMessage
 from action_msgs.msg import GoalStatusArray
-from control_arbiter_node import ArbiterNode
-from release_policy import ReleasePolicy,TrialLimiter
-from ros_bridge import Bridge
-from model import MapDocument
-from return_map import saved_grid_digest
+from charging_robot.control.control_arbiter_node import ArbiterNode
+from charging_robot.returning.release_policy import ReleasePolicy, TrialLimiter
+from charging_robot.control.ros_bridge import Bridge
+from charging_robot.shared.model import MapDocument
+from charging_robot.returning.return_map import saved_grid_digest
 from test_return import fixture
 
 NS='/charging_return_isolated'

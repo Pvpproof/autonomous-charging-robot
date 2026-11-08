@@ -1,14 +1,15 @@
 """Synthetic clocks/feedback and offscreen Qt only: never a ROS node or device."""
+from charging_robot.paths import source_path
 import ast,copy,json,tempfile,types,unittest
 from pathlib import Path
 from unittest.mock import patch
 import _current_fixtures as fixture
 from test_raw_mode import make_plan,snap,update,conditions
 from _recording_helpers import session_fixture
-from raw_odom_mode import RawReturnRuntime
-from control_arbiter import Arbiter
-from control_causes import recording_block_reason,control_evidence,fault_detail
-from return_hold_pad import ReturnStartPad,HoldPad
+from charging_robot.returning.raw_odom_mode import RawReturnRuntime
+from charging_robot.control.control_arbiter import Arbiter
+from charging_robot.control.control_causes import recording_block_reason, control_evidence, fault_detail
+from charging_robot.ui.return_hold_pad import ReturnStartPad, HoldPad
 from PyQt5 import QtCore
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -18,7 +19,7 @@ class LivenessTests(unittest.TestCase):
   self.b.cancel_requested=False;self.b.navigation_id=None;self.b.stop_cause=None;self.b.manual_stamp=self.now;self.b.gui_at=self.now
  def tearDown(self):self.tmp.cleanup()
  def tick(self,now=None):
-  with patch('return_bridge.time.monotonic',return_value=self.now if now is None else now):self.b.control_tick()
+  with patch('charging_robot.returning.return_bridge.time.monotonic',return_value=self.now if now is None else now):self.b.control_tick()
   return self.b.packets[-1]
  def feedback(self):
   self.b.s.update(snap(self.tracker,self.now));self.b.arbiter_at=self.now
@@ -36,10 +37,10 @@ class LivenessTests(unittest.TestCase):
   self.b.gui_at=self.now;self.tick();self.assertEqual([n for n,_ in self.b.events].count('ui_update_recovered'),1)
  def test_successful_reset_clears_old_stop_cause(self):
   self.b.latch_software_stop('operator_stop','用户请求停车',self.now)
-  with patch('stop_recovery.time.monotonic',return_value=self.now):self.b.release_stop()
+  with patch('charging_robot.control.stop_recovery.time.monotonic',return_value=self.now):self.b.release_stop()
   self.b.stop_reset_pending['sequence']=1;self.b.control_sequence=1
   data=dict(self.b.arbiter_state,authority_sequence=1,output_v_m_s=0.,output_w_rad_s=0.,fault=None)
-  with patch('return_bridge.time.monotonic',return_value=self.now+.1):self.b.on_arbiter(types.SimpleNamespace(data=json.dumps(data)))
+  with patch('charging_robot.returning.return_bridge.time.monotonic',return_value=self.now+.1):self.b.on_arbiter(types.SimpleNamespace(data=json.dumps(data)))
   self.assertFalse(self.b.software_stop);self.assertIsNone(self.b.stop_cause)
  def test_foreign_server_goal_not_adopted(self):
   self.b.server_active=True;self.assertEqual(self.tick()['mode'],'stop')
@@ -63,7 +64,7 @@ class LivenessTests(unittest.TestCase):
   self.assertEqual(r.phase,'stopped');self.assertIn('控制循环过期',r.reason);self.assertFalse(self.b.return_keepalive('a'*32));self.assertFalse(r.run_heartbeat(self.now+.01,'a'*32))
  def test_duplicate_start_idempotent_wrong_session_cannot_continue(self):
   r=self.return_runtime(False)
-  with patch('return_bridge.time.monotonic',return_value=self.now):
+  with patch('charging_robot.returning.return_bridge.time.monotonic',return_value=self.now):
    token=self.b.start_return();self.assertEqual(self.b.start_return(),token)
   self.assertFalse(r.run_heartbeat(self.now,'b'*32));self.assertEqual(r.phase,'stopped')
  def test_first_cause_preserved_after_secondary_recording_stop(self):
@@ -71,9 +72,9 @@ class LivenessTests(unittest.TestCase):
   self.b.latch_software_stop('recording_failed','记录因停车失败',self.now+.1);self.assertEqual(self.b.stop_cause,cause)
   self.assertEqual(sum(n=='motion_stop_requested' for n,_ in self.b.events),1)
  def test_actual_emergency_stop_method_cancels_and_zeroes(self):
-  tree=ast.parse((ROOT/'ros_bridge.py').read_text());klass=next(n for n in tree.body if getattr(n,'name',None)=='Bridge');node=next(n for n in klass.body if getattr(n,'name',None)=='emergency_stop');space={'Twist':lambda:object()};exec(compile(ast.Module(body=[node],type_ignores=[]),'<actual-stop>','exec'),space)
+  tree=ast.parse((source_path('ros_bridge.py')).read_text());klass=next(n for n in tree.body if getattr(n,'name',None)=='Bridge');node=next(n for n in klass.body if getattr(n,'name',None)=='emergency_stop');space={'Twist':lambda:object()};exec(compile(ast.Module(body=[node],type_ignores=[]),'<actual-stop>','exec'),space)
   self.b.manual_pub=types.SimpleNamespace(publish=lambda _:None);self.b.busy=True;self.b.navigation_id='own'
-  with patch('return_bridge.time.monotonic',return_value=self.now):space['emergency_stop'](self.b)
+  with patch('charging_robot.returning.return_bridge.time.monotonic',return_value=self.now):space['emergency_stop'](self.b)
   self.assertEqual(self.b.packets[-1]['mode'],'stop');self.assertEqual(self.b.stop_cause['code'],'operator_stop');self.assertEqual(self.b.commands.get_nowait(),('cancel',()))
  def test_control_loss_is_independent_of_gui(self):
   a=Arbiter();self.b.busy=True;self.b.navigation_id='own';p=self.tick();a.receive(p,self.now,self.now);a.odom(0,0,self.now,self.now);a.navigation(.1,0,self.now)

@@ -1,13 +1,14 @@
 """Fresh recording read, strict real data ages. No ROS or hardware."""
+from charging_robot.paths import source_path
 import ast,copy,json,math,tempfile,types,unittest
 from pathlib import Path
 from unittest.mock import patch
-import app
-from raw_odom_mode import raw_timing,sample_now,RawChassisSession
+import charging_robot.ui.app as app
+from charging_robot.returning.raw_odom_mode import raw_timing, sample_now, RawChassisSession
 from test_raw_mode import snap,update
 from _recording_helpers import session_fixture
 from _current_fixtures import ui
-import return_bridge as backend
+import charging_robot.returning.return_bridge as backend
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -37,7 +38,7 @@ class TimingTests(unittest.TestCase):
    result=backend.ReturnBridge.raw_snapshot(b,now+.5);self.assertIsNone(result['raw_odom']);self.assertTrue(result['raw_odom_error']);e=raw_timing(result,now+.5);self.assertAlmostEqual(e['receive_age_s'],.5);self.assertEqual(e['sequence'],t.sequence)
    with self.assertRaises(ValueError):sample_now(result,now+.5)
  def test_bridge_snapshot_adds_capture_time_without_touching_feedback_times(self):
-  tree=ast.parse((ROOT/'ros_bridge.py').read_text());klass=next(n for n in tree.body if getattr(n,'name',None)=='Bridge');method=next(n for n in klass.body if getattr(n,'name',None)=='snapshot');namespace={'time':types.SimpleNamespace(monotonic=iter([10.,10.02]).__next__)}
+  tree=ast.parse((source_path('ros_bridge.py')).read_text());klass=next(n for n in tree.body if getattr(n,'name',None)=='Bridge');method=next(n for n in klass.body if getattr(n,'name',None)=='snapshot');namespace={'time':types.SimpleNamespace(monotonic=iter([10.,10.02]).__next__)}
   exec(compile(ast.Module(body=[method],type_ignores=[]),'<isolated-snapshot>','exec'),namespace)
   import threading
   obj=types.SimpleNamespace(lock=threading.Lock(),_snapshot=lambda now:{'raw_odom':{'received_at':9.99,'source_stamp':20}})
@@ -52,7 +53,7 @@ class UiFreshnessTests(unittest.TestCase):
  def fixture(self):
   self.t,self.now,self.session=session_fixture(self.tmp.name);self.w.chassis_session=self.session;self.w.navigation_map_matches=lambda:True;self.w.document=types.SimpleNamespace(fingerprint='meta',yaml_path=Path(self.tmp.name)/'map.yaml');self.b.s.update(snap(self.t,self.now));self.w.latest=self.b.snapshot()
  def execute(self):
-  with patch('app.time.monotonic',return_value=self.now):self.w.update_route()
+  with patch('charging_robot.ui.app.time.monotonic',return_value=self.now):self.w.update_route()
  def test_continuous_source_and_half_second_ui_delay_keep_all_samples(self):
   self.fixture();cached=copy.deepcopy(self.w.latest);first=self.session.cursor;self.now=stream(self.t,self.now,10);self.b.s.update(snap(self.t,self.now));self.w.latest=cached
   self.execute();self.assertEqual(self.session.phase,'outbound');self.assertEqual(self.session.cursor,self.t.sequence);self.assertEqual(len(self.session.samples),11);self.assertGreater(self.session.cursor,first);self.assertFalse(self.session.rejection)

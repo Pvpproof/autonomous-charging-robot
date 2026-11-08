@@ -1,12 +1,13 @@
 """Independent terminal tools. Tool outcomes never grant or revoke a route."""
+from charging_robot.paths import PROJECT_ROOT
 import json
 from pathlib import Path
 import time
 import uuid
 from PyQt5 import QtCore, QtWidgets as W
-from arm_tools_guard import base_tool_reason,independent_tool_reason
-from arm_process_guard import active_arm_tools
-from model import write_json
+from charging_robot.arm.arm_tools_guard import base_tool_reason, independent_tool_reason
+from charging_robot.arm.arm_process_guard import active_arm_tools
+from charging_robot.shared.model import write_json
 
 
 class DetachedTool:
@@ -81,7 +82,7 @@ class ArmToolsUi:
         self.update_arm_tools_ui()
 
     def _launch_arm_tool(self):
-        script=Path(__file__).with_name('arm_tool_terminal.py')
+        script=PROJECT_ROOT/'arm_tool_terminal.py'
         ok,pid=QtCore.QProcess.startDetached('gnome-terminal',
             ['--wait','--title=charge_robot '+self.arm_action,'--','/usr/bin/python3',
              str(script),self.arm_action,'--state',str(self.arm_status_path),

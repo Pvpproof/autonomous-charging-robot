@@ -1,4 +1,5 @@
 """Verify publication changes preserve explicit configuration boundaries."""
+from charging_robot.paths import source_path
 import importlib.util
 import json
 import os
@@ -13,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def navigation_module():
-    spec = importlib.util.spec_from_file_location('publication_navigation', ROOT/'navigation.launch.py')
+    spec = importlib.util.spec_from_file_location('publication_navigation', source_path('navigation.launch.py'))
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -51,7 +52,7 @@ class PublicationConfigurationTests(unittest.TestCase):
         self.assertEqual(include.call_args.kwargs['map'], str(self.map_file))
 
     def test_docking_command_can_be_set_without_embedded_account_path(self):
-        spec = importlib.util.spec_from_file_location('publication_docking', ROOT/'docking_console.py')
+        spec = importlib.util.spec_from_file_location('publication_docking', source_path('docking_console.py'))
         module = importlib.util.module_from_spec(spec)
         with patch.dict(os.environ, {'CHARGING_DOCKING_COMMAND': '/synthetic/bin/docking-tool'}):
             spec.loader.exec_module(module)

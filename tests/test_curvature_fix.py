@@ -1,7 +1,7 @@
 """The uncalibrated path classifier is gone; integrity checks stay. Synthetic only."""
 import inspect,tempfile,unittest
 from pathlib import Path
-import raw_odom_mode as raw
+import charging_robot.returning.raw_odom_mode as raw
 from _recording_helpers import session_fixture,move,finish
 from test_raw_mode import make_plan,conditions,snap
 class ModelRemovalTests(unittest.TestCase):

@@ -3,10 +3,10 @@ import copy
 import math
 from pathlib import Path
 import yaml
-from chassis_route import observe
-from route_cycle import CycleError, StartStore, near
-from supervised_draft import SupervisedDraft
-from pose_aware_reverse import PoseAwareReversePursuit
+from charging_robot.returning.chassis_route import observe
+from charging_robot.returning.route_cycle import CycleError, StartStore, near
+from charging_robot.returning.supervised_draft import SupervisedDraft
+from charging_robot.returning.pose_aware_reverse import PoseAwareReversePursuit
 
 
 def read_alignment_tolerance(path):
@@ -126,7 +126,7 @@ class ReturnRuntime:
             raise CycleError('当前加载地图与记录地图不同')
         if snapshot.get('localization_epoch') != self.plan['localization_epoch']:
             raise CycleError('定位会话已变化；旧坐标不能自动恢复')
-        from session_revalidation import validate_binding,runtime_identity
+        from charging_robot.returning.session_revalidation import validate_binding, runtime_identity
         if self.plan.get('prepared_runtime_identity') is not None and runtime_identity(snapshot)!=self.plan['prepared_runtime_identity']:
             raise CycleError('准备后控制链进程身份改变')
         adopted=validate_binding(self.plan,snapshot,now,starting=starting)

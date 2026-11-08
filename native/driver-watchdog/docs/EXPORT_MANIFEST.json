@@ -1,6 +1,6 @@
 {
   "scope": "project-authored watchdog components and independent synthetic PTY test",
-  "overall_license": "not selected by project owner; no license invented",
+  "overall_license": "MIT for Pvpproof-owned components only; external/vendor terms unchanged",
   "manufacturer_source_included": false,
   "manufacturer_patch_included": false,
   "binary_or_field_evidence_included": false,
@@ -22,8 +22,8 @@
     },
     {
       "path": "docs/PUBLICATION_BOUNDARY.md",
-      "sha256": "8e3bf2f75b9b3e44cc4250338d4040336f865acfbd7835082d3413f3db7d5c76",
-      "bytes": 1154
+      "sha256": "40812bbd5ae8410ee60945fb56dabccb22791554c818fbaaace5395f27896fc3",
+      "bytes": 1178
     },
     {
       "path": "include/charging_robot/bounded_serial_tx.hpp",

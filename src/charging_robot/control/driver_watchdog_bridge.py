@@ -6,7 +6,7 @@ import json
 import time
 from std_msgs.msg import String
 from std_srvs.srv import Trigger
-from driver_watchdog_client import DriverWatchdogState
+from charging_robot.control.driver_watchdog_client import DriverWatchdogState
 
 class DriverWatchdogControl:
     def init_driver_watchdog(self,required):

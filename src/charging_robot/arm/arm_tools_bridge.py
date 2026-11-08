@@ -1,6 +1,6 @@
 """Base ownership for independent arm tools, on the existing Bridge lock."""
 import time
-from arm_tools_guard import base_tool_reason,independent_tool_reason
+from charging_robot.arm.arm_tools_guard import base_tool_reason, independent_tool_reason
 
 
 class ArmToolsBridge:

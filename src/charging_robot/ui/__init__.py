@@ -1,0 +1,1 @@
+"""Charging robot project components."""

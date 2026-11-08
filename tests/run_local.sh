@@ -3,10 +3,10 @@ set -eo pipefail
 cd "$(dirname "$0")/.."
 source /opt/ros/humble/setup.bash
 export PYTHONDONTWRITEBYTECODE=1
-export PYTHONPATH="$PWD:$PWD/tests:${PYTHONPATH:-}"
+export PYTHONPATH="$PWD/src:$PWD:$PWD/tests:${PYTHONPATH:-}"
 export QT_QPA_PLATFORM=offscreen
 test_runtime="$(mktemp -d /tmp/charging-unit-tests.XXXXXX)"
 export ROS_LOG_DIR="$test_runtime/ros_logs"
-for test_file in test_return.py test_raw_mode.py test_curvature_fix.py test_speed015.py test_full_trial.py test_feedback025.py test_feedback040.py test_release_policy.py test_oneclick.py test_driver_watchdog_client.py test_startup_lock.py test_heartbeat_clock.py test_panel.py test_launch.py test_publication.py test_isolation_guard.py test_per_route.py test_arm_tools.py test_control_liveness.py test_stop_behavior.py test_recording_freshness.py; do
+for test_file in test_return.py test_raw_mode.py test_curvature_fix.py test_speed015.py test_full_trial.py test_feedback025.py test_feedback040.py test_release_policy.py test_oneclick.py test_driver_watchdog_client.py test_startup_lock.py test_heartbeat_clock.py test_panel.py test_launch.py test_publication.py test_isolation_guard.py test_per_route.py test_arm_tools.py test_control_liveness.py test_stop_behavior.py test_recording_freshness.py test_layout.py; do
     /usr/bin/python3 "tests/$test_file"
 done

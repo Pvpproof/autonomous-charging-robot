@@ -4,7 +4,7 @@ Does not alter the recorded path or loosen ReturnMonitor's error thresholds.
 Not wired to ROS or a real vehicle. Gains require validation beyond this route.
 """
 import bisect
-from offline_reverse import ReversePursuit, wrap
+from charging_robot.returning.offline_reverse import ReversePursuit, wrap
 
 
 class PoseAwareReversePursuit(ReversePursuit):

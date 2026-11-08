@@ -1,8 +1,8 @@
 import copy,json,math,tempfile,unittest
 from pathlib import Path
-from raw_odom_mode import *
-from supervised_draft import TestConditions
-from offline_reverse import forward_path
+from charging_robot.returning.raw_odom_mode import *
+from charging_robot.returning.supervised_draft import TestConditions
+from charging_robot.returning.offline_reverse import forward_path
 
 def identity(gid='g'):return dict(boot_id='b',driver=dict(pid=1,start_ticks='1'),publisher_gid=gid,topic='/odom',source_kind=SOURCE)
 def snap(tracker,now,epoch='arb-epoch'):

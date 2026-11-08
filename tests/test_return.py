@@ -4,11 +4,11 @@ import math
 from pathlib import Path
 import tempfile
 import unittest
-from control_arbiter import Arbiter
-from return_runtime import ReturnRuntime, check_plan
-from supervised_draft import TestConditions
-from route_cycle import CycleError
-from return_map import saved_grid_digest, grid_digest
+from charging_robot.control.control_arbiter import Arbiter
+from charging_robot.returning.return_runtime import ReturnRuntime, check_plan
+from charging_robot.returning.supervised_draft import TestConditions
+from charging_robot.returning.route_cycle import CycleError
+from charging_robot.returning.return_map import saved_grid_digest, grid_digest
 
 
 def fixture():

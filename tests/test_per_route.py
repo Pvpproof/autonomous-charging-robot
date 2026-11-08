@@ -1,6 +1,6 @@
 """Synthetic per-route policy; public configuration stays disabled."""
 import unittest
-from release_policy import ReleasePolicy,TrialLimiter
+from charging_robot.returning.release_policy import ReleasePolicy, TrialLimiter
 from test_release_policy import packet
 def config():
     return dict(profile='recorded_route',return_start_mode='click',return_speed_m_s=.15,

@@ -1,5 +1,5 @@
 import unittest,copy
-from driver_watchdog_client import DriverWatchdogState
+from charging_robot.control.driver_watchdog_client import DriverWatchdogState
 
 def state(now=10.,**kw):
  d=dict(version=2,session='12345678-1234-1234-1234-123456789abc',state_seq=1,latched=True,reason='startup_reset_required',monotonic_ns=int(now*1e9),command_age_s=-1.,feedback_age_s=-1.)

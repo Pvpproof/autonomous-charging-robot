@@ -1,8 +1,8 @@
 import unittest,tempfile,copy,struct
 from pathlib import Path
 from dataclasses import replace
-from release_policy import ReleasePolicy,TrialLimiter
-from raw_odom_mode import RawReturnRuntime
+from charging_robot.returning.release_policy import ReleasePolicy, TrialLimiter
+from charging_robot.returning.raw_odom_mode import RawReturnRuntime
 from test_full_trial import full_config
 from test_release_policy import packet,config
 from test_raw_mode import make_plan,conditions,snap
