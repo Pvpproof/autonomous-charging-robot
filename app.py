@@ -17,15 +17,28 @@ from docking_state import readiness, goal_error
 from power_status import power_text
 from route_cycle import StartStore, CycleError
 from chassis_route import ChassisSession
-from raw_odom_mode import RawChassisSession,SOURCE
+from raw_odom_mode import RawChassisSession,SOURCE,raw_timing
 from navigation_status import navigation_reasons,button_status
 from session_revalidation import load_source
 from return_hold_pad import ReturnStartPad
+from arm_tools_ui import ArmToolsUi
+from arm_process_guard import active_arm_tools
+from return_readiness import return_reasons
 
 ROOT=Path(__file__).resolve().parent
 
 
-class Window(W.QMainWindow):
+class CompactReturnPad(ReturnStartPad):
+    def __init__(self,parent=None):
+        super().__init__(parent)
+        self.set_running(False)
+
+    def set_running(self,value):
+        super().set_running(value)
+        self.button.setText('返程运行中' if self.running else '开始返程')
+
+
+class Window(ArmToolsUi, W.QMainWindow):
     def __init__(self,offline=False):
         super().__init__()
         self.offline=offline;self.bridge=None;self.backend=None;self.base_process=None;self.saver=None;self.mode=None
@@ -44,16 +57,21 @@ class Window(W.QMainWindow):
         if self.docking_marker.exists():
             try:self.docking_active=bool(json.loads(self.docking_marker.read_text())['active'])
             except (OSError,ValueError,KeyError):self.docking_active=True
+        self.motion_recovery_marker=ROOT/'config'/'motion_recovery.json'
+        self.saved_motion_recovery=False
+        # A previous window's ordinary stop is not a persistent movement lock.
+        # Current backend/arbiter state is still checked before any new intent.
         self.logdir=ROOT/'logs'/self.session;self.logdir.mkdir()
         self.events=(self.logdir/'events.jsonl').open('a',encoding='utf-8')
         self.console=(self.logdir/'backend.log').open('a',encoding='utf-8')
         self.setWindowTitle('充电导航工作台'+(' · 离线预览' if offline else ''))
         self.resize(1380,880);self.setMinimumSize(1100,760)
+        self.init_arm_tools()
         self.build_ui()
         self.cleanup_timer=QtCore.QTimer(self);self.cleanup_timer.timeout.connect(self.poll_cleanup);self.cleanup_timer.setInterval(250)
         if not offline:
             from ros_bridge import Bridge
-            self.bridge=Bridge(docking_hold=self.docking_active)
+            self.bridge=Bridge(docking_hold=self.docking_active,recovery_required=self.saved_motion_recovery)
         self.manual_timer=QtCore.QTimer(self);self.manual_timer.timeout.connect(self.manual_heartbeat);self.manual_timer.start(50)
         QtWidgetsApp=W.QApplication.instance()
         QtWidgetsApp.applicationStateChanged.connect(self.application_state)
@@ -66,6 +84,7 @@ class Window(W.QMainWindow):
             except (ValueError,KeyError,OSError) as error:self.log('无法恢复上次地图：'+str(error))
         self.timer=QtCore.QTimer(self);self.timer.timeout.connect(self.tick);self.timer.start(200)
         self.update_navigation_ui()
+        self.update_return_ui()
         self.log('面板已启动。编辑地图和点位不会发送运动命令。')
 
     def button(self,text,slot,layout,primary=False):
@@ -92,18 +111,26 @@ class Window(W.QMainWindow):
         header.addWidget(self.power_label)
         self.state=W.QLabel('地图未加载');self.state.setWordWrap(True);self.state.setMinimumWidth(460);header.addWidget(self.state)
         stoprow=W.QHBoxLayout();outer.addLayout(stoprow)
-        self.emergency_button=W.QPushButton('■  底盘紧急停车');self.emergency_button.setMinimumHeight(64);self.emergency_button.setMinimumWidth(240)
+        self.emergency_button=W.QPushButton('■  停止底盘');self.emergency_button.setMinimumHeight(64);self.emergency_button.setMinimumWidth(240)
         self.emergency_button.setStyleSheet('QPushButton {background:#c81e1e;color:white;border:3px solid #ffb4b4;font-size:25px;font-weight:bold;border-radius:8px;} QPushButton:hover {background:#ef2929;} QPushButton:pressed {background:#8b0000;}')
         self.emergency_button.clicked.connect(self.emergency_stop);stoprow.addWidget(self.emergency_button)
-        self.stop_note=W.QLabel('底盘软件停车：立即发零速度、取消导航并锁定操控。\n不控制机械臂；不能替代实体急停。');self.stop_note.setWordWrap(True);stoprow.addWidget(self.stop_note,1)
+        self.stop_note=W.QLabel('停止按钮仅停止底盘，不控制机械臂。');self.stop_note.setWordWrap(True);stoprow.addWidget(self.stop_note,1)
         self.release_stop_button=W.QPushButton('解除停车锁定');self.release_stop_button.clicked.connect(self.release_stop);self.release_stop_button.setEnabled(False);stoprow.addWidget(self.release_stop_button)
-        splitter=W.QSplitter();outer.addWidget(splitter,1)
-        left=W.QWidget();left.setMaximumWidth(365);left.setMinimumWidth(320);side=W.QVBoxLayout(left);side.setContentsMargins(0,0,6,0)
-        scroll=W.QScrollArea();scroll.setWidgetResizable(True);scroll.setWidget(left);scroll.setMinimumWidth(340);splitter.addWidget(scroll)
-        devicebox=W.QGroupBox('设备连接 · 各功能共用');side.addWidget(devicebox);dl=W.QHBoxLayout(devicebox)
+        splitter=W.QSplitter(QtCore.Qt.Vertical);outer.addWidget(splitter,1)
+        left=W.QWidget();side=W.QHBoxLayout(left);side.setContentsMargins(0,0,0,0)
+        splitter.addWidget(left)
+        self.module_sections=[]
+        def module(title):
+            group=W.QGroupBox(title);side.addWidget(group,1);self.module_sections.append(group)
+            column=W.QVBoxLayout(group);column.setContentsMargins(4,8,4,4)
+            area=W.QScrollArea();area.setWidgetResizable(True);column.addWidget(area)
+            content=W.QWidget();area.setWidget(content)
+            layout=W.QVBoxLayout(content);layout.setContentsMargins(2,2,2,2);return layout
+        mapside=module('01  地图与操控');navside=module('02  去程与返程');armside=module('03  机械臂')
+        devicebox=W.QGroupBox('设备');outer.insertWidget(2,devicebox);dl=W.QHBoxLayout(devicebox)
         self.connect_button=self.button('连接底盘与雷达',self.start_devices,dl,True)
         self.disconnect_button=self.button('断开设备',self.stop_devices,dl)
-        mapbox=W.QGroupBox('01  地图与工作模式');side.addWidget(mapbox);ml=W.QVBoxLayout(mapbox)
+        mapbox=W.QGroupBox('地图');mapside.addWidget(mapbox);ml=W.QVBoxLayout(mapbox)
         self.map_combo=W.QComboBox();ml.addWidget(self.map_combo)
         row=W.QHBoxLayout();ml.addLayout(row)
         self.button('加载选中',self.load_selected,row);self.button('导入地图…',self.import_map,row)
@@ -116,20 +143,23 @@ class Window(W.QMainWindow):
         self.mapping_button=self.button('开始重新建图',lambda:self.start_backend('mapping'),mapping_layout,True)
         self.save_map_button=self.button('保存当前地图',self.save_map,mapping_layout)
         row=W.QHBoxLayout();ml.addLayout(row)
-        self.nav_button=W.QPushButton('启动本图定位导航');self.nav_button.clicked.connect(lambda:self.start_backend('navigation'))
-        self.stop_button=self.button('停止当前模式',self.stop_backend,row)
-        self.recovery_button=self.button('关闭已有建图 / 定位服务',lambda:self.cleanup_services(),ml)
+        self.nav_button=W.QPushButton('启动定位与导航');self.nav_button.clicked.connect(lambda:self.start_backend('navigation'))
+        self.stop_button=W.QPushButton('停止定位 / 建图');self.stop_button.clicked.connect(self.stop_backend)
+        self.recovery_button=W.QPushButton('关闭定位 / 建图服务');self.recovery_button.clicked.connect(lambda:self.cleanup_services())
         self.recovery_button.setToolTip('关闭本次或上次面板遗留的建图、Nav2 服务；保留底盘和雷达')
         self.map_label=W.QLabel('尚未加载地图');self.map_label.setWordWrap(True);ml.addWidget(self.map_label)
         self.sensors=W.QLabel('雷达 —   里程计 —   定位 —');self.sensors.setWordWrap(True);ml.addWidget(self.sensors)
-        stations=W.QGroupBox('03  充电点与预停靠');side.addWidget(stations);sl=W.QVBoxLayout(stations)
-        self.list=W.QListWidget();self.list.setMaximumHeight(115);self.list.currentRowChanged.connect(self.select_station);sl.addWidget(self.list)
+        stations=W.QGroupBox('充电点');mapside.addWidget(stations);sl=W.QVBoxLayout(stations)
+        self.list=W.QListWidget();self.list.setMaximumHeight(65);self.list.currentRowChanged.connect(self.select_station);sl.addWidget(self.list)
         row=W.QHBoxLayout();sl.addLayout(row)
         self.button('新增',self.add_station,row);self.button('删除',self.delete_station,row);self.button('保存点位',self.save_stations,row,True)
         self.button('点击地图新增充电停靠点',lambda:self.tool('new_station'),sl)
         self.button('当前位置新增充电停靠点',lambda:self.capture_pose(new=True),sl)
-        note=W.QLabel('以下坐标仅编辑充电点，不用于车辆初始定位。');note.setWordWrap(True);sl.addWidget(note)
-        self.station_editor=W.QWidget();sl.addWidget(self.station_editor);sl=W.QVBoxLayout(self.station_editor);sl.setContentsMargins(0,0,0,0)
+        note=W.QLabel('以下坐标仅编辑充电点，不用于车辆初始定位。');note.setWordWrap(True);note.hide();sl.addWidget(note)
+        self.station_editor=W.QWidget()
+        self.station_details=W.QPushButton('点位参数');self.station_details.setCheckable(True);sl.addWidget(self.station_details)
+        sl.addWidget(self.station_editor);self.station_editor.hide();self.station_details.toggled.connect(self.station_editor.setVisible)
+        sl=W.QVBoxLayout(self.station_editor);sl.setContentsMargins(0,0,0,0)
         self.station_editor.setEnabled(False)
         self.name=W.QLineEdit();self.name.setPlaceholderText('充电点名称');sl.addWidget(self.name)
         self.socket_valid=W.QCheckBox('已设置充电口标记');sl.addWidget(self.socket_valid)
@@ -146,40 +176,39 @@ class Window(W.QMainWindow):
         self.button('拖出预停靠朝向',lambda:self.tool('dock'),row)
         self.button('记录当前底盘位置为预停靠位',self.capture_pose,sl)
         self.point_note=W.QLabel('紫色：充电口   蓝色箭头：预停靠位');self.point_note.setWordWrap(True);sl.addWidget(self.point_note)
-        nav=W.QGroupBox('02  定位与导航 · 无需充电点');side.insertWidget(2,nav);nl=W.QVBoxLayout(nav)
-        self.nav_help=W.QLabel();self.nav_help.setWordWrap(True);nl.addWidget(self.nav_help)
+        nl=navside;nl.setSpacing(4)
+        self.nav_help=W.QLabel();self.nav_help.setWordWrap(True);nl.addWidget(self.nav_help);self.nav_help.hide()
         nl.addWidget(self.nav_button)
-        self.initial_button=self.button('在地图上设置初始位置',lambda:self.tool('initial'),nl)
-        self.apply_initial_button=self.button('应用初始位置（不移动车辆）',self.apply_initial_pose,nl,True)
-        self.initial_note=W.QLabel('尚未标记车辆初始位置');self.initial_note.setWordWrap(True);nl.addWidget(self.initial_note)
-        self.goal_button=self.button('在地图选择导航目标',lambda:self.tool('goal'),nl)
-        self.free_go_button=self.button('导航到选定目标',self.navigate_free,nl,True)
-        self.go_button=self.button('前往选中预停靠位',self.navigate,nl,True)
-        self.go_status=W.QLabel();self.go_status.setWordWrap(True);nl.addWidget(self.go_status)
-        self.record_route=W.QCheckBox('记录实际去程（同会话底盘原始里程）');nl.addWidget(self.record_route)
-        self.route_note=W.QLabel('定位后勾选记录并导航；返程使用本轮原始里程，不套地图起点参考。');self.route_note.setWordWrap(True);nl.addWidget(self.route_note)
-        self.return_button=W.QPushButton('准备沿实测轨迹返程');self.return_button.clicked.connect(self.prepare_return);self.return_button.setEnabled(False);nl.addWidget(self.return_button)
-        self.import_return_button=self.button('旧地图轨迹不可用于原始里程模式',self.import_return_route,nl);self.import_return_button.setEnabled(False)
-        self.return_short=W.QCheckBox('首次短测：最多 3 秒 / 实测 0.15 米');self.return_short.setChecked(True);nl.addWidget(self.return_short)
-        self.return_run_session=None;self.return_hold=ReturnStartPad(self);self.return_hold.start_requested.connect(self.start_return);self.return_hold.cancel_requested.connect(self.stop_return);self.return_hold.setEnabled(False);nl.addWidget(self.return_hold)
-        self.return_stop=W.QPushButton('停止返程');self.return_stop.clicked.connect(self.stop_return);nl.addWidget(self.return_stop)
-        self.return_note=W.QLabel('人工持续监护，无后向自动避障。记录路径无法发现新进入的障碍。');self.return_note.setWordWrap(True);nl.addWidget(self.return_note)
-        self.cancel_button=self.button('取消导航',self.cancel_navigation,nl)
-        self.nav_label=W.QLabel('可直接选目标导航，也可前往已保存充电点。');self.nav_label.setWordWrap(True);nl.addWidget(self.nav_label)
+        row=W.QHBoxLayout();nl.addLayout(row)
+        self.initial_button=self.button('设置初始位置',lambda:self.tool('initial'),row)
+        self.apply_initial_button=self.button('应用初始位置',self.apply_initial_pose,row,True)
+        self.initial_note=W.QLabel('尚未设置起点');self.initial_note.setWordWrap(True);nl.addWidget(self.initial_note)
+        self.goal_button=self.button('设置导航目标',lambda:self.tool('goal'),mapside)
+        row=W.QHBoxLayout();nl.addLayout(row)
+        self.free_go_button=self.button('去程：地图目标',self.navigate_free,row,True)
+        self.go_button=self.button('去程：充电点',self.navigate,row,True)
+        self.cancel_button=self.button('停止去程',self.cancel_navigation,nl)
+        self.go_status=W.QLabel();self.go_status.setWordWrap(True);nl.addWidget(self.go_status);self.go_status.hide()
+        self.record_route=W.QCheckBox('自动记录去程');self.record_route.setChecked(True);self.record_route.hide()
+        self.route_note=W.QLabel('尚无去程记录');self.route_note.setWordWrap(True);nl.addWidget(self.route_note)
+        self.return_button=self.button('开始返程',self.request_recorded_return,nl,True);self.return_button.setEnabled(False)
+        self.import_return_button=W.QPushButton('不导入旧轨迹');self.import_return_button.setEnabled(False);self.import_return_button.hide()
+        self.return_run_session=None;self.return_hold=CompactReturnPad(self)
+        self.return_hold.layout().setContentsMargins(0,0,0,0)
+        self.return_hold.start_requested.connect(self.start_return);self.return_hold.cancel_requested.connect(self.stop_return)
+        self.return_hold.setEnabled(False);nl.addWidget(self.return_hold);self.return_hold.hide()
+        self.return_stop=self.button('停止返程',self.stop_return,nl)
+        self.return_note=W.QLabel('未准备返程');self.return_note.setWordWrap(True);nl.addWidget(self.return_note)
+        self.return_short=W.QCheckBox('短测（3 秒 / 0.15 米）');self.return_short.setChecked(True);nl.addWidget(self.return_short);self.return_short.hide()
+        self.nav_label=W.QLabel('尚无导航任务');self.nav_label.setWordWrap(True);nl.addWidget(self.nav_label);self.nav_label.hide()
         self.nav_failure_note=W.QLabel();self.nav_failure_note.setWordWrap(True);self.nav_failure_note.setStyleSheet('color:#fbbf24;');nl.addWidget(self.nav_failure_note)
-        dock=W.QGroupBox('04  导航后对接 · 人工接管');side.addWidget(dock);dkl=W.QVBoxLayout(dock)
-        self.docking_note=W.QLabel();self.docking_note.setWordWrap(True);dkl.addWidget(self.docking_note)
-        self.docking_conditions=W.QCheckBox('现场确认停靠姿态及工作区安全')
-        self.docking_conditions.setToolTip('软件停稳观察不证明可对接；需确认相机能看到充电口、机械臂可达，外部底盘控制已停用')
-        dkl.addWidget(self.docking_conditions)
-        self.docking_conditions.toggled.connect(self.update_docking_ui)
-        self.docking_button=self.button('锁定底盘并打开对接终端',self.open_docking_console,dkl,True)
-        self.docking_result=W.QLabel('test/home 不会自动启动；原工作流仍逐段确认。')
-        self.docking_result.setWordWrap(True);dkl.addWidget(self.docking_result)
-        self.docking_release_button=self.button('现场确认机械臂已收拢，解除对接锁',self.release_docking,dkl)
-        boundary=W.QLabel('home 可能先拔枪，必须先确认断电、解锁及退回路径。底盘停车不停止机械臂。')
-        boundary.setWordWrap(True);dkl.addWidget(boundary)
-        side.addStretch()
+        more=W.QPushButton('导航服务操作');more.setCheckable(True);nl.addWidget(more)
+        extra=W.QWidget();el=W.QVBoxLayout(extra);el.setContentsMargins(0,0,0,0);nl.addWidget(extra);extra.hide();more.toggled.connect(extra.setVisible)
+        self.pause_nav_button=self.button('暂停导航计算',self.pause_navigation_compute,el)
+        el.addWidget(self.stop_button);el.addWidget(self.recovery_button)
+        self.build_arm_tools_ui(armside)
+        mapside.addStretch();navside.addStretch();armside.addStretch()
+
         right=W.QWidget();rl=W.QVBoxLayout(right);rl.setContentsMargins(4,0,0,0);splitter.addWidget(right)
         row=W.QHBoxLayout();rl.addLayout(row)
         self.hint=W.QLabel('中键拖图 · 滚轮缩放 · 右键取消当前标点');row.addWidget(self.hint,1)
@@ -195,15 +224,16 @@ class Window(W.QMainWindow):
         self.button('停车并退出键盘',lambda:self.keyboard.disarm('用户停车'),manual_row)
         self.keyboard=KeyboardPad();self.keyboard.released.connect(self.keyboard_released);ml.addWidget(self.keyboard)
         self.steering_note=W.QLabel('键盘意图 / 里程计反馈：等待数据');self.steering_note.setWordWrap(True);ml.addWidget(self.steering_note)
-        rl.addWidget(manual_box)
-        self.canvas=MapCanvas();rl.addWidget(self.canvas,1)
+        mapside.insertWidget(0,manual_box)
+        self.canvas=MapCanvas();self.canvas.setMinimumSize(480,180);rl.addWidget(self.canvas,1)
         self.canvas.poseDrawn.connect(self.pose_drawn)
         self.canvas.operationCanceled.connect(self.cancel_map_operation)
         self.canvas.cursorWorld.connect(lambda x,y:self.statusBar().showMessage('地图坐标 X {:.3f} m   Y {:.3f} m'.format(x,y)))
         self.pose_label=W.QLabel('底盘位姿：等待定位');rl.addWidget(self.pose_label)
-        self.logview=W.QPlainTextEdit();self.logview.setReadOnly(True);self.logview.setMaximumBlockCount(700);self.logview.setMaximumHeight(130);rl.addWidget(self.logview)
-        self.log_path=W.QLabel('日志：'+str(self.logdir));self.log_path.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse);rl.addWidget(self.log_path)
-        splitter.setSizes([350,1000])
+        self.logview=W.QPlainTextEdit();self.logview.setReadOnly(True);self.logview.setMaximumBlockCount(700);self.logview.setMaximumHeight(80);rl.addWidget(self.logview);self.logview.hide()
+        self.log_toggle=W.QPushButton('显示日志');self.log_toggle.setCheckable(True);self.log_toggle.toggled.connect(self.logview.setVisible);row.addWidget(self.log_toggle)
+        self.log_path=W.QLabel('日志：'+str(self.logdir));self.log_path.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse);self.log_path.hide();rl.addWidget(self.log_path)
+        splitter.setSizes([410,270])
 
     def number(self,layout,label,minimum=-10000,maximum=10000):
         layout.addWidget(W.QLabel(label));n=W.QDoubleSpinBox();n.setRange(minimum,maximum);n.setDecimals(3);n.setSingleStep(.05);layout.addWidget(n);return n
@@ -388,19 +418,45 @@ class Window(W.QMainWindow):
         self.pose_drawn('new_station' if new or self.list.currentRow()<0 else 'dock',*self.latest['pose'])
 
     def emergency_stop(self):
+        self.note_base_stop('操作员紧急停车')
         if self.bridge and not self.offline:
             self.bridge.emergency_stop()
-            self.keyboard.disarm('紧急停车');self.latest['software_stop']=True
-            self.log('紧急停车已请求：持续零速度、取消导航、锁定面板运动；等待实际停稳')
+            self.keyboard.disarm('停止底盘');self.latest=self.bridge.snapshot()
+            self.save_motion_recovery(self.latest.get('motion_recovery_required',False))
+            self.log('已请求停止当前底盘任务；不锁定后续操作，旧任务不会自动恢复')
         else:self.stop_note.setText('离线预览：没有连接底盘，未发送停车命令。');return
         self.update_navigation_ui()
 
+    def save_motion_recovery(self,required):
+        try:
+            write_json(self.motion_recovery_marker,dict(required=bool(required),automatic_resume=False))
+            self.saved_motion_recovery=bool(required);return True
+        except OSError as error:
+            self.log('无法保存底盘恢复状态',error=str(error));return False
+
+    def sync_motion_recovery(self):
+        if 'motion_recovery_required' in self.latest and bool(self.latest['motion_recovery_required'])!=self.saved_motion_recovery:
+            self.save_motion_recovery(self.latest['motion_recovery_required'])
+
     def release_stop(self):
         if not self.bridge or self.offline:return
-        if not self.confirm('确认车辆已经停稳、现场可以继续操作，解除软件停车锁定？\n解除后不会自动恢复键盘操控或导航任务。'):return
-        try:self.bridge.release_stop()
-        except ValueError as error:self.error(str(error));return
-        self.latest=self.bridge.snapshot();self.log('已请求解除停车锁定，等待底盘与仲裁零速确认；不会自动恢复任务');self.update_navigation_ui()
+        if not self.confirm('人工恢复面板 / 确认底盘就绪？\n反馈不足时只恢复面板，底盘运动仍禁用；反馈恢复也不会自动放行。\n如需清理旧工具占用，请确认机械臂已停稳收拢、枪头退出、其他控制停用。'):return
+        if not self.save_motion_recovery(True):
+            self.error('恢复状态无法保存，请检查文件权限；未解除底盘运动保护');return
+        self.keyboard.disarm('人工恢复面板，不恢复旧按键')
+        try:
+            result=self.bridge.release_stop()
+            if self.docking_active and not self.arm_tool_busy() and not active_arm_tools():
+                self.bridge.clear_recovered_tool_hold()
+                write_json(self.docking_marker,dict(active=False,session=self.session))
+                self.docking_active=False
+        except (OSError,ValueError) as error:self.error(str(error));return
+        self.latest=self.bridge.snapshot()
+        self.return_run_session=None
+        if result and result.get('kind')=='panel_only':
+            self.log('面板已恢复；底盘运动未放行',reasons=result['reasons'])
+        else:self.log('已请求确认底盘就绪；等待仲裁零速确认，不自动恢复任务')
+        self.update_navigation_ui();self.update_return_ui()
 
     def application_state(self,state):
         if state!=QtCore.Qt.ApplicationActive:self.keyboard.disarm('窗口失去激活')
@@ -581,19 +637,24 @@ class Window(W.QMainWindow):
         if self.latest.get('pose_age',math.inf)>1 or self.latest.get('scan_age',math.inf)>1 or self.latest.get('odom_age',math.inf)>1:
             self.error('定位、雷达或里程计尚未就绪，请先设置初始位置并检查显示。');return
         if self.latest.get('busy'):self.error('已有导航任务，请先取消或等待完成。');return
+        if self.arm_tool_busy():self.error('机械臂工具仍在运行，请先结束并确认收拢');return
         if not self.confirm('前往“{}”？\nX {:.2f} m，Y {:.2f} m，朝向 {:.1f}°\n确认定位正确、底盘通道畅通、工具已收拢。'.format(label,pose[0],pose[1],math.degrees(pose[2]))):return
-        request_id=None
-        self.imported_return_plan=None
-        if self.chassis_session:
-            self.chassis_session.stop('新导航请求，旧记录不自动恢复',time.monotonic());self.chassis_session=None
-        if self.record_route.isChecked():
-            self.latest=self.bridge.snapshot()
-            try:
-                self.chassis_session=RawChassisSession(self.document.fingerprint,self.start_store().path,self.logdir,self.latest,time.monotonic(),self.bridge.raw_samples_since)
-                request_id=self.chassis_session.goal_id
-            except (OSError,ValueError,KeyError) as error:self.error('无法开始实际轨迹记录：'+str(error));return
-        try:self.bridge.request_goal(pose,request_id=request_id)
-        except ValueError as error:self.error(str(error));return
+        try:
+            current=self.bridge.snapshot()
+            session=RawChassisSession(self.document.fingerprint,self.start_store().path,self.logdir,
+                                      current,time.monotonic(),self.bridge.raw_samples_since)
+        except (OSError,ValueError,KeyError) as error:
+            self.log('raw_record_start_refused',reason=str(error),timing=raw_timing(locals().get('current') or self.latest,time.monotonic()))
+            self.error('无法开始实际轨迹记录：'+str(error));return
+        try:self.bridge.request_goal(pose,request_id=session.goal_id)
+        except ValueError as error:
+            session.stop('导航请求未提交：'+str(error),time.monotonic())
+            self.error(str(error));return
+        # Commit the new recording only after Bridge accepts the request. A
+        # refused button action must not erase a usable completed recording.
+        previous=self.chassis_session
+        self.chassis_session=session;self.imported_return_plan=None
+        if previous:previous.stop('新导航请求，旧记录不自动恢复',time.monotonic())
         self.nav_failure_note.clear()
         self.target=pose
         self.log('请求前往 '+label,pose_m_rad=pose,map_sha256=self.document.fingerprint)
@@ -603,16 +664,32 @@ class Window(W.QMainWindow):
         session=self.chassis_session
         try:
             sha=self.document.fingerprint if self.navigation_map_matches() else 'map-changed'
-            session.update(self.latest,sha,time.monotonic())
+            cached_timing=raw_timing(self.latest,time.monotonic())
+            # GUI layout/process inspection may outlive a display snapshot.
+            # Refresh from the ROS-owned tracker immediately before validation;
+            # do not modify source or receive timestamps to make it pass.
+            current=self.bridge.snapshot() if self.bridge else self.latest
+            checked=time.monotonic();self.latest=current
+            session.update(current,sha,checked)
+            if (isinstance(cached_timing.get('receive_age_s'),(int,float)) and
+                    cached_timing['receive_age_s']>.25 and not getattr(session,'ui_snapshot_refresh_reported',False)):
+                session.ui_snapshot_refresh_reported=True
+                self.log('raw_recording_refreshed_stale_ui_snapshot',cached=cached_timing,
+                         current=raw_timing(current,checked),phase=session.core.phase)
             if session.core.phase=='outbound_stopped' and not session.candidate_attempted:
                 try:session.return_candidate()
                 except CycleError as error:self.log('不能生成纯倒车返程候选：'+str(error))
-            self.route_note.setText(session.status())
+            self.route_note.setText(session.status().split('\n')[0]);self.route_note.setToolTip(session.status())
         except (OSError,ValueError,KeyError) as error:
-            session.core.stop_or_take_over('记录失败：'+str(error));self.route_note.setText(session.status())
+            session.core.stop_or_take_over('记录失败：'+str(error));self.route_note.setText(session.status().split('\n')[0]);self.route_note.setToolTip(session.status())
+        issue=getattr(session,'return_rejection',None)
+        if issue and not getattr(session,'return_issue_reported',False):
+            session.return_issue_reported=True
+            self.log('去程继续记录，暂不能返程：'+issue['reason'],return_qualification=issue,
+                     recording_continues=True,stop_requested=False)
         if session.core.phase=='blocked' and isinstance(session,RawChassisSession) and not getattr(session,'stop_requested',False):
             session.stop_requested=True
-            if self.bridge:self.bridge.emergency_stop()
+            if self.bridge:self.bridge.emergency_stop(reason='recording_failed',detail=str(session.block_reason))
             self.log('原始去程记录失败，已请求停车：'+str(session.block_reason))
         self.update_return_ui()
 
@@ -636,30 +713,41 @@ class Window(W.QMainWindow):
         except (OSError,ValueError,KeyError,TypeError) as error:
             self.imported_return_plan=None;self.error('旧轨迹重验失败：'+str(error))
 
+    def request_recorded_return(self):
+        if self.return_run_session:return
+        if self.latest.get('return_active'):
+            if self.latest.get('return_state',{}).get('phase')=='ready':self.start_return()
+            return
+        if self.prepare_return():self.start_return()
+
     def prepare_return(self):
         if self.offline or not self.bridge or (not self.chassis_session and not self.imported_return_plan):return
         if self.docking_guard():return
         try:
             plan=self.imported_return_plan or self.chassis_session.return_candidate()
-            if not self.confirm('按同会话原始里程轨迹闭环倒车，保持原车身朝向。地图仅用于去程导航。轮滑或被推动无法靠这套里程保证识别。\n请现场逐项确认：人员持续监护、通道清空、机械臂和枪头收拢、线缆无牵拉、实体断电按钮可及，其他遥控已交接。\n没有后向自动避障；记录轨迹无法发现新进入的障碍。\n'+('短测：0.05 m/s，最多3秒或实测0.15米，先到即请求停车。' if self.return_short.isChecked() else '完整返程：{:.2f} m/s，点击启动，点击停止返程取消；全程保持现场监护。'.format(self.latest.get('arbiter',{}).get('return_speed_m_s',.05)))):return
+            if not self.confirm('沿本轮记录返程（{:.2f} m/s）？\n确认通道清空、机械臂和枪头收拢、线缆安全，实体停车可用，其他控制已交接。\n全程现场监护；无后向自动避障。'.format(self.latest.get('arbiter',{}).get('return_speed_m_s',.15))):return False
             confirmations={name:True for name in ('operator_present','route_cleared','physical_stop_ready',
                 'arm_stowed','exclusive_control_confirmed','no_rear_detection_acknowledged')}
             self.bridge.prepare_return(plan,self.start_store().path,self.document.yaml_path,
                 confirmations,short_test=self.return_short.isChecked())
             self.return_run_session=None
-            self.log('返程已准备，尚未运动；点击启动才开始')
-            self.latest=self.bridge.snapshot();self.update_return_ui()
-        except (OSError,ValueError,KeyError,TypeError) as error:self.error('不能准备返程：'+str(error))
+            self.log('返程检查通过，准备提交启动请求')
+            self.latest=self.bridge.snapshot();self.update_return_ui();return True
+        except (OSError,ValueError,KeyError,TypeError) as error:
+            self.error('不能返程：'+str(error));return False
 
     def start_return(self):
+        if self.docking_guard():return
         if not self.bridge:return
         try:
             self.return_run_session=self.bridge.start_return()
             self.log('已请求启动返程；停止、急停或故障后不自动续行')
+            self.latest=self.bridge.snapshot();self.update_return_ui()
         except (ValueError,TypeError) as error:
             self.return_hold.set_running(False);self.error('不能启动返程：'+str(error))
 
     def stop_return(self):
+        self.note_base_stop('操作员停止返程')
         self.return_run_session=None;self.return_hold.set_running(False)
         if self.bridge:self.bridge.stop_return('操作员停止返程')
         self.log('已请求停止返程，不自动恢复')
@@ -668,21 +756,17 @@ class Window(W.QMainWindow):
         state=self.latest.get('return_state',{})
         active=self.latest.get('return_active',False)
         arbiter=self.latest.get('arbiter',{})
-        eligible=(not self.offline and (self.imported_return_plan is not None or (self.chassis_session is not None and
-            self.chassis_session.core.phase=='outbound_stopped')) and
-            not active and not self.latest.get('busy') and not self.latest.get('software_stop') and
-            not self.latest.get('manual') and not self.docking_active and not self.cleanup and
-            self.latest.get('arbiter_age',math.inf)<=.25 and arbiter.get('commissioned') is True and
-            not arbiter.get('fault') and arbiter.get('mode')=='stop' and
-            not (arbiter.get('release_profile')=='supervised_trial' and arbiter.get('full_trial_consumed')) and
-            arbiter.get('raw_odom_ready') is True and self.latest.get('raw_odom') is not None and
-            not self.latest.get('raw_odom_error'))
+        starting=active and state.get('phase')=='ready' and not self.return_run_session
+        reasons=return_reasons(self.latest,self.chassis_session,now=time.monotonic(),offline=self.offline,
+                               cleanup=bool(self.cleanup),docking=self.docking_active,starting=starting)
+        eligible=not reasons
         self.return_button.setEnabled(eligible)
         short_only=arbiter.get('release_profile')=='short_only'
         full_trial=arbiter.get('release_profile')=='supervised_trial'
+        per_route=arbiter.get('release_profile')=='recorded_route'
         if short_only:self.return_short.setChecked(True)
-        if full_trial:self.return_short.setChecked(False)
-        self.return_short.setEnabled(not active and not short_only and not full_trial)
+        if full_trial or per_route:self.return_short.setChecked(False)
+        self.return_short.setEnabled(not active and not short_only and not full_trial and not per_route)
         self.import_return_button.setEnabled(False)
         self.return_hold.setEnabled(active and arbiter.get('return_start_mode')=='click')
         if not active:self.return_run_session=None
@@ -696,30 +780,44 @@ class Window(W.QMainWindow):
         if full_trial:text+='\n一次完整试验 · {:.2f} m/s · 单击启动 / 点击停止取消；运行后本次授权不再复用。'.format(arbiter.get('return_speed_m_s',.05))
         if not arbiter.get('commissioned'):text+='\n尚未完成现场验收，实车输出禁用。'
         if self.latest.get('raw_odom_error'):text+='\n原始里程未就绪：'+str(self.latest['raw_odom_error'])
-        self.return_button.setToolTip(text)
-        self.return_note.setText(text+'\n同会话原始里程闭环；轮滑无独立位置验证。人工持续监护，无后向自动避障。')
+        if per_route:text+='\n按本轮有效去程返程；无全局一次性试验次数限制。'
+        if reasons:brief=reasons[0]
+        elif starting:brief='已就绪，点击开始返程'
+        elif active:brief=labels.get(state.get('phase'),'返程运行中')
+        else:brief='本轮去程有效，可开始返程'
+        if active and state.get('phase')!='ready':brief=labels.get(state.get('phase'),brief)
+        if active and self.return_run_session and state.get('phase')=='ready':brief='正在启动返程'
+        if state.get('reason') and not active:brief+='：'+str(state['reason'])
+        self.return_note.setText(brief)
+        details='\n'.join(reasons) if reasons else text
+        self.return_button.setToolTip(details);self.return_note.setToolTip(details+'\n同会话原始里程；人工监护，无后向自动避障。')
         if active:
             for button in (self.manual_button,self.connect_button,self.disconnect_button,self.nav_button,
                 self.mapping_button,self.initial_button,self.apply_initial_button,self.go_button,
                 self.free_go_button,self.recovery_button,self.stop_button,self.docking_button):button.setEnabled(False)
 
     def cancel_navigation(self):
+        self.note_base_stop('操作员取消导航')
         if self.latest.get('return_active'):self.stop_return();return
         if self.bridge:self.bridge.commands.put(('cancel',()));self.log('请求取消导航；等待服务器确认')
     def update_navigation_ui(self):
         loaded=self.document is not None;matching=self.navigation_map_matches()
         busy=self.latest.get('busy',False)
-        stopped=self.latest.get('software_stop',False)
+        recovery=self.latest.get('motion_recovery_required',False)
+        stopped=self.latest.get('software_stop',False) or recovery
         manual=self.keyboard.armed or self.latest.get('manual',False) or self.latest.get('manual_stop_pending',False)
         reset_pending=bool(self.latest.get('stop_reset_pending'))
         self.release_stop_button.setEnabled(stopped and not self.offline and not reset_pending)
+        self.release_stop_button.setVisible(bool(stopped))
+        self.release_stop_button.setText('处理控制故障')
         self.manual_button.setEnabled(not self.offline and not stopped and self.latest.get('odom_age',math.inf)<=1 and not busy and not self.keyboard.armed)
         if stopped:
             v,w=self.latest.get('velocity',(0.,0.))
             observed=self.latest.get('odom_age',math.inf)<=1 and abs(v)<=.01 and abs(w)<=.02
-            self.stop_note.setText('软件停车已锁定 · '+('里程计显示静止，请现场确认' if observed else '尚未确认停稳，请现场检查；必要时使用实体急停')+'\n持续发送零速度；解除后不会自动恢复任务。')
-        if reset_pending:self.stop_note.setText('软件停车保持锁定 · 正在等待解除确认，请勿重复点击。\n底盘与仲裁确认前不允许运动，确认后也不自动恢复任务。')
-        elif not stopped:self.stop_note.setText('底盘软件停车：立即发零速度、取消导航并锁定操控。\n不控制机械臂；不能替代实体急停。')
+            self.stop_note.setText('底盘控制故障 · '+('反馈静止' if observed else '停稳未确认'))
+        if recovery:self.stop_note.setText('面板可用 · 底盘运动未放行，停稳/通信待确认')
+        if reset_pending:self.stop_note.setText('等待解除停车确认；不自动恢复任务。')
+        elif not stopped:self.stop_note.setText('停止按钮仅停止底盘，不控制机械臂。')
         localized=matching and self.latest.get('pose_age',math.inf)<=1.
         initial_ready=matching and self.latest.get('initial_ready',False)
         ready=localized and self.latest.get('nav_ready',False) and self.latest.get('scan_age',math.inf)<=1 and self.latest.get('odom_age',math.inf)<=1
@@ -736,8 +834,9 @@ class Window(W.QMainWindow):
         elif self.mode is None and any(n in self.latest.get('nodes',[]) for n in ('amcl','map_server','nav2_container','slam_gmapping','slam_toolbox')):
             phase='检测到已有建图 / 定位服务';hint='可能由上次面板或其他窗口启动。点击“关闭已有建图 / 定位服务”，结束后重新启动本图定位。'
         else:phase='定位未启动';hint='地图已加载，可先标车辆位置；点击“启动本图定位导航”后应用初始位置。' if loaded else '先加载已有地图；也可以独立使用设备连接和键盘操控。'
-        if stopped:phase='软件停车锁定 · '+phase
-        self.state.setText(map_text+'\n'+phase);self.nav_help.setText(hint)
+        if recovery:phase='底盘运动未放行 · '+phase
+        elif stopped:phase='底盘控制故障 · '+phase
+        self.state.setText(map_text+'\n'+phase);self.nav_help.setToolTip(hint);self.nav_help.setText(phase)
         self.state.setToolTip(hint)
         self.initial_button.setEnabled(loaded and not busy)
         self.initial_button.setToolTip('先结束当前导航任务' if busy else '只标记位置和朝向；加载地图后即可使用，无需充电点')
@@ -747,8 +846,8 @@ class Window(W.QMainWindow):
         self.apply_initial_button.setToolTip('标记位置后启动本图定位，待车辆停稳再应用' if not can_apply else '发布初始定位，不发运动命令')
         if self.initial_pose:
             x,y,yaw=self.initial_pose
-            self.initial_note.setText('已标记 X {:.2f} m · Y {:.2f} m · {:.1f}°\n已保存参考，不代表当前定位。核实现车位置后再应用，并检查激光重合。'.format(x,y,math.degrees(yaw)))
-        else:self.initial_note.setText('尚未标记车辆初始位置；在地图按住并拖出车头朝向。')
+            self.initial_note.setText('起点 X {:.2f} · Y {:.2f} · {:.1f}°'.format(x,y,math.degrees(yaw)))
+        else:self.initial_note.setText('尚未设置起点')
         can_go=not self.offline and ready and not busy and not manual and not stopped
         self.free_go_button.setEnabled(can_go and self.free_goal is not None)
         i=self.list.currentRow()
@@ -762,6 +861,9 @@ class Window(W.QMainWindow):
             matching=self.navigation_map_matches(),mode=self.mode,cleanup=bool(self.cleanup),
             docking=self.docking_active,manual=self.keyboard.armed or self.latest.get('manual',False) or
             self.latest.get('manual_stop_pending',False),backend_failure=self.backend_failure)
+        if self.latest.get('nav2_pause',{}).get('phase','idle')!='idle':
+            reasons.append('Nav2导航已暂停或暂停未完成；原始里程计返程保留，新导航需结束本轮后重开面板及定位导航')
+            self.free_go_button.setEnabled(False);self.go_button.setEnabled(False)
         free=list(reasons)
         if self.free_goal is None:free.append('请先在地图选择目标位置和朝向')
         station=list(reasons);i=self.list.currentRow()
@@ -770,88 +872,20 @@ class Window(W.QMainWindow):
         free_text=button_status(self.free_go_button.isEnabled(),free)
         station_text=button_status(self.go_button.isEnabled(),station)
         self.free_go_button.setToolTip(free_text);self.go_button.setToolTip(station_text)
-        self.go_status.setText('选定目标：'+free_text+'\n预停靠位：'+station_text)
+        self.go_status.setText('去程就绪' if self.free_go_button.isEnabled() or self.go_button.isEnabled() else (free or station or ['等待目标'])[0])
+        self.go_status.setToolTip('选定目标：'+free_text+'\n预停靠位：'+station_text)
 
     def docking_guard(self):
         if self.docking_active:
-            self.error('对接锁定中：先结束对接终端，现场确认枪头已退出、机械臂已收拢，再解除对接锁。底盘停车按钮仍可使用。')
+            self.error('机械臂占用底盘：结束工具后，现场确认收拢并释放底盘。')
             return True
         return False
 
     def update_docking_ui(self):
-        if not hasattr(self,'docking_button'):return
-        allowed,reason=readiness(self.latest,self.navigation_map_matches())
-        if self.offline:reason='离线预览：不连接机器人，不允许打开运动工作流'
-        if self.docking_active:reason='对接锁定中：本面板持续发零速度；机械臂状态请看终端并现场核实'
-        error=goal_error(self.latest) if self.latest.get('pose_age',math.inf)<=1 else None
-        if error:reason+='\n当前相对本次目标误差 {:.3f} m / {:.1f}°（仅定位估计）'.format(*error)
-        self.docking_note.setText(reason)
-        if not allowed and self.docking_conditions.isChecked():
-            self.docking_conditions.blockSignals(True);self.docking_conditions.setChecked(False);self.docking_conditions.blockSignals(False)
-        eligible=allowed and not self.offline and not self.cleanup and not self.docking_active
-        self.docking_conditions.setEnabled(eligible)
-        self.docking_button.setEnabled(eligible and self.docking_conditions.isChecked())
-        running=self.docking_process is not None and self.docking_process.state()!=QtCore.QProcess.NotRunning
-        self.docking_release_button.setEnabled(self.docking_active and not running and not self.offline)
-        if self.docking_active:
-            for button in (self.manual_button,self.connect_button,self.disconnect_button,self.nav_button,self.mapping_button,self.initial_button,self.apply_initial_button,self.go_button,self.free_go_button,self.recovery_button,self.stop_button):button.setEnabled(False)
-        path=self.logdir/'docking-state.json'
-        if self.docking_active and path.exists():
-            try:
-                data=json.loads(path.read_text());phase=data.get('phase')
-                messages={'ready':'终端已打开，尚未执行命令','test-running':'test 命令进行中（可能正在等待人工确认）',
-                    'test-returned':'test 返回成功；仅运动流程完成，未验证充电或锁止',
-                    'home-running':'home 命令进行中；可能先退枪，实际状态需现场核实',
-                    'home-returned':'home 返回成功；请现场确认机械臂收拢',
-                    'uncertain':'命令中断/失败，实体状态未确认；不自动重试',
-                    'launch-failed':'命令启动失败；未解除底盘对接锁',
-                    'console-closed':'终端已关闭；底盘对接锁仍保持'}
-                self.docking_result.setText(messages.get(phase,'对接终端状态未知，请现场核实'))
-            except (OSError,ValueError):self.docking_result.setText('无法读取对接终端状态，保持对接锁；请现场核实')
-
-    def open_docking_console(self):
-        if self.offline or not self.bridge or self.docking_active or self.cleanup:return
-        self.latest=self.bridge.snapshot()
-        allowed,reason=readiness(self.latest,self.navigation_map_matches())
-        if not allowed or not self.docking_conditions.isChecked():self.error(reason+'；需要现场勾选确认');return
-        if not self.confirm('只锁定底盘并打开人工终端，不自动执行test。\n确认位置朝向合适、机械臂工作区安全、其他底盘控制源已停用。原test仍逐段确认，home需先确认断电解锁。'):return
-        try:self.bridge.begin_docking()
-        except ValueError as error:self.error(str(error));return
-        self.docking_active=True;self.latest=self.bridge.snapshot()
-        try:write_json(self.docking_marker,{'active':True,'session':self.session})
-        except OSError as error:
-            self.error('无法保存对接锁，未打开终端；本面板仍保持锁定：'+str(error));self.update_docking_ui();return
-        self.keyboard.disarm('对接锁定');self.docking_conditions.setChecked(False)
-        proc=QtCore.QProcess(self);self.docking_process=proc
-        proc.errorOccurred.connect(self.docking_console_error)
-        proc.finished.connect(self.docking_console_finished)
-        proc.start('gnome-terminal',['--wait','--title=充电机器人 · 人工对接', '--', '/usr/bin/python3',str(ROOT/'docking_console.py'),'--state',str(self.logdir/'docking-state.json')])
-        self.log('已锁定本面板底盘操控，打开人工对接终端；没有自动运行test或home')
-        self.update_navigation_ui();self.update_docking_ui()
-
-    def docking_console_error(self,error):
-        if error==QtCore.QProcess.FailedToStart:
-            self.docking_result.setText('无法打开终端，底盘对接锁仍保持；检查桌面会话与gnome-terminal')
-            self.log('对接终端启动失败；保持对接锁')
-            self.update_docking_ui()
-
-    def docking_console_finished(self,code,status):
-        self.log('对接终端已退出，不代表机械臂停止；对接锁保持',exit_code=code)
-        self.update_docking_ui()
+        self.update_arm_tools_ui()
 
     def release_docking(self):
-        if not self.docking_active or not self.bridge:return
-        if self.docking_process is not None and self.docking_process.state()!=QtCore.QProcess.NotRunning:
-            self.error('请先在对接终端完成操作并退出；不能把关闭窗口当成机械臂停止。');return
-        if not self.confirm('解除底盘对接锁会允许后续导航。\n请现场确认：机械臂已实际停止并收拢，枪头已完全退出，线缆无牵拉风险。解除不会自动移动。'):return
-        try:self.bridge.release_docking()
-        except ValueError as error:self.error(str(error));return
-        self.docking_active=False;self.latest=self.bridge.snapshot()
-        try:write_json(self.docking_marker,{'active':False,'session':self.session})
-        except OSError as error:self.error('本次已解除对接锁，但保存失败；重开面板可能仍锁定：'+str(error))
-        self.docking_result.setText('已由现场人员确认解除对接锁；不会自动导航或恢复任务')
-        self.log('现场确认后解除底盘对接锁，无自动恢复')
-        self.update_navigation_ui();self.update_docking_ui()
+        self.release_arm_hold()
 
     def repaint_map(self):
         overlay=(self.view_mode=='live' and self.mode=='mapping') or (self.view_mode=='saved' and self.navigation_map_matches())
@@ -862,6 +896,7 @@ class Window(W.QMainWindow):
     def tick(self):
         if self.bridge:
             self.latest=self.bridge.snapshot();self.graph_ready=self.latest['graph_ready']
+            self.sync_motion_recovery()
             while not self.bridge.events.empty():
                 event=self.bridge.events.get_nowait();self.log(event.pop('event'),**event)
             s=self.latest
@@ -902,22 +937,30 @@ class Window(W.QMainWindow):
         self.update_docking_ui()
         self.update_route()
         self.update_return_ui()
+        self.tick_arm_tools()
         self.repaint_map()
+    def request_exit_stop(self):
+        if self.bridge:
+            try:self.bridge.emergency_stop(reason='panel_close',detail='用户关闭面板')
+            except Exception as error:self.log('退出停车请求未能提交；请现场确认实体停车',error=str(error))
+
     def cleanup_services(self,exit_after=False):
-        if self.docking_guard():return
         if self.cleanup:return
         if self.offline and not exit_after:self.error('离线预览不会关闭真实服务。');return
         if self.saver:self.error('地图正在保存，请等待保存结束再关闭服务。');return
         group=int(self.base_process.processId()) if exit_after and self.base_process else None
         processes=find_services(ROOT,device_group=group) if not self.offline else []
         if not processes:
-            if exit_after:self.allow_close=True;QtCore.QTimer.singleShot(0,self.close)
+            if exit_after:
+                self.request_exit_stop()
+                self.allow_close=True;QtCore.QTimer.singleShot(0,self.close)
             else:self.log('未发现残留建图/定位进程，可重新启动。')
             return
         listing='\n'.join('{}  {}'.format(p['pid'],' '.join(p['argv'][:3])) for p in processes)
         action='停止以下建图/定位及本面板设备进程，并退出面板？' if exit_after else '关闭以下建图 / 定位服务？底盘、雷达连接保留。'
-        if not self.confirm(action+'\n如有导航任务将先请求取消。确认车辆可安全停稳。未保存的实时建图会丢失，已保存地图和点位保留。\n'+listing):return
+        if not self.confirm(action+'\n请现场确认车辆已停稳。将请求底盘停车；关闭面板不停止独立机械臂终端。\n未保存的实时建图会丢失，已保存地图和点位保留。\n'+listing):return
         self.keyboard.disarm('关闭服务')
+        if exit_after:self.request_exit_stop()
         self.cleanup={'processes':processes,'exit':exit_after,'phase':'cancel','deadline':time.monotonic()+8.}
         self.stopping_backend=True
         if self.latest.get('busy'):self.cancel_navigation()
@@ -930,7 +973,7 @@ class Window(W.QMainWindow):
         if job['phase']=='cancel':
             v,w=self.latest.get('velocity',(0.,0.))
             moving=self.latest.get('odom_age',math.inf)<=1 and (abs(v)>.01 or abs(w)>.02)
-            if self.latest.get('busy') or moving or self.latest.get('manual_stop_pending'):
+            if not job['exit'] and (self.latest.get('busy') or moving or self.latest.get('manual_stop_pending')):
                 if time.monotonic()>job['deadline']:
                     self.cleanup_timer.stop();self.cleanup=None;self.stopping_backend=False
                     self.error('导航取消或停稳尚未确认，未关闭控制进程。请先现场停稳并检查导航状态，再重试关闭。')
@@ -950,7 +993,7 @@ class Window(W.QMainWindow):
         if job['phase']=='force':
             self.cleanup=None;self.stopping_backend=False
             self.error('仍有进程未退出：'+', '.join(str(p['pid']) for p in alive));return
-        if self.latest.get('busy'):
+        if not job['exit'] and self.latest.get('busy'):
             self.cleanup=None;self.stopping_backend=False;self.error('检测到导航任务，未强制关闭。请先取消任务并停稳。');return
         if not self.confirm('以下进程未正常退出：'+', '.join(str(p['pid']) for p in alive)+'\n确认车辆已停稳，强制关闭这些进程？不会删除已保存地图或点位。'):
             self.cleanup=None;self.stopping_backend=False;return
@@ -958,16 +1001,18 @@ class Window(W.QMainWindow):
         job.update(phase='force',deadline=time.monotonic()+3.);self.cleanup_timer.start()
 
     def closeEvent(self,event):
-        if self.docking_active:
-            event.ignore();self.docking_guard();return
+        self.note_base_stop('面板关闭，序列不自动恢复')
         if not self.allow_close:
             event.ignore()
             if self.cleanup:return
             if not self.dirty_guard():return
+            if self.arm_tool_busy() and not self.confirm('关闭面板不会停止独立机械臂终端或机械臂运动。\n请继续在现场监护并使用机械臂自己的停止方式。底盘占用状态保留，重开不会自动恢复动作。\n关闭面板？'):return
             self.cleanup_services(exit_after=True);return
         self.keyboard.disarm('关闭窗口')
         self.timer.stop();self.manual_timer.stop();self.cleanup_timer.stop()
-        if self.bridge:self.bridge.close()
+        if self.bridge:
+            try:self.bridge.close()
+            except Exception as error:self.log('面板连接退出异常；未证明车辆或机械臂停止',error=str(error))
         self.events.close();self.console.close();event.accept()
 
 

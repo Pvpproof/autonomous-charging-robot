@@ -9,6 +9,7 @@ def navigation_reasons(snapshot, *, offline, loaded, matching, mode, cleanup,
     if cleanup:reasons.append('正在关闭服务，请等待进程退出')
     if docking:reasons.append('底盘对接锁定中，请先完成对接并现场确认解除')
     if snapshot.get('return_active'):reasons.append('返程已准备或进行中，请先停止并确认停稳')
+    if snapshot.get('motion_recovery_required'):reasons.append('面板已恢复，底盘运动未放行；请确认底盘就绪')
     if snapshot.get('software_stop'):reasons.append('软件停车已锁定，请停稳后手动解除')
     if snapshot.get('busy'):reasons.append('已有导航或底盘任务尚未结束')
     if manual:reasons.append('键盘操控或停车请求尚未结束，请先退出并等待停稳')

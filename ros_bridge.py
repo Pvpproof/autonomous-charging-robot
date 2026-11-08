@@ -27,17 +27,22 @@ from pathlib import Path
 from ament_index_python.packages import get_package_share_directory
 
 
+from arm_tools_bridge import ArmToolsBridge
 from return_bridge import ReturnBridge
+from nav2_pause_bridge import Nav2PauseBridge
 from runtime_provenance import panel_identity
 from return_map import grid_digest
 from return_runtime import read_alignment_tolerance,alignment_timing
 
 
-class Bridge(ReturnBridge, Node):
-    def __init__(self,docking_hold=False, *, ros_args=None):
+from stop_recovery import StopRecoveryBridge
+
+class Bridge(StopRecoveryBridge, ArmToolsBridge, Nav2PauseBridge, ReturnBridge, Node):
+    def __init__(self,docking_hold=False, *, recovery_required=False, ros_args=None):
         rclpy.init(args=ros_args)
         super().__init__('charging_navigation_panel')
         self.lock=threading.Lock(); self.commands=queue.Queue(); self.events=queue.Queue()
+        self.init_nav2_pause()
         self.grid=None; self.grid_seq=0; self.scan=None; self.path=[]
         self.scan_times=deque(maxlen=40); self.odom_time=0.; self.velocity=(0.,0.)
         self.pose=None; self.pose_time=0.; self.scan_world=[]; self.nodes=[]; self.graph_ready=False
@@ -50,7 +55,7 @@ class Bridge(ReturnBridge, Node):
         self.goal_status=None;self.goal_target=None;self.goal_finished_at=None
         self.stop_observation=StopObservation();self.docking_hold=docking_hold
         self.manual=False; self.manual_target=(0.,0.); self.manual_stamp=0.
-        self.manual_stop_pending=False; self.server_active=False;self.software_stop=False
+        self.manual_stop_pending=False; self.server_active=False;self.software_stop=False;self.motion_recovery_required=False
         self.init_return()
         self.alignment_tolerance=read_alignment_tolerance(Path(__file__).parent/'config/nav2_ackermann.yaml')
         # Legacy zero requests are routed to a disconnected input; the arbiter owns chassis output.
@@ -79,41 +84,25 @@ class Bridge(ReturnBridge, Node):
     def nav_status(self,msg):
         with self.lock:self.server_active=any(g.status in (1,2,3) for g in msg.status_list)
 
-    def emergency_stop(self):
+    def emergency_stop(self,reason='operator_stop',detail='用户请求底盘停车'):
         with self.lock:
-            self.software_stop=True;self.stop_reset_pending=None;self.reset_arbiter=False;self.manual=False;self.manual_target=(0.,0.)
+            self.latch_software_stop(reason,detail);self.stop_reset_pending=None;self.reset_arbiter=False;self.manual=False;self.manual_target=(0.,0.)
             self.manual_stop_pending=False;self.cancel_requested=True
             self.manual_pub.publish(Twist())
         self.control_tick()
         self.commands.put(('cancel',()))
-        self.event('software_stop_requested',zero_velocity_requested=True)
-
-    def release_stop(self):
-        with self.lock:
-            if self.busy or self.server_active:raise ValueError('导航任务尚未结束，继续保持停车锁定')
-            if time.monotonic()-self.odom_time>1.:raise ValueError('里程计未更新，无法确认车辆已停稳')
-            if abs(self.velocity[0])>.01 or abs(self.velocity[1])>.02:raise ValueError('里程计仍显示运动，请先确认车辆停稳')
-            if self.stop_observation.duration(self.stop_observation.first)<2.:raise ValueError('需连续停稳两秒再解除')
-            if self.stop_reset_pending is not None:raise ValueError('正在等待仲裁确认解除，请勿重复点击')
-            now=time.monotonic();a=self.arbiter_state
-            if self.arbiter_at is None or not 0<=now-self.arbiter_at<=.25:raise ValueError('独立仲裁反馈未就绪，保持停车锁定')
-            if not a.get('instance_id') or a.get('graph_ready') is not True:
-                raise ValueError('控制链尚未就绪：'+str(a.get('graph_reason') or '等待驱动与控制节点'))
-            self.software_stop=True;self.manual=False;self.manual_target=(0.,0.)
-            self.return_runtime=None;self.reset_arbiter=True
-            self.stop_reset_pending=dict(instance_id=a['instance_id'],requested_at=now,sequence=None,request_id=self.control_owner+'-'+str(self.control_sequence+1))
-            if self.raw_tracker.error:self.raw_tracker.reset()
-        self.event('software_stop_reset_requested',automatic_resume=False)
+        self.event('software_stop_requested',zero_velocity_requested=True,requested_source=reason,requested_detail=detail,first_cause=self.stop_cause)
 
     def enable_manual(self):
         with self.lock:
             self.return_guard()
             if getattr(self,'docking_hold',False):raise ValueError('对接锁定中，请先现场确认机械臂已收拢并解除对接锁')
-            if self.software_stop:raise ValueError('软件停车已锁定，请先手动解除')
+            if self.software_stop or self.motion_recovery_required:raise ValueError('底盘运动未放行，请先确认底盘就绪')
             if self.busy or self.server_active or self.manual_stop_pending:
                 raise ValueError('导航任务或停车请求尚未结束')
             if time.monotonic()-self.odom_time>1.:
                 raise ValueError('尚无新鲜底盘里程计')
+            self.cancel_requested=False;self.stop_cause=None
             self.manual=True;self.manual_target=(0.,0.);self.manual_stamp=time.monotonic()
             self.goal_status=None;self.goal_target=None;self.goal_finished_at=None
         self.event('manual_enabled',source='ychd_robot_keyboard.moveBindings -> cmd_vel -> ychd_robot_node')
@@ -179,6 +168,7 @@ class Bridge(ReturnBridge, Node):
     def event(self,kind,**data):self.events.put({'event':kind,**data})
 
     def tick(self):
+        self.tick_nav2_pause()
         try:
             t=self.tf.lookup_transform('map','base_footprint',rclpy.time.Time())
             age=(self.get_clock().now().nanoseconds-(t.header.stamp.sec*10**9+t.header.stamp.nanosec))/1e9
@@ -248,10 +238,12 @@ class Bridge(ReturnBridge, Node):
     def request_goal(self,pose,request_id=None):
         with self.lock:
             self.return_guard()
+            if self.nav2_pause_gate.phase!='idle':raise ValueError('Nav2导航已暂停或暂停未完成；不会自动恢复，请结束本轮后关闭并重开面板及定位导航')
             if getattr(self,'docking_hold',False):raise ValueError('对接锁定中，请先现场确认机械臂已收拢并解除对接锁')
-            if self.software_stop:raise ValueError('软件停车已锁定，请先手动解除')
+            if self.software_stop or self.motion_recovery_required:raise ValueError('底盘运动未放行，请先确认底盘就绪')
             if self.manual or self.manual_stop_pending:raise ValueError('请先退出键盘控制并等待停车命令发出')
             if self.busy or self.server_active:raise ValueError('已有导航请求正在处理，请先取消或等待完成')
+            self.stop_cause=None
             self.navigation_id=request_id or uuid.uuid4().hex
             self.busy=True;self.status='等待目标接受';self.cancel_requested=False;self.path=[]
             self.goal_status=None;self.goal_target=tuple(pose);self.goal_finished_at=None
@@ -260,7 +252,7 @@ class Bridge(ReturnBridge, Node):
     def send_goal(self,x,y,yaw,request_id):
         with self.lock:
             if request_id!=self.navigation_id:return
-            if self.software_stop or getattr(self,'docking_hold',False):
+            if self.cancel_requested or self.software_stop or self.motion_recovery_required or getattr(self,'docking_hold',False):
                 self.busy=False;self.event('queued_goal_blocked_by_stop');return
         if not self.action.server_is_ready():
             with self.lock:self.busy=False;self.status='导航 Action 尚未就绪'
@@ -272,7 +264,7 @@ class Bridge(ReturnBridge, Node):
         self.event('goal_requested',x_m=x,y_m=y,yaw_rad=yaw)
         try:
             with self.lock:
-                if self.software_stop or getattr(self,'docking_hold',False):
+                if self.cancel_requested or self.software_stop or self.motion_recovery_required or getattr(self,'docking_hold',False):
                     self.busy=False;self.event('queued_goal_blocked_by_stop');return
                 future=self.action.send_goal_async(goal,feedback_callback=self.feedback)
             future.add_done_callback(lambda result:self.accepted(result,request_id))
@@ -336,13 +328,7 @@ class Bridge(ReturnBridge, Node):
         self.event('docking_hold_enabled',scope='panel_chassis_only')
 
     def release_docking(self):
-        with self.lock:
-            if self.busy or self.server_active:raise ValueError('导航任务尚未结束')
-            if time.monotonic()-self.odom_time>1.:raise ValueError('里程计无新鲜数据，保持对接锁')
-            if self.stop_observation.duration(self.stop_observation.first)<2.:raise ValueError('尚未连续观察到底盘停稳，保持对接锁')
-            self.docking_hold=False
-            self.goal_status=None;self.goal_target=None;self.goal_finished_at=None
-        self.event('docking_hold_released',operator_confirmed_arm_clear=True,automatic_resume=False)
+        return ArmToolsBridge.release_docking(self)
 
     def _snapshot(self,now):
         times=list(self.scan_times)
@@ -351,7 +337,7 @@ class Bridge(ReturnBridge, Node):
             elapsed=now-paired.pop('paired_at')
             paired['odom_tf_age']+=elapsed;paired['alignment_age']+=elapsed
             if not paired.pop('alignment_future_valid'):paired['alignment_age']=math.inf
-        return dict(**paired,odom_frame=self.odom_frame,base_frame='base_footprint',
+        return dict(nav2_pause=self.nav2_pause_gate.snapshot(),**paired,odom_frame=self.odom_frame,base_frame='base_footprint',
             odom_frame_valid=self.odom_frame_valid,odom_source_stamp=self.odom_source_stamp,map_sha256=self.gui_map_sha,map_grid_sha=getattr(self,'map_grid_sha',None),
             return_state=dict(self.return_state),return_active=self.return_active(),
             **self.raw_snapshot(now),
@@ -365,16 +351,21 @@ class Bridge(ReturnBridge, Node):
             scan_hz=(len(times)-1)/(times[-1]-times[0]) if len(times)>1 and times[-1]>times[0] else 0.,
             odom_age=max(now-self.odom_time,self.get_clock().now().nanoseconds/1e9-self.odom_source_stamp) if self.odom_source_stamp is not None else math.inf,velocity=self.velocity,scan_world=list(self.scan_world),
             path=list(self.path),nodes=list(self.nodes),graph_ready=self.graph_ready,initial_ready=self.initial_ready,nav_ready=self.nav_ready,
-            software_stop=self.software_stop,stop_reset_pending=bool(self.stop_reset_pending),busy=self.busy or self.server_active or self.return_active(),manual=self.manual,manual_stop_pending=self.manual_stop_pending,
+            software_stop=self.software_stop,stop_cause=dict(self.stop_cause) if self.stop_cause else None,gui_age_s=now-self.gui_at if self.gui_at is not None else None,control_mode=self.control_mode,motion_recovery_required=self.motion_recovery_required,stop_reset_pending=bool(self.stop_reset_pending),navigation_busy=self.busy or self.server_active,busy=self.busy or self.server_active or self.return_active(),manual=self.manual,manual_stop_pending=self.manual_stop_pending,
             status=self.status,distance=self.distance,goal_status=self.goal_status,goal_target=self.goal_target,
             cancel_requested=self.cancel_requested,docking_hold=self.docking_hold,
             stationary_s=self.stop_observation.duration(self.goal_finished_at),stationary_samples=self.stop_observation.samples,
             power=self.power.snapshot(now),power48=self.power48.snapshot(now),manual_target=self.manual_target)
 
     def snapshot(self):
-        with self.lock:return self._snapshot(time.monotonic())
+        with self.lock:
+            taken=time.monotonic();state=self._snapshot(taken)
+            state['snapshot_taken_at']=taken
+            state['snapshot_completed_at']=time.monotonic()
+            return state
 
     def close(self):
+        self.emergency_stop(reason='panel_close',detail='用户关闭面板')
         self.stop_return('面板关闭')
         self.disable_manual('面板关闭')
         self.manual_tick()
@@ -399,4 +390,4 @@ class Bridge(ReturnBridge, Node):
                 self.raw_tracker.error=str(e)
                 if first or not getattr(self,'raw_rejection_reported',None)==self.raw_tracker.epoch:
                     self.event('raw_odometry_rejected',rejection=self.raw_tracker.rejection);self.raw_rejection_reported=self.raw_tracker.epoch
-                if self.return_active():self.software_stop=True;self.return_state=self.return_runtime.stop(str(e))
+                if self.return_active():self.latch_software_stop('raw_odometry_rejected',str(e));self.return_state=self.return_runtime.stop(str(e))

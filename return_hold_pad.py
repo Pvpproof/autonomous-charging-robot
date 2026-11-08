@@ -30,7 +30,7 @@ class HoldPad(QtWidgets.QWidget):
 
 
 class ReturnStartPad(QtWidgets.QWidget):
-    """A click requests start once; release does not cancel. Hiding stops it."""
+    """A click requests start once; only explicit close/cancel stops autonomous work."""
     start_requested=QtCore.pyqtSignal()
     cancel_requested=QtCore.pyqtSignal()
 
@@ -53,8 +53,7 @@ class ReturnStartPad(QtWidgets.QWidget):
         self.button.setText('返程运行中 · 点击停止返程可取消' if self.running else '点击启动沿实测轨迹返程')
 
     def eventFilter(self,watched,event):
-        if self.running and (event.type()==QtCore.QEvent.ApplicationDeactivate or
-                (event.type() in (QtCore.QEvent.Hide,QtCore.QEvent.Close) and watched==self.window())):
+        if self.running and event.type()==QtCore.QEvent.Close and watched==self.window():
             self.cancel_requested.emit()
             self.set_running(False)
         return False

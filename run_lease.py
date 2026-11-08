@@ -1,7 +1,7 @@
-"""One explicit start, then a fresh GUI lease; never resumes after cancellation.
+"""One explicit start, then a fresh controller lease; never resumes after cancellation.
 
-The independent arbiter checks GUI sequence *progress*, even if the panel ROS
-thread keeps publishing authority packets. This is not obstacle detection.
+The independent arbiter checks controller sequence *progress*, even if another publisher
+replays an old run packet. This is not obstacle detection.
 """
 import math
 import re
@@ -40,11 +40,11 @@ class RunLeaseGate:
         elif key != self.key:
             raise ValueError('run session changed while active')
         elif not 0 <= now-self.advanced_at <= self.TIMEOUT:
-            raise ValueError('GUI run lease expired')
+            raise ValueError('controller run lease expired')
         elif sequence < self.sequence:
             raise ValueError('run lease sequence reversed')
         elif sequence > self.sequence:
             self.sequence = sequence
             self.advanced_at = now
         if not 0 <= now-self.advanced_at <= self.TIMEOUT:
-            raise ValueError('GUI run lease expired')
+            raise ValueError('controller run lease expired')

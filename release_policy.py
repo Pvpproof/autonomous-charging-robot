@@ -27,7 +27,7 @@ class ReleasePolicy:
         if type(self.feedback_speed_limit) not in (int,float) or not math.isfinite(self.feedback_speed_limit) or not self.return_speed<=self.feedback_speed_limit<=.40:
             self.errors.append('invalid measured return speed limit');self.feedback_speed_limit=self.return_speed*1.2
         if self.profile=='short_only' and self.feedback_speed_limit>.06:self.errors.append('short_only feedback limit must remain 0.06')
-        if self.profile not in ('disabled','short_only','supervised_route','supervised_trial'):
+        if self.profile not in ('disabled','short_only','supervised_route','supervised_trial','recorded_route'):
             self.errors.append('unknown release profile')
         if self.profile!='disabled' and not isolated_test:
             if not config.get('deployment_id'):self.errors.append('missing deployment identity')
@@ -115,19 +115,19 @@ class TrialLimiter:
             return self.fail('return hold/site confirmation absent')
         if self.policy.profile=='short_only' and packet.get('short_test') is not True:
             return self.fail('short_only rejects full-route requests')
-        if self.policy.profile=='supervised_trial':
+        if self.policy.profile in ('supervised_trial','recorded_route'):
             length=packet.get('route_length_m')
             if packet.get('short_test') is not False:return self.fail('full trial requires full-route mode')
             if type(length) not in (int,float) or not math.isfinite(length):return self.fail('full trial route length is invalid')
             if length<.05:return self.fail('full trial route is too short')
-            if length>self.policy.trial_max_route_m:return self.fail('full trial route {:.3f}m exceeds authorization {:.3f}m'.format(length,self.policy.trial_max_route_m))
+            if self.policy.profile=='supervised_trial' and length>self.policy.trial_max_route_m:return self.fail('full trial route {:.3f}m exceeds authorization {:.3f}m'.format(length,self.policy.trial_max_route_m))
         if self.active!=key:
             if self.active is not None:return self.fail('return trial changed while active')
             if key in self.used:return self.fail('consumed return trial cannot resume')
             if self.policy.profile=='supervised_trial' and self.full_trial_consumed:return self.fail('one-time full trial already consumed')
             self.active=key;self.used.add(key);self.distance=0.;self.started_at=None;self.claimed=False;self.active_route_length=packet.get('route_length_m')
             self.last_tick=now;self.last_odom=None
-        if self.policy.profile=='supervised_trial' and length!=self.active_route_length:return self.fail('full trial route length changed')
+        if self.policy.profile in ('supervised_trial','recorded_route') and length!=self.active_route_length:return self.fail('active return route length changed')
         if not isinstance(now,(int,float)) or not math.isfinite(now) or not 0<=now-self.last_tick<=.25:
             return self.fail('independent return loop stalled')
         self.last_tick=now
@@ -154,6 +154,9 @@ class TrialLimiter:
         if self.policy.profile=='short_only' and self.started_at is not None:
             if now-self.started_at>=self.MAX_TIME or self.distance>=self.MAX_DISTANCE:
                 return self.fail('independent short trial limit reached')
+        if self.policy.profile=='recorded_route' and self.started_at is not None:
+            if now-self.started_at>=length/.03+15. or self.distance>=length+.20:
+                return self.fail('recorded route/time watchdog reached')
         if self.policy.profile=='supervised_trial':
             if self.started_at is not None and (now-self.started_at>=min(self.policy.trial_max_time_s,length/.03+15.) or self.distance>=length+.20):return self.fail('full trial route/time watchdog reached')
             if (v!=0 or w!=0) and not self.claimed:

@@ -31,12 +31,12 @@ class ClickLeaseTests(unittest.TestCase):
  def test_closed_session_cannot_resume(self):
   g=RunLeaseGate();g.check(clickpacket(),10.);g.close()
   with self.assertRaisesRegex(ValueError,'cannot resume'):g.check(clickpacket(run_sequence=2),10.1)
- def test_independent_gui_freeze_stops_even_authority_is_fresh(self):
+ def test_controller_sequence_freeze_stops_even_authority_is_fresh(self):
   c=full_config();c['return_start_mode']='click';c['feedback_speed_limit_m_s']=.4
   g=TrialLimiter(ReleasePolicy(c));g.claim_trial=lambda *a:True
   for i in range(7):
    now=10+i*.05;out=g.filter('return',clickpacket(),(-.15,0.),now,odom_pose=(-i*.0075,0),odom_stamp=now,odom_age=0.,measured_velocity=(-.15,0.))
-  self.assertEqual(out,(0.,0.));self.assertIn('GUI run lease expired',g.fault)
+  self.assertEqual(out,(0.,0.));self.assertIn('controller run lease expired',g.fault)
  def test_hold_packet_rejected_by_click_policy_and_reverse(self):
   c=full_config();c['return_start_mode']='click';g=TrialLimiter(ReleasePolicy(c));g.claim_trial=lambda *a:True
   for mode in ['hold','click']:
@@ -54,7 +54,7 @@ class ClickRuntimeTests(unittest.TestCase):
    self.assertEqual(r.tick(snap(t,now),now,True)['phase'],'running')
    r.stop('cancel');self.assertFalse(r.run_heartbeat(now+.05,TOKEN));self.assertFalse(r.start_run(now+.05,TOKEN))
    self.assertEqual(r.tick(snap(t,now),now,True)['phase'],'stopped')
- def test_gui_stall_cannot_be_revived_by_heartbeat(self):
+ def test_controller_stall_cannot_be_revived_by_heartbeat(self):
   plan,t,now=make_plan()
   with tempfile.TemporaryDirectory() as tmp:
    r=RawReturnRuntime(plan,conditions(plan),Path(tmp)/'s.json',activation_mode='click');r.start_run(now,TOKEN)

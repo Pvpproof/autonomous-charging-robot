@@ -13,6 +13,8 @@ from return_map import saved_grid_digest
 from supervised_draft import TestConditions
 from session_revalidation import revalidate,runtime_identity
 from runtime_provenance import panel_identity
+from stop_recovery import motion_reset_reasons
+from control_causes import fault_detail
 
 
 class ReturnBridge:
@@ -35,6 +37,8 @@ class ReturnBridge:
         self.raw_tracker=RawTracker();self.known_raw_arbiter_epoch=None
         self.reset_arbiter = False
         self.stop_reset_pending = None
+        self.stop_cause={'code':'restored_stop','detail':'已恢复保存的停车状态'} if self.software_stop else None
+        self.ui_late_reported=False
         self.odom_frame_valid = False
         self.odom_frame = None
         self.odom_source_stamp = None
@@ -49,7 +53,7 @@ class ReturnBridge:
             with self.lock:
                 instance=data.get('instance_id')
                 if self.known_arbiter_instance is not None and instance!=self.known_arbiter_instance:
-                    self.software_stop=True;self.stop_reset_pending=None;self.reset_arbiter=False;self.manual=False;self.manual_target=(0.,0.)
+                    self.latch_software_stop('arbiter_restarted','独立仲裁实例改变，旧任务不恢复');self.motion_recovery_required=True;self.stop_reset_pending=None;self.reset_arbiter=False;self.manual=False;self.manual_target=(0.,0.)
                     self.commands.put(('cancel',()))
                     if self.return_runtime:self.return_state=self.return_runtime.stop('独立仲裁重启，禁止恢复旧任务')
                 if data.get('raw_source_identity'):self.raw_tracker.bind(data['raw_source_identity'])
@@ -57,14 +61,14 @@ class ReturnBridge:
                 if self.known_raw_arbiter_epoch is not None and raw_epoch!=self.known_raw_arbiter_epoch:
                     self.raw_tracker.reset()
                     if self.return_active():
-                        self.software_stop=True;self.return_state=self.return_runtime.stop('原始里程仲裁会话重置')
+                        self.latch_software_stop('raw_epoch_changed','原始里程仲裁会话重置');self.return_state=self.return_runtime.stop('原始里程仲裁会话重置')
                 self.known_raw_arbiter_epoch=raw_epoch
                 self.known_arbiter_instance=instance
                 self.arbiter_state = data; self.arbiter_at = time.monotonic()
                 if self.return_runtime is not None or data.get('mode')=='return' or getattr(self,'last_diagnostic_mode',None)=='return':
                     self.event('return_arbiter_output',status=data,received_monotonic_s=self.arbiter_at,received_ros_stamp=self.get_clock().now().nanoseconds/1e9)
                 self.last_diagnostic_mode=data.get('mode')
-                if data.get('fault') and data.get('commissioned') is True:self.software_stop=True
+                if data.get('fault') and data.get('commissioned') is True:self.latch_software_stop('arbiter_fault',fault_detail(data['fault']))
                 pending=self.stop_reset_pending
                 if pending is not None:
                     elapsed=self.arbiter_at-pending['requested_at']
@@ -75,8 +79,16 @@ class ReturnBridge:
                         if (data.get('owner')==self.control_owner and data.get('mode')=='stop' and
                                 not data.get('fault') and data.get('graph_ready') is True and
                                 data.get('output_v_m_s')==0. and data.get('output_w_rad_s')==0.):
-                            self.stop_reset_pending=None;self.software_stop=False
-                            self.event('software_stop_released',automatic_resume=False,acknowledged_sequence=data['authority_sequence'])
+                            current=self._snapshot(self.arbiter_at)
+                            current['stationary_s']=self.stop_observation.duration(self.stop_observation.first)
+                            blockers=motion_reset_reasons(current)
+                            self.stop_reset_pending=None
+                            if blockers:
+                                self.latch_software_stop('reset_failed','底盘就绪确认期间条件变化');self.motion_recovery_required=True
+                                self.event('software_stop_reset_failed',reason='确认期间条件已变化：'+'；'.join(blockers),automatic_resume=False)
+                            else:
+                                self.software_stop=False;self.motion_recovery_required=False;self.stop_cause=None
+                                self.event('software_stop_released',automatic_resume=False,acknowledged_sequence=data['authority_sequence'])
                         else:
                             self.stop_reset_pending=None
                             self.event('software_stop_reset_failed',reason=data.get('fault') or data.get('graph_reason') or '仲裁未确认零速停止',automatic_resume=False)
@@ -86,6 +98,24 @@ class ReturnBridge:
                     self.event('arbiter_guard_state',fault=data.get('fault'),graph_ready=data.get('graph_ready'),graph_reason=data.get('graph_reason'))
         except (ValueError, TypeError):
             with self.lock: self.arbiter_state = {}; self.arbiter_at = None
+
+    def latch_software_stop(self,code,detail,now=None):
+        """Stop current intent; ordinary operator/cancel stops do not latch a lock."""
+        if now is None:now=time.monotonic()
+        ordinary=code in ('operator_stop','panel_close','recording_failed','return_cancelled',
+                         'return_controller_stop','manual_input_expired','arm_tool_hold')
+        first=not getattr(self,'stop_cause',None)
+        if not ordinary:self.software_stop=True
+        if ordinary:
+            self.cancel_requested=True
+            self.manual=False;self.manual_target=(0.,0.)
+            if self.return_active():self.return_state=self.return_runtime.stop(detail)
+        if first:
+            self.stop_cause=dict(code=code,detail=detail,source_monotonic_s=now,
+                previous_control_mode=getattr(self,'control_mode','unknown'),
+                gui_age_s=now-self.gui_at if getattr(self,'gui_at',None) is not None else None,
+                latched=not ordinary)
+            self.event('software_stop_latched' if not ordinary else 'motion_stop_requested',**self.stop_cause,automatic_resume=False)
 
     def gui_heartbeat(self, map_sha):
         with self.lock:
@@ -110,6 +140,7 @@ class ReturnBridge:
         """Operator click creates one immutable run session; timer never starts it."""
         with self.lock:
             runtime=self.return_runtime
+            if getattr(self,'motion_recovery_required',False):raise ValueError('请先确认底盘就绪')
             if not isinstance(runtime,RawReturnRuntime) or runtime.activation_mode!='click':
                 raise ValueError('尚未准备单击返程，或仲裁版本不匹配')
             if runtime.phase in ('stopped','complete'):raise ValueError('返程已停止，不能重新启动旧会话')
@@ -117,8 +148,6 @@ class ReturnBridge:
             now=time.monotonic()
             if runtime.phase!='ready' or self.software_stop or self.docking_hold:
                 raise ValueError('返程已停止或停车锁定；需要重新准备')
-            if self.gui_at is None or not 0<=now-self.gui_at<=.25:
-                raise ValueError('界面心跳过期，不能启动')
             if self.arbiter_at is None or not 0<=now-self.arbiter_at<=.25 or self.arbiter_state.get('fault'):
                 raise ValueError('独立仲裁未就绪，不能启动')
             state=self._snapshot(now);state['busy']=self.busy or self.server_active
@@ -132,14 +161,15 @@ class ReturnBridge:
         with self.lock:
             runtime=self.return_runtime
             if not runtime or runtime.activation_mode!='click':return False
-            return runtime.run_heartbeat(time.monotonic(),session)
+            # GUI observation cannot renew a stalled backend controller.
+            return runtime.phase not in ('stopped','complete') and runtime.run_session==session
 
     def stop_return(self, reason):
         with self.lock:
             if self.return_runtime:
                 self.return_state = self.return_runtime.stop(reason)
                 self.return_held = False
-                self.software_stop = True
+                self.latch_software_stop('return_cancelled',reason)
 
     def revalidate_saved_route(self,directory,map_path,confirmations):
         now=time.monotonic()
@@ -163,8 +193,8 @@ class ReturnBridge:
             now = time.monotonic()
             self.return_guard()
             state = self._snapshot(now)
-            if (self.software_stop or self.docking_hold or state['busy'] or self.manual or
-                    self.manual_stop_pending or self.cancel_requested):
+            if (self.software_stop or getattr(self,'motion_recovery_required',False) or self.docking_hold or state['busy'] or self.manual or
+                    self.manual_stop_pending):
                 raise ValueError('导航/对接/操控尚未交接，或软件停车锁定')
             if (self.arbiter_at is None or now-self.arbiter_at > .25 or
                     self.arbiter_state.get('commissioned') is not True or self.arbiter_state.get('fault') or
@@ -172,6 +202,12 @@ class ReturnBridge:
                 raise ValueError('独立底盘仲裁未就绪或尚未完成现场验收：'+str(self.arbiter_state))
             if self.arbiter_state.get('release_profile')=='short_only' and not short_test:
                 raise ValueError('独立仲裁只允许短测，不能请求完整返程')
+            # Explicit new preparation after navigation has ended may discard an
+            # old cancellation marker; it cannot bypass a live goal or stop lock.
+            obsolete_cancel=bool(self.cancel_requested)
+            state['cancel_requested']=False
+            if self.arbiter_state.get('release_profile')=='recorded_route' and short_test:
+                raise ValueError('按轮返程使用完整记录，不启用旧短测模式')
             if not raw:plan['prepared_runtime_identity']=runtime_identity(state)
             certificate_id=plan.get('revalidation',{}).get('certificate_id')
             if certificate_id in self.used_revalidations:
@@ -197,14 +233,14 @@ class ReturnBridge:
             if certificate_id:self.used_revalidations.add(certificate_id)
             self.return_arbiter_instance=self.arbiter_state['instance_id']
             self.return_trial_id=uuid.uuid4().hex;self.return_short_test=bool(short_test)
-            self.goal_status=None;self.goal_target=None
+            self.goal_status=None;self.goal_target=None;self.cancel_requested=False;self.stop_cause=None
             self.return_runtime = runtime
             self.return_held = self.return_ever_held = False
             self.return_prepared_at = now
             self.return_map_path = str(map_path)
             self.return_map_checked_at = now
             self.return_state = dict(phase='ready', reason=None, short_test=short_test)
-        self.event('return_prepared', cycle_id=plan['cycle_id'], short_test=short_test,
+        self.event('return_prepared', cycle_id=plan['cycle_id'], short_test=short_test,obsolete_cancel_cleared=obsolete_cancel,
                    detects_new_obstacles=False)
 
     def control_tick(self):
@@ -217,9 +253,12 @@ class ReturnBridge:
             gui_fresh = self.gui_at is not None and 0 <= now-self.gui_at <= .25
             state = self._snapshot(now)
             runtime = self.return_runtime
+            click_return=isinstance(runtime,RawReturnRuntime) and runtime.activation_mode=='click'
+            if click_return and runtime.run_session and runtime.phase not in ('stopped','complete') and not self.software_stop and not getattr(self,'motion_recovery_required',False) and not self.docking_hold:
+                runtime.run_heartbeat(now,runtime.run_session)
             if self.return_active():
-                if not gui_fresh or self.software_stop or self.docking_hold:
-                    self.return_state = runtime.stop('面板心跳丢失或停车/对接锁定')
+                if (not click_return and not gui_fresh) or self.software_stop or getattr(self,'motion_recovery_required',False) or self.docking_hold:
+                    self.return_state = runtime.stop('保持式输入过期或底盘停车/占用状态')
                 elif not isinstance(runtime,RawReturnRuntime) and now-self.return_map_checked_at >= .2:
                     self.return_map_checked_at = now
                     try:
@@ -245,18 +284,24 @@ class ReturnBridge:
                         mode = 'return'
                         v, w = self.return_state.get('v', 0.), self.return_state.get('w', 0.)
             if runtime and runtime.runner.phase == 'stopped':
-                self.software_stop = True
+                self.latch_software_stop('return_controller_stop',getattr(runtime,'reason',None) or self.return_state.get('reason') or '返程控制器已停止',now)
             if runtime and runtime.runner.phase in ('stopped', 'complete'):
                 mode, v, w = 'stop', 0., 0.
                 self.event('return_finished', **self.return_state,elapsed_s=now-runtime.started if isinstance(runtime,RawReturnRuntime) and runtime.started is not None else None,software_stop=self.software_stop,raw_odom=state.get('raw_odom'))
                 self.return_runtime = None
-            elif not self.return_active() and gui_fresh and not self.software_stop and not self.docking_hold:
-                if self.manual and not self.busy and not self.server_active and now-self.manual_stamp <= .25:
-                    mode, (v, w) = 'manual', self.manual_target
-                elif self.busy or self.server_active:
+            elif not self.return_active() and not self.software_stop and not getattr(self,'motion_recovery_required',False) and not self.docking_hold and not self.cancel_requested:
+                if self.manual and not self.busy and not self.server_active:
+                    if gui_fresh and 0<=now-self.manual_stamp<=.25:
+                        mode, (v, w) = 'manual', self.manual_target
+                    else:self.latch_software_stop('manual_input_expired','键控输入或界面输入心跳过期',now)
+                elif self.busy and getattr(self,'navigation_id',None):
                     mode = 'navigation'
-            if not gui_fresh and self.control_mode != 'stop':
-                self.software_stop = True
+            if mode in ('navigation','return'):
+                if not gui_fresh and not getattr(self,'ui_late_reported',False):
+                    self.ui_late_reported=True
+                    self.event('ui_update_delayed',source_monotonic_s=now,gui_age_s=now-self.gui_at if self.gui_at is not None else None,control_mode=mode,control_callback_running=True)
+                elif gui_fresh and getattr(self,'ui_late_reported',False):
+                    self.ui_late_reported=False;self.event('ui_update_recovered',source_monotonic_s=now)
             if self.control_mode not in ('stop', mode) and mode != 'stop':
                 # Arbiter requires a zero-output transition between owners.
                 mode, v, w = 'stop', 0., 0.
@@ -274,6 +319,7 @@ class ReturnBridge:
                           run_state='running' if isinstance(runtime,RawReturnRuntime) and runtime.run_session and runtime.phase not in ('stopped','complete') else 'inactive',
                           run_session=runtime.run_session if isinstance(runtime,RawReturnRuntime) else None,
                           run_sequence=runtime.run_sequence if isinstance(runtime,RawReturnRuntime) else 0,
+                          run_lease_source='backend_controller' if click_return else 'hold_input',
                           held=bool(self.return_held),site_confirmed=bool(runtime is not None),short_test=self.return_short_test,
                           coordinate_mode=SOURCE if isinstance(runtime,RawReturnRuntime) else None,
                           raw_source_key=runtime.plan['scope']['source_key'] if isinstance(runtime,RawReturnRuntime) else None,
@@ -295,7 +341,10 @@ class ReturnBridge:
         ros_now=self.get_clock().now().nanoseconds/1e9
         try:raw=self.raw_tracker.current(now,ros_now);error=None
         except ValueError as e:raw=None;error=str(e)
-        return dict(raw_odom=raw,raw_odom_error=error,raw_odom_rejection=self.raw_tracker.rejection,ros_now=ros_now,control_owner=self.control_owner,
+        latest=self.raw_tracker.latest or {}
+        timing={k:latest.get(k) for k in ('sequence','source_stamp','received_at')}
+        timing['checked_at']=now
+        return dict(raw_odom=raw,raw_odom_error=error,raw_odom_timing=timing,raw_odom_rejection=self.raw_tracker.rejection,ros_now=ros_now,control_owner=self.control_owner,
             raw_stationary_since=self.raw_tracker.still_since,
             raw_stationary_s=now-self.raw_tracker.still_since if raw and self.raw_tracker.still_since is not None else 0.,
             raw_stationary_samples=self.raw_tracker.still_samples if raw else 0)

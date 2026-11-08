@@ -1,125 +1,49 @@
 {
-  "source": "Read-only verified snapshot of installed user-accepted click-to-start raw-odometry return; runtime data and authorization excluded",
+  "source": "Read-only verified current installed robot sources after reboot; public configuration and adapters retained, runtime data excluded",
   "files": [
     {
-      "file": "raw_odom_mode.py",
-      "live_sha256": "2ce92b6420bf084d6560705df4298e3c1af53bb85fd22c5dfe1482902244a4b8",
-      "published_sha256": "2ce92b6420bf084d6560705df4298e3c1af53bb85fd22c5dfe1482902244a4b8",
-      "modified_for_publication": false
-    },
-    {
-      "file": "release_policy.py",
-      "live_sha256": "e68cae3940c70370726d94fd5939d72396c261334b559e272e5d1cf2f06ee3a3",
-      "published_sha256": "e68cae3940c70370726d94fd5939d72396c261334b559e272e5d1cf2f06ee3a3",
-      "modified_for_publication": false
-    },
-    {
-      "file": "return_hold_pad.py",
-      "live_sha256": "d7d7a5e397e169333787c8373fce6bc53d27552633a94cf5fad78b091b76eebb",
-      "published_sha256": "d7d7a5e397e169333787c8373fce6bc53d27552633a94cf5fad78b091b76eebb",
-      "modified_for_publication": false
-    },
-    {
-      "file": "navigation.launch.py",
-      "live_sha256": "5ddbe4f4300dd121bdcf97007d7c0172e396cafb0194593c2860b6c9eb97f6bd",
-      "published_sha256": "310bebe3a4cb61db54cd28ab7ad45e0c4a166f579c99a92ca4c451c264360ed0",
-      "modified_for_publication": true
-    },
-    {
-      "file": "docking_console.py",
-      "live_sha256": "dc0d403f86b1cb8c3e0725099bcd04e4b371706fd4a774c81e17113922f8c4bc",
-      "published_sha256": "ed5a7a5b66430240f99466b58231f3b1443cc8b8a7a37b803853b5b1d3c81a21",
-      "modified_for_publication": true
-    },
-    {
-      "file": "runtime_provenance.py",
-      "live_sha256": "d870b6df5f669db25ee43dcf65212e0aa5a2f4976710020dcf729e9a0adf7d69",
-      "published_sha256": "d870b6df5f669db25ee43dcf65212e0aa5a2f4976710020dcf729e9a0adf7d69",
-      "modified_for_publication": false
-    },
-    {
-      "file": "passive_map.py",
-      "live_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
-      "published_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
-      "modified_for_publication": false
-    },
-    {
-      "file": "supervised_draft.py",
-      "live_sha256": "51c6e92ee8255067c1ff213c83fabdc693d202a8b547e4a48c5ce52b300a60d9",
-      "published_sha256": "51c6e92ee8255067c1ff213c83fabdc693d202a8b547e4a48c5ce52b300a60d9",
-      "modified_for_publication": false
-    },
-    {
-      "file": "control_arbiter.py",
-      "live_sha256": "e1b4483614ed82ca18839de0a2b2f415112cf6615605fb70b0dddcc37d9c423e",
-      "published_sha256": "e1b4483614ed82ca18839de0a2b2f415112cf6615605fb70b0dddcc37d9c423e",
-      "modified_for_publication": false
-    },
-    {
-      "file": "process_control.py",
-      "live_sha256": "e0f4a520e510c4bb32b9af663ef3e7f457b7c0e2310a7dbedddec972b7902bf8",
-      "published_sha256": "e0f4a520e510c4bb32b9af663ef3e7f457b7c0e2310a7dbedddec972b7902bf8",
-      "modified_for_publication": false
-    },
-    {
-      "file": "pose_aware_reverse.py",
-      "live_sha256": "823cb98dc69206b2dac407af7500ed6ca664f0110a072680431c9e9bd2add66b",
-      "published_sha256": "823cb98dc69206b2dac407af7500ed6ca664f0110a072680431c9e9bd2add66b",
-      "modified_for_publication": false
-    },
-    {
-      "file": "control_arbiter_node.py",
-      "live_sha256": "e22554d9e77c06456cecd43b862392742efcdc10ffb52a4d62d90b6a98a53319",
-      "published_sha256": "7e2900535cede4ff85feb51688316a0a66cc18080891857fb3cd6d23a206e554",
-      "modified_for_publication": true,
-      "publication_change": "Remove one extra blank line at EOF; executable statements unchanged"
-    },
-    {
-      "file": "teleop.py",
-      "live_sha256": "c417acc850e621758bc6662c1c41c3548adc0c6402a6b97bfad76072e00b159c",
-      "published_sha256": "c417acc850e621758bc6662c1c41c3548adc0c6402a6b97bfad76072e00b159c",
-      "modified_for_publication": false
-    },
-    {
-      "file": "docking_state.py",
-      "live_sha256": "4fe1bb4a948c7edc3b0f99b5df2f32aec787a021bec34b1321221ffae60b5697",
-      "published_sha256": "4fe1bb4a948c7edc3b0f99b5df2f32aec787a021bec34b1321221ffae60b5697",
-      "modified_for_publication": false
-    },
-    {
       "file": "app.py",
-      "live_sha256": "5c4553e2c57fe612e17cd9f17d4c72fd3b68a731cf00adbd28200fe1f0f0599a",
-      "published_sha256": "5c4553e2c57fe612e17cd9f17d4c72fd3b68a731cf00adbd28200fe1f0f0599a",
+      "live_sha256": "a9e3884b012891d18a27bead1666f1046035f6726c8161f8a55ab2d1fd6fab21",
+      "published_sha256": "a9e3884b012891d18a27bead1666f1046035f6726c8161f8a55ab2d1fd6fab21",
       "modified_for_publication": false
     },
     {
-      "file": "navigation_status.py",
-      "live_sha256": "3402c8e841d8108554a0309c58bb3f6857562f99a3c31ad666aed51f8f390c1a",
-      "published_sha256": "3402c8e841d8108554a0309c58bb3f6857562f99a3c31ad666aed51f8f390c1a",
+      "file": "arm_process_guard.py",
+      "live_sha256": "1c24416605418a50850f4fdb8d6ba6a63c821c5f2f9be2f4af52e5481944e37d",
+      "published_sha256": "1c24416605418a50850f4fdb8d6ba6a63c821c5f2f9be2f4af52e5481944e37d",
       "modified_for_publication": false
     },
     {
-      "file": "passive_coordinates.py",
-      "live_sha256": "863ef0610ec9dd1f3901eb101a760201e9cd46f8c19d9c4d7ceb62e1eed918fe",
-      "published_sha256": "6b10100edfcdc399fab99829f73cd6035d8ad1b4d1bc478198ffa282e1e77def",
-      "modified_for_publication": true
+      "file": "arm_tool_terminal.py",
+      "live_sha256": "fd54fcb74299d42bdab272bed573de0d73be0d0034ae8a86280a1aa80845b404",
+      "published_sha256": "2f55c33cfa8944e57c59f5c3abfec8468256e8bd58c5dec991ad1e8a86fd3b06",
+      "modified_for_publication": true,
+      "publication_change": "Honor explicit CHARGING_DOCKING_COMMAND without shell evaluation."
     },
     {
-      "file": "route_cycle.py",
-      "live_sha256": "08d4fa898d50148a3ed44c48a1551a794d49dde8b48c38322f52890a9af12a20",
-      "published_sha256": "08d4fa898d50148a3ed44c48a1551a794d49dde8b48c38322f52890a9af12a20",
+      "file": "arm_tools_bridge.py",
+      "live_sha256": "2cb813bfabedd2c65560c1f340677e9c95fa4094190eced8d2f52b9751778c99",
+      "published_sha256": "2cb813bfabedd2c65560c1f340677e9c95fa4094190eced8d2f52b9751778c99",
       "modified_for_publication": false
     },
     {
-      "file": "return_map.py",
-      "live_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
-      "published_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
-      "modified_for_publication": false
+      "file": "arm_tools_guard.py",
+      "live_sha256": "f6bd6b597e23c3b250e1480f8a356af5145acd2c5d73bbf0f04d479164bb25c2",
+      "published_sha256": "46bf53d542fc419a9997cf9e25fd16bc16314697b8f8b196927c1d6cbf699a87",
+      "modified_for_publication": true,
+      "publication_change": "Normalize trailing blank line only; executable statements unchanged."
     },
     {
-      "file": "power_status.py",
-      "live_sha256": "871a34c0ece7656ee7ca1f51cfcf3c7f148a11138c686863b61d8c6b2a2e3622",
-      "published_sha256": "871a34c0ece7656ee7ca1f51cfcf3c7f148a11138c686863b61d8c6b2a2e3622",
+      "file": "arm_tools_ui.py",
+      "live_sha256": "7d825f5f01dfde89bde5f31dd073fa66afded49de76b7b064c74255f64985473",
+      "published_sha256": "0fe1812769b152f2cf5101966353830ed1e217f929d5c36f5cf820191e42a159",
+      "modified_for_publication": true,
+      "publication_change": "Correct obsolete tooltip: releasing a tool does not create an ordinary software stop lock."
+    },
+    {
+      "file": "canvas.py",
+      "live_sha256": "1911428c96a86e36f3a68ed834d7b3f0c48b63eb488487b57a1ae6edd47504ad",
+      "published_sha256": "1911428c96a86e36f3a68ed834d7b3f0c48b63eb488487b57a1ae6edd47504ad",
       "modified_for_publication": false
     },
     {
@@ -129,51 +53,41 @@
       "modified_for_publication": false
     },
     {
-      "file": "model.py",
-      "live_sha256": "7ce890b35cd69893fe3983f496392d9e7ff338c044ddf9118ffcd60e1df03eb4",
-      "published_sha256": "7ce890b35cd69893fe3983f496392d9e7ff338c044ddf9118ffcd60e1df03eb4",
+      "file": "control_arbiter.py",
+      "live_sha256": "e1b4483614ed82ca18839de0a2b2f415112cf6615605fb70b0dddcc37d9c423e",
+      "published_sha256": "e1b4483614ed82ca18839de0a2b2f415112cf6615605fb70b0dddcc37d9c423e",
       "modified_for_publication": false
     },
     {
-      "file": "return_runtime.py",
-      "live_sha256": "a2ad31d3d939cc83f81fcd8d6fa8e2fd80d6d507c5dc9d72922af24920fba7f8",
-      "published_sha256": "a2ad31d3d939cc83f81fcd8d6fa8e2fd80d6d507c5dc9d72922af24920fba7f8",
+      "file": "control_arbiter_node.py",
+      "live_sha256": "e22554d9e77c06456cecd43b862392742efcdc10ffb52a4d62d90b6a98a53319",
+      "published_sha256": "7e2900535cede4ff85feb51688316a0a66cc18080891857fb3cd6d23a206e554",
+      "modified_for_publication": true,
+      "publication_change": "Retain public EOF whitespace normalization; executable statements unchanged."
+    },
+    {
+      "file": "control_causes.py",
+      "live_sha256": "3a6c07d114ee54fb5c93dd806ec6c9aef509656c0a19f97c3b23c5e8891e1755",
+      "published_sha256": "3a6c07d114ee54fb5c93dd806ec6c9aef509656c0a19f97c3b23c5e8891e1755",
       "modified_for_publication": false
     },
     {
-      "file": "session_revalidation.py",
-      "live_sha256": "c5a08949e13cf3b223501f08dd191aa8bb6fae19996f2e1f1a63a08543fe2958",
-      "published_sha256": "c5a08949e13cf3b223501f08dd191aa8bb6fae19996f2e1f1a63a08543fe2958",
+      "file": "docking_console.py",
+      "live_sha256": "dc0d403f86b1cb8c3e0725099bcd04e4b371706fd4a774c81e17113922f8c4bc",
+      "published_sha256": "ed5a7a5b66430240f99466b58231f3b1443cc8b8a7a37b803853b5b1d3c81a21",
+      "modified_for_publication": true,
+      "publication_change": "Retain existing configurable external docking command boundary."
+    },
+    {
+      "file": "docking_state.py",
+      "live_sha256": "4fe1bb4a948c7edc3b0f99b5df2f32aec787a021bec34b1321221ffae60b5697",
+      "published_sha256": "4fe1bb4a948c7edc3b0f99b5df2f32aec787a021bec34b1321221ffae60b5697",
       "modified_for_publication": false
     },
     {
-      "file": "ros_bridge.py",
-      "live_sha256": "231880308d6721a6964e534738add557d8074f64a19defcfa1d0c03f431de145",
-      "published_sha256": "231880308d6721a6964e534738add557d8074f64a19defcfa1d0c03f431de145",
-      "modified_for_publication": false
-    },
-    {
-      "file": "canvas.py",
-      "live_sha256": "1911428c96a86e36f3a68ed834d7b3f0c48b63eb488487b57a1ae6edd47504ad",
-      "published_sha256": "1911428c96a86e36f3a68ed834d7b3f0c48b63eb488487b57a1ae6edd47504ad",
-      "modified_for_publication": false
-    },
-    {
-      "file": "return_bridge.py",
-      "live_sha256": "f241800f04400e63481d617a1d3c0a8fefbcc4c3a572a33d61e6e143b600ed1b",
-      "published_sha256": "f241800f04400e63481d617a1d3c0a8fefbcc4c3a572a33d61e6e143b600ed1b",
-      "modified_for_publication": false
-    },
-    {
-      "file": "offline_reverse.py",
-      "live_sha256": "7d3b07654b8f8a813654573c21727c1393ae9cd9bc60d490cab319bfa7a0e6e4",
-      "published_sha256": "7d3b07654b8f8a813654573c21727c1393ae9cd9bc60d490cab319bfa7a0e6e4",
-      "modified_for_publication": false
-    },
-    {
-      "file": "run_lease.py",
-      "live_sha256": "732e77b21a2e18711fe06e64ed8e7276aa15f81a8fd1a2bb9c455824d6d2e3f4",
-      "published_sha256": "732e77b21a2e18711fe06e64ed8e7276aa15f81a8fd1a2bb9c455824d6d2e3f4",
+      "file": "driver_watchdog_bridge.py",
+      "live_sha256": "31d18946d404630ea5e7b48dee6497611baf54f1ca98128999a8a9db9d3fb5b9",
+      "published_sha256": "31d18946d404630ea5e7b48dee6497611baf54f1ca98128999a8a9db9d3fb5b9",
       "modified_for_publication": false
     },
     {
@@ -183,9 +97,175 @@
       "modified_for_publication": false
     },
     {
-      "file": "driver_watchdog_bridge.py",
-      "live_sha256": "31d18946d404630ea5e7b48dee6497611baf54f1ca98128999a8a9db9d3fb5b9",
-      "published_sha256": "31d18946d404630ea5e7b48dee6497611baf54f1ca98128999a8a9db9d3fb5b9",
+      "file": "model.py",
+      "live_sha256": "7ce890b35cd69893fe3983f496392d9e7ff338c044ddf9118ffcd60e1df03eb4",
+      "published_sha256": "7ce890b35cd69893fe3983f496392d9e7ff338c044ddf9118ffcd60e1df03eb4",
+      "modified_for_publication": false
+    },
+    {
+      "file": "nav2_pause.py",
+      "live_sha256": "81f13eac84d188ce186ec491988d83b5879717a914f790c4f9cf1d95b3643689",
+      "published_sha256": "81f13eac84d188ce186ec491988d83b5879717a914f790c4f9cf1d95b3643689",
+      "modified_for_publication": false
+    },
+    {
+      "file": "nav2_pause_bridge.py",
+      "live_sha256": "87913977203a98ecaf4ab5daf824fe04df3d9e385adaaab6bc2a0059ba251c9e",
+      "published_sha256": "87913977203a98ecaf4ab5daf824fe04df3d9e385adaaab6bc2a0059ba251c9e",
+      "modified_for_publication": false
+    },
+    {
+      "file": "navigation.launch.py",
+      "live_sha256": "5ddbe4f4300dd121bdcf97007d7c0172e396cafb0194593c2860b6c9eb97f6bd",
+      "published_sha256": "310bebe3a4cb61db54cd28ab7ad45e0c4a166f579c99a92ca4c451c264360ed0",
+      "modified_for_publication": true,
+      "publication_change": "Retain existing public external Nav2/gated-driver configuration boundary."
+    },
+    {
+      "file": "navigation_display.py",
+      "live_sha256": "69bb57be31d92521dd037d472dd10f335f10380b6ef6aa8c60d9b8d70bac87cc",
+      "published_sha256": "d5a48e0f56c5aff3cbc6acb393490a25a80709ef0d3325198cad1dfe3a37fb3d",
+      "modified_for_publication": true,
+      "publication_change": "Use current-user workspace paths and optional CHARGING_NAV_RVIZ_CONFIGS; remove account-specific paths."
+    },
+    {
+      "file": "navigation_status.py",
+      "live_sha256": "60404759cd1b4a60ec86d0a86050bf35dd5971f728f9f501b0344263652257fe",
+      "published_sha256": "60404759cd1b4a60ec86d0a86050bf35dd5971f728f9f501b0344263652257fe",
+      "modified_for_publication": false
+    },
+    {
+      "file": "offline_reverse.py",
+      "live_sha256": "7d3b07654b8f8a813654573c21727c1393ae9cd9bc60d490cab319bfa7a0e6e4",
+      "published_sha256": "7d3b07654b8f8a813654573c21727c1393ae9cd9bc60d490cab319bfa7a0e6e4",
+      "modified_for_publication": false
+    },
+    {
+      "file": "passive_coordinates.py",
+      "live_sha256": "863ef0610ec9dd1f3901eb101a760201e9cd46f8c19d9c4d7ceb62e1eed918fe",
+      "published_sha256": "6b10100edfcdc399fab99829f73cd6035d8ad1b4d1bc478198ffa282e1e77def",
+      "modified_for_publication": true,
+      "publication_change": "Retain public EOF whitespace normalization; executable statements unchanged."
+    },
+    {
+      "file": "passive_map.py",
+      "live_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
+      "published_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
+      "modified_for_publication": false
+    },
+    {
+      "file": "pose_aware_reverse.py",
+      "live_sha256": "823cb98dc69206b2dac407af7500ed6ca664f0110a072680431c9e9bd2add66b",
+      "published_sha256": "823cb98dc69206b2dac407af7500ed6ca664f0110a072680431c9e9bd2add66b",
+      "modified_for_publication": false
+    },
+    {
+      "file": "power_status.py",
+      "live_sha256": "871a34c0ece7656ee7ca1f51cfcf3c7f148a11138c686863b61d8c6b2a2e3622",
+      "published_sha256": "871a34c0ece7656ee7ca1f51cfcf3c7f148a11138c686863b61d8c6b2a2e3622",
+      "modified_for_publication": false
+    },
+    {
+      "file": "process_control.py",
+      "live_sha256": "e0f4a520e510c4bb32b9af663ef3e7f457b7c0e2310a7dbedddec972b7902bf8",
+      "published_sha256": "e0f4a520e510c4bb32b9af663ef3e7f457b7c0e2310a7dbedddec972b7902bf8",
+      "modified_for_publication": false
+    },
+    {
+      "file": "raw_odom_mode.py",
+      "live_sha256": "5dd913b0dccedbe25b0fa75dc98b784e1025d681149d2e895b530071e3f44976",
+      "published_sha256": "5dd913b0dccedbe25b0fa75dc98b784e1025d681149d2e895b530071e3f44976",
+      "modified_for_publication": false
+    },
+    {
+      "file": "release_policy.py",
+      "live_sha256": "7fc164be6d2d090f9627def133940671fd0ddb8f107ca08a6b75be97529f2ca1",
+      "published_sha256": "7fc164be6d2d090f9627def133940671fd0ddb8f107ca08a6b75be97529f2ca1",
+      "modified_for_publication": false
+    },
+    {
+      "file": "return_bridge.py",
+      "live_sha256": "de7a4f223a5911fa8e13b71a6a5733caeb3460473a6d5adc8859a65f308fa2fd",
+      "published_sha256": "de7a4f223a5911fa8e13b71a6a5733caeb3460473a6d5adc8859a65f308fa2fd",
+      "modified_for_publication": false
+    },
+    {
+      "file": "return_hold_pad.py",
+      "live_sha256": "c4c7dcc8c0d04e9107fb1ea048c8387cd1f10cd586b2a8e60a7951f090066316",
+      "published_sha256": "c4c7dcc8c0d04e9107fb1ea048c8387cd1f10cd586b2a8e60a7951f090066316",
+      "modified_for_publication": false
+    },
+    {
+      "file": "return_map.py",
+      "live_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
+      "published_sha256": "b75e60fb510dbe43edd31da1953449f976a30f0e48a4fbaa66e7c73596ece48c",
+      "modified_for_publication": false
+    },
+    {
+      "file": "return_readiness.py",
+      "live_sha256": "b441a384b5f947ab9c1aecb67f809676ac15e50e0f5f8af3f255a4c35eb5cbab",
+      "published_sha256": "b441a384b5f947ab9c1aecb67f809676ac15e50e0f5f8af3f255a4c35eb5cbab",
+      "modified_for_publication": false
+    },
+    {
+      "file": "return_runtime.py",
+      "live_sha256": "a2ad31d3d939cc83f81fcd8d6fa8e2fd80d6d507c5dc9d72922af24920fba7f8",
+      "published_sha256": "a2ad31d3d939cc83f81fcd8d6fa8e2fd80d6d507c5dc9d72922af24920fba7f8",
+      "modified_for_publication": false
+    },
+    {
+      "file": "ros_bridge.py",
+      "live_sha256": "9764d9a25c990f87a24c0a414430742ada98c4bf73d642d79957230602fbee3a",
+      "published_sha256": "9764d9a25c990f87a24c0a414430742ada98c4bf73d642d79957230602fbee3a",
+      "modified_for_publication": false
+    },
+    {
+      "file": "route_cycle.py",
+      "live_sha256": "08d4fa898d50148a3ed44c48a1551a794d49dde8b48c38322f52890a9af12a20",
+      "published_sha256": "08d4fa898d50148a3ed44c48a1551a794d49dde8b48c38322f52890a9af12a20",
+      "modified_for_publication": false
+    },
+    {
+      "file": "run_lease.py",
+      "live_sha256": "5f0640ff619ef28b37f1f2491d1ccc018f1d8b99dab951f79bdf4101a3e631c1",
+      "published_sha256": "5f0640ff619ef28b37f1f2491d1ccc018f1d8b99dab951f79bdf4101a3e631c1",
+      "modified_for_publication": false
+    },
+    {
+      "file": "runtime_provenance.py",
+      "live_sha256": "d870b6df5f669db25ee43dcf65212e0aa5a2f4976710020dcf729e9a0adf7d69",
+      "published_sha256": "d870b6df5f669db25ee43dcf65212e0aa5a2f4976710020dcf729e9a0adf7d69",
+      "modified_for_publication": false
+    },
+    {
+      "file": "session_revalidation.py",
+      "live_sha256": "c5a08949e13cf3b223501f08dd191aa8bb6fae19996f2e1f1a63a08543fe2958",
+      "published_sha256": "c5a08949e13cf3b223501f08dd191aa8bb6fae19996f2e1f1a63a08543fe2958",
+      "modified_for_publication": false
+    },
+    {
+      "file": "start.sh",
+      "live_sha256": "233e9228d6dea681d978785133fc631390eaac4dce68b0b316dc7a50e4e8b8af",
+      "published_sha256": "d9e93ea2c6d90ec16b701d4a5c8740dc6b5407a700fcc983486a954cff46ecac",
+      "modified_for_publication": true,
+      "publication_change": "Retain existing explicit external workspace/driver setup boundary."
+    },
+    {
+      "file": "stop_recovery.py",
+      "live_sha256": "96be2d70123a29f50158f112674724cb5e14f81c46521279233d243ceb43531d",
+      "published_sha256": "96be2d70123a29f50158f112674724cb5e14f81c46521279233d243ceb43531d",
+      "modified_for_publication": false
+    },
+    {
+      "file": "supervised_draft.py",
+      "live_sha256": "51c6e92ee8255067c1ff213c83fabdc693d202a8b547e4a48c5ce52b300a60d9",
+      "published_sha256": "51c6e92ee8255067c1ff213c83fabdc693d202a8b547e4a48c5ce52b300a60d9",
+      "modified_for_publication": false
+    },
+    {
+      "file": "teleop.py",
+      "live_sha256": "c417acc850e621758bc6662c1c41c3548adc0c6402a6b97bfad76072e00b159c",
+      "published_sha256": "c417acc850e621758bc6662c1c41c3548adc0c6402a6b97bfad76072e00b159c",
       "modified_for_publication": false
     }
   ],
@@ -200,21 +280,25 @@
     }
   ],
   "publication_adapters": [
-    "external docking command path retained from previous public version",
-    "navigation parameters and gated driver prefix supplied explicitly via environment",
-    "startup requires locally built native relay",
-    "default disabled configuration without site authorizations",
-    "synthetic tests only; captured-route fixtures excluded"
+    "Configurable external docking command for test/home",
+    "RViz configs from standard/current-user paths or explicit environment; no account-specific path",
+    "Existing public Nav2, setup and gated-driver boundaries retained",
+    "Public default disabled with no live authorizations",
+    "Synthetic tests only; captured recordings and evidence excluded"
   ],
   "driver_contract_version": 2,
   "driver_publication": "Project-owned components only: native/driver-watchdog/docs/EXPORT_MANIFEST.json; manufacturer source, contextual patch and binary excluded",
   "runtime_configuration_published": false,
   "public_configuration": "disabled; click interaction; all site acknowledgements false; no trial authorization",
   "tests": {
-    "local_cases": 120,
-    "ros_integration_cases": 41,
-    "watchdog_ctest_cases": 1,
-    "watchdog_internal_assertions": 59,
+    "local_cases": 172,
+    "ros_integration_rerun_this_update": false,
+    "native_watchdog_rerun_this_update": false,
+    "historical_ros_integration_cases": 41,
+    "historical_watchdog_ctest_cases": 1,
+    "historical_watchdog_internal_assertions": 59,
     "field_motion_by_agent": false
-  }
+  },
+  "verified_date_utc": "2026-11-08",
+  "baseline_public_commit": "d8b9bd102ae99b55ac6dfc804b1e3119a2dfd1e7"
 }
