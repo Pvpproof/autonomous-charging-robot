@@ -2,7 +2,7 @@
 
 环境与文件齐备情况见 [同车原版环境说明](robot_originals/ENVIRONMENT.md)：当前 599 个原文件，环境软件通过文档安装，运行验收单独进行。
 
-**2026-11-09 原件恢复：** 已从机器人只读补齐原版 charge_robot、ICP、V3、模型启动链和自有仿真包，替换昨日重建实现。源码/模板/配置已核对哈希，详情见 [原件恢复](arm_stack/README.md)。按用户要求，完整原版、现用 DOBOT 依赖及本车标定另收入 [robot_originals](robot_originals/README.md)，附带保留原目录布局的恢复工具；本轮未实机运行。
+**2026-11-09 原件恢复：** 已从机器人只读补齐原版 charge_robot、ICP、V3、模型启动链和自有仿真包，替换早期重建实现。源码/模板/配置已核对哈希，详情见 [原件恢复](arm_stack/README.md)。按用户要求，完整原版、现用 DOBOT 依赖及本车标定另收入 [robot_originals](robot_originals/README.md)，附带保留原目录布局的恢复工具；本轮未实机运行。
 
 **面向国标充电接口，串联移动导航、视觉定位、机械臂插接与轨迹返程的 ROS 2 / PyQt5 研发工作台。**
 
@@ -20,10 +20,10 @@
 | --- | --- | --- |
 | 底盘导航 | 用 Nav2 与统一地图面板把机器人送到充电点，并记录完整去程。 | 历史现场使用；驱动、地图与导航参数需另配。 |
 | 视觉定位 | ICP 粗定位衔接 V3 RGB PnP 稳定测量，为相机对齐和枪头预备位提供目标。 | 有逐段成功日志；不等于插入成功。 |
-| 机械臂插接 | 以本轮冻结目标连接预对齐、枪头预备位与 75 mm 笛卡尔插入规划。 | 每段人工确认；75 mm 公开策略未实测，历史插入曾超时。 |
+| 机械臂插接 | 以本轮冻结目标连接预对齐、枪头预备位与 75 mm 笛卡尔插入规划。 | 原版插入目标为 75 mm，每段人工确认；本次公开打包未实机复测，历史插入曾超时。 |
 | 轨迹返程 | 在同一原始里程会话内倒序跟踪实际记录位姿，避免仅按时间重播速度。 | 早期完整返程有用户成功报告；最新版本待复核，无新增障碍检测。 |
 | 控制与诊断 | 以单一速度仲裁、后台租约、反馈新鲜度和取消状态管理各控制源。 | 合成回归与离线 Qt 验证；不替代硬件急停。 |
-| 模型与规划 | 用显式模型和禁止执行的 MoveIt 入口检查模型与规划链。 | 包装已补；完整 Gazebo、TF、模型资产与执行适配器尚未验收。 |
+| 模型与规划 | 用显式模型和禁止执行的 MoveIt 入口检查模型与规划链。 | 原版 Nova2 模型、MoveIt、执行适配器与自有仿真包已收录；本次未运行验收，独立 Gazebo 包未包含。 |
 
 ## 快速开始
 
@@ -35,7 +35,7 @@ bash start.sh --offline
 
 离线预览不连接设备；仓库不附真实地图。机械臂归档的静态与合成测试使用 `bash tests/run_arm.sh`（系统 Python 与 NumPy），工作台回归使用 `bash tests/run_local.sh`（另需 ROS 2 Humble Python 包）。[完整测试说明](docs/TESTING.md)
 
-真实集成前阅读[部署指南](docs/DEPLOYMENT.md)：公开配置保持 `disabled`、`commissioned=false`，厂家驱动、现场配置和完整机械臂环境需独立准备。
+真实集成前阅读[部署指南](docs/DEPLOYMENT.md)与[中文恢复说明](docs/本车恢复说明.md)：面板公开配置保持 `disabled`、`commissioned=false`。原版机械臂源码、DOBOT 依赖、模板和本车标定已收入 `robot_originals/`；ROS、相机驱动、Python 环境与底盘导航地图/参数仍按[环境说明](robot_originals/ENVIRONMENT.md)准备。
 
 ## 演示视频
 
@@ -81,13 +81,13 @@ flowchart TB
   TERM --> ARM[自有 charge_robot / ICP / V3 · 外部 MoveIt]
 ```
 
-本仓库包含面板、桥接、记录/返程、仲裁及自有原生辅助组件；自有机械臂算法工具链待补齐，厂家驱动和专用标定另行配置。
+本仓库包含面板、桥接、记录/返程、仲裁及自有原生辅助组件；原版机械臂、视觉工具链与本车恢复资料见 `robot_originals/`。底盘硬件驱动和导航地图/参数按实际设备配置。
 
 </details>
 <details>
 <summary>视觉与机械臂：源码范围、缺件与集成</summary>
 
-自有源码见 [arm_stack](arm_stack/README.md)：40 个历史源码/显示文件、5 个明确标记的有限重建文件及 2 个未启用算法示例，来源强弱见清单。面板仍调用独立安装的机械臂工具；本仓库不是可直接部署的完整工具链。[缺件](arm_stack/README.md#未完成--missing-or-unverified) · [重建边界](arm_stack/RECONSTRUCTION.md) · [源码状态](docs/ARM_SOURCE_SCOPE.md)
+原版源码和恢复配置见 [robot_originals](robot_originals/README.md)：599 个原文件覆盖 `charge_robot test/home`、ICP/V3、充电口点云模板、手眼标定、回位姿态、枪头补偿、自有仿真，以及现用 DOBOT 驱动/模型/MoveIt 依赖。原件逐文件核对哈希，不再使用早期重建工作流。[arm_stack](arm_stack/README.md) 保留路径适配后的源码阅读视图；同车恢复以 `robot_originals/` 为准。面板仍通过独立终端调用已部署的工具。[环境与待验证事项](robot_originals/ENVIRONMENT.md)
 
 </details>
 <details>
@@ -148,12 +148,12 @@ flowchart LR
   U[明确指定的本地 URDF] --> M[原版模型显示入口]
   J[已有真实或隔离测试关节反馈] --> M
   M --> V[RViz 模型与 TF]
-  D[外部 DOBOT Nova2 MoveIt 配置] --> P[纯规划入口：执行关闭]
+  D[已收录 DOBOT Nova2 MoveIt 配置] --> P[纯规划入口：执行关闭]
   P --> R[规划结果供检查]
-  G[官方 Gazebo 与虚拟控制组件] --> S[待安装并验证的隔离仿真]
+  G[自有 charging_dock_sim] --> S[ROS 2 规划演示与 RViz]
 ```
 
-已补模型显示与纯规划包装，但不含假关节发布器、现场手眼标定或完整 Gazebo 工程。官方 Nova2 URDF 和 5 个 MoveIt 配置与历史现场哈希一致；完整现场提交、网格依赖和执行适配器仍待核对。官方依赖应固定版本并保留 Dobot 版权，见 [DOBOT 来源与许可](arm_stack/DOBOT_DEPENDENCY.md)。
+已收录原车模型启动脚本、Nova2 URDF/SRDF/网格、MoveIt 配置、执行适配器及自有 `charging_dock_sim`。本车手眼标定另存于 `robot_originals/`；自有仿真示例的插入距离为 35 mm，与实机工具链的 75 mm 目标分开。独立 `dobot_gazebo` 物理仿真包未包含，本次未构建或运行仿真。DOBOT 原件保留原许可；现场目录无 Git 元数据，不能宣称整套副本对应某个确定上游提交。见 [DOBOT 来源与许可](arm_stack/DOBOT_DEPENDENCY.md)与[环境说明](robot_originals/ENVIRONMENT.md)。
 
 </details>
 
@@ -162,7 +162,8 @@ flowchart LR
 | 路径 | 内容 |
 | --- | --- |
 | `src/charging_robot/` | `ui`、`navigation`、`returning`、`arm`、`control`、`shared` 六个职责包 |
-| [arm_stack/](arm_stack/README.md) | 自有历史视觉/机械臂源码、来源与重建说明 |
+| [robot_originals/](robot_originals/README.md) | 599 个原车文件、模板标定、DOBOT 依赖、哈希清单与恢复工具 |
+| [arm_stack/](arm_stack/README.md) | 由原件整理的视觉/机械臂/仿真源码阅读视图及来源说明 |
 | [native/](native/driver-watchdog/README.md) | 自有原始里程 relay、命令看门狗与 PTY 测试 |
 | [docs/](docs/README.md) | 架构、操作流程、部署、测试、依赖与验证记录 |
 | [config/](config/README.md) · [examples/](examples/nav2.placeholder.yaml) | 默认禁用的公开配置与不能用于导航的占位参数 |
@@ -174,7 +175,7 @@ flowchart LR
 
 历史实测、用户报告与本轮离线验证分别记录在[验证说明](docs/VALIDATION.md)，不把源码收录或软件测试当作实车验收。原始里程不能消除轮滑；返程不能发现新增障碍。界面卡顿时健康后台控制可能继续，需独立硬件急停。
 
-自有代码及本仓库原创 SVG 图采用 [MIT](LICENSE)。第三方组件保留原许可：PyQt GPL/商业许可、历史建图包非商业声明和部分厂家授权仍需核实。未引入第三方图像、SDK、模型、实拍、地图、轨迹、专用标定或凭据。[第三方边界](THIRD_PARTY_NOTICES.md) · [依赖核查](docs/DEPENDENCIES.md)
+自有应用代码及本仓库原创 SVG 图采用 [MIT](LICENSE)，原自有仿真包保留 Apache-2.0。随附 DOBOT 原件保留 Dobot LICENSE 与各包原有声明；PyQt GPL/商业许可、历史建图包声明等依其原条款。本车标定与配置经作者授权公开；密码、密钥、无关运行日志及真实导航地图/轨迹未纳入。[第三方边界](THIRD_PARTY_NOTICES.md) · [依赖核查](docs/DEPENDENCIES.md)
 
 [贡献指南](CONTRIBUTING.md) · [更新日志](CHANGELOG.md) · [源码来源](docs/source-manifest.json)
 

@@ -8,9 +8,9 @@ Sources were read directly from the robot on 2026-11-09. The private local recov
 
 workflow_progress.py、insertion_runtime.py、模型/纯规划启动脚本已经用现场原件替换昨天的重建实现。新增的 insertion_limits.py、publication_paths.py 及不在当前现场链中的旧 insert_force.py 已移出。重建历史保留于 Git 历史，不作为当前实现。
 
-原始 nova2_env.sh 含设备地址，公开文件仅将地址分离为显式环境变量。原始模型 launch 含现场手眼变换，完整原件仅保留本地；公开派生文件省略该相机静态 TF，不编造替代数值。个人目录统一替换为 /opt/charging-robot-local 占位布局。原始功能没有重新设计，但这些路径仍需部署时适配。
+原始 nova2_env.sh 含设备地址，公开文件仅将地址分离为显式环境变量。原始模型 launch 含现场手眼变换，完整原件经作者授权收入 `../robot_originals/`；本目录的派生文件省略该相机静态 TF，不编造替代数值。个人目录统一替换为 /opt/charging-robot-local 占位布局。原始功能没有重新设计，但这些路径仍需部署时适配。
 
-Original workflow/runtime and startup wrappers supersede yesterday's reconstructions. Device addresses are supplied locally, and the private camera transform is omitted from the public model launch without inventing a replacement. Account-specific roots become a documented placeholder layout, not an automatic installation.
+Original workflow/runtime and startup wrappers supersede yesterday's reconstructions. This reading view uses local device configuration and omits the camera transform without inventing a replacement; the authorized exact originals are published separately in `../robot_originals/`. Account-specific roots become a documented placeholder layout, not an automatic installation.
 
 ## 已恢复 / Recovered
 
@@ -21,11 +21,11 @@ Original workflow/runtime and startup wrappers supersede yesterday's reconstruct
 
 ## 依赖和未纳入内容 / Dependencies and exclusions
 
-DOBOT 驱动、消息、MoveIt、Nova2 模型/网格等 383 个文件也已恢复到本地隔离目录，保留原 LICENSE 和包声明；没有加入本公开副本。现场目录没有可用的 Git remote/HEAD，不能宣称已确定整套上游提交及修改差异。执行适配器 action_move_server.py 属于这批依赖，文件已找回，但不能把其混合来源实现改署 Pvpproof MIT。
+DOBOT 驱动、消息、MoveIt、Nova2 模型/网格等 509 个原文件（含后补的 126 个 ROS 接口）已收入 `../robot_originals/nova2_ros2_ws/src/dobot_ros2_v4/`，保留原 LICENSE 和包声明；不在本阅读视图中重复存放。现场目录没有可用的 Git remote/HEAD，不能宣称已确定整套上游提交及修改差异。执行适配器 action_move_server.py 属于这批依赖，文件已找回，但不能把其混合来源实现改署 Pvpproof MIT。
 
-私密手眼标定、初始机械臂姿态、枪头横向补偿、密码密钥和无关运行数据不公开。相机/枪头 TF、现场地址、Python/ROS 环境和完整依赖安装仍需本地配置。恢复源码不是可直接安装的完整运行包。
+本车手眼标定、初始机械臂姿态、枪头横向补偿、相机参数和原现场配置经作者授权收入 `../robot_originals/`。密码、密钥和无关运行数据不公开。Python/ROS 与相机驱动仍需安装；其他机器人需要自己的标定与配置，源码恢复不等于运行验收。
 
-The full vendor dependency snapshot exists locally with original notices but is not vendored here. Its checkout revision cannot be identified from missing Git metadata. Site calibration, saved home joints, compensation, credentials and unrelated runtime data are excluded. Application source recovery does not establish a complete deployable environment.
+The vendor dependency snapshot and authorized robot-specific calibration, saved home joints, compensation and original configuration are published in `../robot_originals/`, with original notices. Missing Git metadata prevents identifying its checkout revision. Credentials and unrelated runtime data are excluded. System dependencies and runtime acceptance remain separate.
 
 ## 验证 / Validation
 

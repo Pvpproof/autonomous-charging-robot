@@ -11,16 +11,16 @@ MIT covers Pvpproof-owned source, tests, native helpers and documentation. It do
 | PyQt5 / Qt | PyQt 为 GPL v3 或商业许可，不能把自有代码 MIT 当作打包 PyQt 的授权。PyQt is GPL v3 or commercially licensed; packaging obligations remain separate. |
 | ROS / Nav2 / message packages | 依各包许可，未随仓库分发。Individual upstream terms apply; not bundled. |
 | slam_gmapping | 历史本机元数据声明非商业许可，需核实准确上游版本和适用条款。Historical metadata contains a noncommercial declaration requiring review. |
-| 厂家底盘、雷达、Nova2、SDK、模型 | 不包含厂家源码、二进制或参数；部分许可未知。Vendor sources, binaries and parameters are excluded; some terms remain unresolved. |
-| charge_robot、ICP/PnP 应用与标定 | 可得历史应用源码已部分纳入 MIT；专用标定排除。Available historical application sources are partially included under MIT; site calibration stays excluded. |
+| 厂家底盘、雷达、Nova2、SDK、模型 | `robot_originals` 收录现用 DOBOT 源码/模型/配置并保留 Dobot LICENSE 与包级声明；底盘/雷达驱动与 SDK 二进制等不在本次恢复范围。Bundled DOBOT originals retain their notices; base/lidar drivers and SDK binaries are outside this recovery scope. |
+| charge_robot、ICP/PnP 应用与标定 | 自有原版应用源码已收录，本车标定/配置经作者授权附带；仅适用于该车。Owned original applications and owner-authorized robot-specific calibration/configuration are included. |
 
 PyQt 官方许可说明：[Riverbank](https://www.riverbankcomputing.com/software/pyqt/intro)。项目 MIT 文本：[OSI](https://opensource.org/license/mit)。历史版本及逐项来源见 [DEPENDENCIES.md](docs/DEPENDENCIES.md)。Commercial use or redistribution of a combined system requires reviewing the actual dependencies and their licenses.
 
-本次未发现已跟踪自有源码内的第三方版权头；这不替代上游权属调查。后续引入第三方文件必须保留原许可并单独标识。论文正文、实拍数据和现场材料未纳入本次授权发布。
+本次未发现已跟踪自有源码内的第三方版权头；这不替代上游权属调查。后续引入第三方文件必须保留原许可并单独标识。论文正文与无关实拍/运行数据未纳入；本车模板、标定与配置属于用户明确授权发布范围。
 
 ## 原版恢复例外 / Original-source licensing exception
 
-arm_stack/simulation/charging_dock_sim 保留现场原 package.xml 的 Apache-2.0 声明，不被根 MIT 统一改授权。DOBOT 依赖仅复制至本地隔离目录，保留原版权，未纳入公开树。
+arm_stack/simulation/charging_dock_sim 保留现场原 package.xml 的 Apache-2.0 声明，不被根 MIT 统一改授权。DOBOT 依赖经用户要求收入 `robot_originals/`，保留原版权与包级声明。
 
 ## 用户要求的原版恢复包 / Owner-requested original bundle
 

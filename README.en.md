@@ -20,10 +20,10 @@ Green means historical field records or user reports; blue means hardware-free s
 | --- | --- | --- |
 | Base navigation | Nav2 and a shared map panel navigate to a charging point while recording a complete outbound route. | Historical field use; drivers, maps and navigation parameters are external. |
 | Visual localization | Coarse ICP followed by stable V3 RGB PnP provides camera alignment and gun prepose targets. | Successful stage logs exist; they do not establish insertion success. |
-| Arm insertion | A frozen cycle target links camera alignment, gun prepose and 75 mm Cartesian insertion planning. | Operator confirms each motion; public 75 mm policy is untested on hardware and historical insertion timed out. |
+| Arm insertion | A frozen cycle target links camera alignment, gun prepose and 75 mm Cartesian insertion planning. | The original target is 75 mm with per-motion confirmation; this published bundle has not been retested on hardware, and historical insertion timed out. |
 | Recorded-route return | Reversed measured poses within one raw-odometry session guide return instead of timed velocity replay. | User-reported success on earlier versions; current revision pending, with no new-obstacle detection. |
 | Control and diagnostics | One velocity arbiter, backend leases, fresh feedback and cancellation state coordinate command sources. | Synthetic and offline Qt regression; independent emergency stop remains necessary. |
-| Model and planning | Explicit models and execution-disabled MoveIt wrappers support model and planning inspection. | Wrappers included; complete Gazebo, TF, model assets and execution integration remain unaccepted. |
+| Model and planning | Explicit models and execution-disabled MoveIt wrappers support model and planning inspection. | Original Nova2 models, MoveIt, execution adapter and project simulation are included; runtime acceptance is pending and the separate Gazebo package is absent. |
 
 ## Quick start
 
@@ -35,7 +35,7 @@ bash start.sh --offline
 
 The preview does not connect to hardware; no field maps are bundled. Use `bash tests/run_arm.sh` for static and synthetic arm checks (system Python and NumPy), and `bash tests/run_local.sh` for workstation regression (also requires ROS 2 Humble Python packages). [Testing guide](docs/TESTING.en.md)
 
-Read the [deployment guide](docs/DEPLOYMENT.en.md) before integration. Public configuration stays `disabled` and `commissioned=false`; vendor drivers, site configuration and a complete arm environment are supplied separately.
+Read the [deployment guide](docs/DEPLOYMENT.en.md) and [robot recovery guide](docs/本车恢复说明.md) before integration. Public panel configuration stays `disabled` and `commissioned=false`. Original arm sources, DOBOT dependencies, the template and robot-specific calibration are in `robot_originals/`. Install ROS, camera drivers and Python dependencies separately; configure base drivers, maps and navigation parameters for the actual device. See [environment requirements](robot_originals/ENVIRONMENT.md).
 
 ## Demo video
 
@@ -85,7 +85,7 @@ flowchart TB
 <details>
 <summary>Vision and arm: source scope and integration gaps</summary>
 
-[arm_stack](arm_stack/README.md) contains 40 historical source/display files, five explicitly limited reconstructions and two inactive algorithm examples. Manifests distinguish provenance strength. Panel tools still use a separate installation; this is not a complete deployable toolchain. [Missing items](arm_stack/README.md#未完成--missing-or-unverified) · [Reconstruction](arm_stack/RECONSTRUCTION.md) · [Source status](docs/ARM_SOURCE_SCOPE.md)
+[robot_originals](robot_originals/README.md) contains 599 hash-verified field-original files: `charge_robot test/home`, ICP/V3, the socket point-cloud template, hand-eye calibration, home pose, tool compensation, project simulation and the current DOBOT driver/model/MoveIt dependencies. Original implementations replace the earlier reconstructed workflow. [arm_stack](arm_stack/README.md) is a path-adapted reading view; use `robot_originals/` for same-robot restoration. The panel calls separately deployed tools through independent terminals. [Environment and remaining validation](robot_originals/ENVIRONMENT.md)
 
 </details>
 <details>
@@ -146,12 +146,12 @@ flowchart LR
   U[Explicit local URDF] --> M[Restored model display]
   J[Existing real or isolated test joint feedback] --> M
   M --> V[RViz model and TF]
-  D[External DOBOT Nova2 MoveIt configuration] --> P[Plan-only entry: execution disabled]
+  D[Included DOBOT Nova2 MoveIt configuration] --> P[Plan-only entry: execution disabled]
   P --> R[Plan for inspection]
-  G[Official Gazebo and virtual controllers] --> S[Isolated simulation pending setup and validation]
+  G[Project charging_dock_sim] --> S[ROS 2 planning demo and RViz]
 ```
 
-Original model-display and plan-only wrappers and the project simulation package are included; site calibration and external vendor assets remain separate. Six official model/MoveIt files match historical field hashes, but the complete field revision, meshes and execution adapter still need verification. Pin external dependencies and preserve Dobot notices; see [upstream audit](arm_stack/DOBOT_DEPENDENCY.md).
+The bundle includes the original model launch, Nova2 URDF/SRDF/meshes, MoveIt configuration, execution adapter and project `charging_dock_sim`. Robot-specific hand-eye calibration is in `robot_originals/`. The simulation example uses a distinct 35 mm insertion setting; the real arm toolchain uses 75 mm. The separate `dobot_gazebo` physics package is absent, and no simulation was built or run during publication. Original Dobot notices are preserved. Missing field Git metadata prevents identifying the whole vendor snapshot as one upstream commit. See [upstream audit](arm_stack/DOBOT_DEPENDENCY.md) and [environment notes](robot_originals/ENVIRONMENT.md).
 
 </details>
 
@@ -160,7 +160,8 @@ Original model-display and plan-only wrappers and the project simulation package
 | Path | Contents |
 | --- | --- |
 | `src/charging_robot/` | Six packages: `ui`, `navigation`, `returning`, `arm`, `control`, `shared` |
-| [arm_stack/](arm_stack/README.md) | Owned historical arm/vision sources, provenance and reconstruction notes |
+| [robot_originals/](robot_originals/README.md) | 599 field-original files, calibration/template, DOBOT dependencies, hashes and restoration tool |
+| [arm_stack/](arm_stack/README.md) | Source reading view derived from arm, vision and simulation originals, with provenance |
 | [native/](native/driver-watchdog/README.md) | Owned raw-odometry relay, command watchdog and PTY tests |
 | [docs/](docs/README.md) | Architecture, workflows, deployment, testing, dependencies and evidence |
 | [config/](config/README.md) · [examples/](examples/nav2.placeholder.yaml) | Disabled public configuration and a navigation-rejected placeholder |
@@ -172,7 +173,7 @@ Original `start.sh`, `app.py`, `navigation.launch.py` and other compatibility en
 
 [Validation notes](docs/VALIDATION.md) distinguish historical field evidence, user reports and current offline checks. Source inclusion and passing software tests are not hardware acceptance. Raw odometry cannot eliminate wheel slip; return cannot detect new obstacles. Healthy backend control may continue during a GUI stall, requiring independent emergency stop.
 
-Owned code and the original SVG diagrams are [MIT licensed](LICENSE). External terms remain separate: PyQt GPL/commercial licensing, historical mapping-package noncommercial metadata and unresolved vendor permissions need review. No third-party imagery, SDKs, models, field photos, maps, routes, site calibration or credentials were added. [Third-party notices](THIRD_PARTY_NOTICES.md) · [Dependency audit](docs/DEPENDENCIES.md)
+Project-owned application code and original SVG diagrams use [MIT](LICENSE); the original project simulation retains Apache-2.0. Bundled DOBOT originals retain the Dobot LICENSE and package-level declarations. PyQt and mapping dependencies retain their own terms. Robot-specific calibration/configuration is published with the owner’s authorization; passwords, keys, unrelated runtime logs and actual navigation maps/routes are excluded. [Third-party notices](THIRD_PARTY_NOTICES.md) · [Dependency audit](docs/DEPENDENCIES.md)
 
 [Contributing](CONTRIBUTING.en.md) · [Changelog](CHANGELOG.md) · [Source provenance](docs/source-manifest.json)
 
