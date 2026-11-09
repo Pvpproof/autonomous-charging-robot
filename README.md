@@ -6,7 +6,7 @@
 
 **面向国标充电接口，串联移动导航、视觉定位、机械臂插接与轨迹返程的 ROS 2 / PyQt5 研发工作台。**
 
-[English](README.en.md) · [文档导航](docs/README.md) · [部署](docs/DEPLOYMENT.md) · [测试](docs/TESTING.md)
+[English](README.en.md) · [How to use](docs/HOW_TO_USE.md) · [Agent 接手](AGENTS.md) · [文档导航](docs/README.md) · [部署](docs/DEPLOYMENT.md) · [测试](docs/TESTING.md)
 
 把“到达充电点—找准充电口—分段对接—返回起点”拆成可观察、可单独操作和测试的模块，方便定位问题、复用算法与继续集成。已有导航、返程和视觉预对接的历史实测记录；当前公开副本仍需整体验收，未验证无人值守电气充电，也不代表国标认证。
 
@@ -36,6 +36,15 @@ bash start.sh --offline
 离线预览不连接设备；仓库不附真实地图。机械臂归档的静态与合成测试使用 `bash tests/run_arm.sh`（系统 Python 与 NumPy），工作台回归使用 `bash tests/run_local.sh`（另需 ROS 2 Humble Python 包）。[完整测试说明](docs/TESTING.md)
 
 真实集成前阅读[部署指南](docs/DEPLOYMENT.md)与[中文恢复说明](docs/本车恢复说明.md)：面板公开配置保持 `disabled`、`commissioned=false`。原版机械臂源码、DOBOT 依赖、模板和本车标定已收入 `robot_originals/`；ROS、相机驱动、Python 环境与底盘导航地图/参数仍按[环境说明](robot_originals/ENVIRONMENT.md)准备。
+
+## How to use · 使用方法
+
+1. **先看界面：** 下载并解压仓库，安装系统 Python、PyQt5、NumPy、Pillow、PyYAML，在根目录运行 `bash start.sh --offline`。
+2. **准备实车：** 按[环境说明](robot_originals/ENVIRONMENT.md)配置 ROS 2 Humble、相机和驱动；同车机械臂原件、模板与标定按[恢复说明](docs/本车恢复说明.md)部署。公开配置默认禁用实车运动。
+3. **使用面板：** 加载地图与充电点 → 连接设备、启动定位并应用初始位置 → 点击去程自动记录 → 完整到达后单击返程。`test`、`home` 在独立终端分别操作。
+4. **机械臂与仿真：** 原车使用 `charge_robot test` / `charge_robot home`；无真机的 MoveIt/RViz 规划演示使用 `charging_dock_sim`，具体命令见[完整使用指南](docs/HOW_TO_USE.md)。
+
+**让其他 Agent 接手开发：** 先读 [AGENTS.md](AGENTS.md)，再看[开发指南](docs/DEVELOPMENT.md)。其中列出源码职责、原件与派生副本关系、兼容入口、任务对应测试及当前验证边界，无需历史聊天。
 
 ## 演示视频
 

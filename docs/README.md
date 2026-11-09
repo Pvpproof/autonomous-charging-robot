@@ -4,6 +4,8 @@
 
 | 阅读目标 / Purpose | 中文 | English |
 | --- | --- | --- |
+| 开始使用 / Get started | [How to use](HOW_TO_USE.md) | [How to use](HOW_TO_USE.en.md) |
+| Agent 与开发者接手 / Development handoff | [AGENTS.md](../AGENTS.md) · [开发指南](DEVELOPMENT.md) | [Agent onboarding](../AGENTS.md) · [Development](DEVELOPMENT.md) |
 | 理解模块与兼容入口 / Modules and compatibility | [架构](ARCHITECTURE.md) | [Architecture](ARCHITECTURE.en.md) |
 | 了解 test/home 逐步流程 / Inspect the staged arm workflow | [机械臂流程](ARM_WORKFLOWS.md) | [Arm workflows](ARM_WORKFLOWS.en.md) |
 | 离线预览、外部依赖与现场边界 / Preview and integration | [部署](DEPLOYMENT.md) | [Deployment](DEPLOYMENT.en.md) |

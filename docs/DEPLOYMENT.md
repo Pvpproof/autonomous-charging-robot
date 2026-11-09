@@ -2,7 +2,7 @@
 
 2026-11-09 更新 / Update: 原版源码已从现场恢复，昨日重建实现已替换；本页此前“缺失/重建”状态属于历史记录。当前范围与缺项以 [恢复说明](../arm_stack/README.md) 为准。 Field originals now supersede reconstructions; older missing-source statements are historical.
 
-`charge_robot`、ICP/V3 与机械臂规划应用是作者自有源码，历史版本与有限重建文件已收录在 `arm_stack/`。当前现场版本、依赖闭包及统一运行布局尚待核对，面板仍使用独立安装工具；本仓库不是完整机械臂部署包。
+`charge_robot`、ICP/V3 与机械臂规划应用是作者自有源码；当前以 `robot_originals/` 收录的 599 个已核对原件为同车恢复来源，`arm_stack/` 为路径适配的阅读视图。原版替换了早期重建实现。面板调用独立部署的机械臂工具；源文件齐备不等于软件环境与运行已验收。实操入口见 [How to use](HOW_TO_USE.md)。
 
 [English](DEPLOYMENT.en.md)
 
@@ -30,7 +30,7 @@ bash tests/run_local.sh
 
 ## 硬件环境配置
 
-真实运行依赖厂家驱动、地图、已验收的 Nav2 参数和独立对接工具。机械臂工具仍需要单独安装的完整 charge_robot 环境；本仓库 arm_stack 已收录部分历史自有实现，但不包含专用标定、厂家 SDK 或完整仿真资产。本仓库不安装或复制这些依赖，也不会自动部署到运行工程。
+真实运行依赖底盘/雷达驱动、地图、有效 Nav2 参数和独立部署的 charge_robot 环境。机械臂原件、现用 DOBOT 源码/模型/配置、自有仿真、模板和本车标定已收入 `robot_originals/`；ROS、相机驱动、Python 环境和工作空间构建仍需按[环境说明](../robot_originals/ENVIRONMENT.md)准备。不会随下载自动部署到运行工程。
 
 | 本地配置 | 用途 |
 | --- | --- |
@@ -46,7 +46,7 @@ bash tests/run_local.sh
 
 ## 数据与设备边界
 
-真实场地图、充电点坐标、运动轨迹、运行日志、设备地址、设备锁定状态、标定、凭据及历史备份不随公开仓库分发。第三方驱动和原始厂家配置也不包含在当前版本中。发布文件来源和脱敏改动见 [来源清单](source-manifest.json)。
+真实场地图、运动轨迹、运行日志、锁定状态、密码密钥和历史备份不随公开仓库分发。`robot_originals/` 中的原机械臂设备地址、标定、回位姿态、补偿和 DOBOT 依赖经用户明确授权附带，只适用于本车；底盘/雷达驱动与现场导航参数另配。原件来源见 [原件清单](../robot_originals/source-manifest.json)，工作台来源和路径适配见 [来源清单](source-manifest.json)。
 
 ## 运行限制
 

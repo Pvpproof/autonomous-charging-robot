@@ -6,7 +6,7 @@ See [environment and completeness](robot_originals/ENVIRONMENT.md): 599 original
 
 **A ROS 2 / PyQt5 R&D workstation combining mobile navigation, visual localization, arm insertion and recorded-route return for GB/T charging interfaces.**
 
-[中文](README.md) · [Documentation](docs/README.md) · [Deployment](docs/DEPLOYMENT.en.md) · [Testing](docs/TESTING.en.md)
+[中文](README.md) · [How to use](docs/HOW_TO_USE.en.md) · [Agent entry](AGENTS.md) · [Documentation](docs/README.md) · [Deployment](docs/DEPLOYMENT.en.md) · [Testing](docs/TESTING.en.md)
 
 Break the journey from reaching a charging point to locating the socket, staged docking and returning to origin into observable, independently operated and tested modules. Navigation, return and visual pre-docking have historical field evidence; the current public copy still needs end-to-end acceptance. Unattended electrical charging and standards certification are unverified.
 
@@ -36,6 +36,15 @@ bash start.sh --offline
 The preview does not connect to hardware; no field maps are bundled. Use `bash tests/run_arm.sh` for static and synthetic arm checks (system Python and NumPy), and `bash tests/run_local.sh` for workstation regression (also requires ROS 2 Humble Python packages). [Testing guide](docs/TESTING.en.md)
 
 Read the [deployment guide](docs/DEPLOYMENT.en.md) and [robot recovery guide](docs/本车恢复说明.md) before integration. Public panel configuration stays `disabled` and `commissioned=false`. Original arm sources, DOBOT dependencies, the template and robot-specific calibration are in `robot_originals/`. Install ROS, camera drivers and Python dependencies separately; configure base drivers, maps and navigation parameters for the actual device. See [environment requirements](robot_originals/ENVIRONMENT.md).
+
+## How to use
+
+1. **Preview:** extract the repository, install system Python with PyQt5, NumPy, Pillow and PyYAML, then run `bash start.sh --offline` from its root.
+2. **Prepare hardware:** follow the [environment notes](robot_originals/ENVIRONMENT.md) for ROS 2 Humble, camera and drivers; use the [recovery guide](docs/本车恢复说明.md) for the original arm files, template and calibration. Public configuration disables hardware motion by default.
+3. **Operate the panel:** load a map/target → connect and localize → apply the initial pose → start outbound with automatic recording → click to return after completed arrival. Invoke `test` and `home` separately through their terminals.
+4. **Arm and simulation:** use `charge_robot test` / `charge_robot home` on the configured original robot; use `charging_dock_sim` for the separate MoveIt/RViz planning demo. Commands are in the [complete usage guide](docs/HOW_TO_USE.en.md).
+
+**For another coding agent:** start with [AGENTS.md](AGENTS.md), then the [development guide](docs/DEVELOPMENT.md). They map source ownership, originals versus adapted copies, compatibility entries, focused tests and current validation limits without requiring chat history.
 
 ## Demo video
 

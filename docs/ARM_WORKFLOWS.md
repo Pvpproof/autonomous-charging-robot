@@ -2,11 +2,11 @@
 
 [中文](ARM_WORKFLOWS.md) · [English](ARM_WORKFLOWS.en.md) · [首页 / Home](../README.md)
 
-以下流程从已发布首页 `1f118a1` 整理而来，并依据收录代码核对；描述程序路径，不代表当前公开副本已完成实机验收。
+以下依据 `robot_originals/nova2_tools/` 收录的原版代码说明程序路径，不代表当前公开副本已完成实机验收。运行步骤见 [How to use](HOW_TO_USE.md)。
 
 ## charge_robot test：从视觉定位到插入
 
-`charge_robot test` 执行一轮机械臂预对接与插入：**ICP 找充电口 → 相机预对齐 → V3 精测 → 枪头预备位 → 75 mm 直线插入**。程序自动衔接规划和视觉阶段，每段运动仍在终端单独确认。以下是收录代码的预期流程，完整部署仍有[依赖和配置缺项](../arm_stack/README.md)。
+`charge_robot test` 执行一轮机械臂预对接与插入：**ICP 找充电口 → 相机预对齐 → V3 精测 → 枪头预备位 → 75 mm 直线插入**。程序自动衔接规划和视觉阶段，每段运动仍在终端单独确认。原版文件已恢复；部署所需环境与未验证事项见[环境说明](../robot_originals/ENVIRONMENT.md)。
 
 1. **启动本轮环境。** 检查执行器是否空闲，清理上一轮视觉/规划进程并建立新周期；启动真实连接、关节反馈、模型与 TF、MoveIt 纯规划、轨迹执行适配器、ICP、位姿/点云桥接和机械臂 RViz。此步骤不自动回初始姿态。
 2. **等待 ICP 与机械臂就绪。** 检查真实连接、完整且新鲜的关节反馈、GetPose 实际响应、MoveIt 接口和有效 ICP 几何位姿。多帧稳定取值后，结合手眼标定把相机测量转换为机械臂规划目标。
@@ -60,7 +60,7 @@ flowchart TD
   MOVE --> OK
 ```
 
-面板中的 `test`、`home` 和底盘返程分别由用户发起，不要求机械臂流程成功才能选择底盘返程。当前公开副本中的历史文件、重建入口和未实机验证部分见[重建说明](../arm_stack/RECONSTRUCTION.md)。
+面板中的 `test`、`home` 和底盘返程分别由用户发起，不要求机械臂流程成功才能选择底盘返程。原版工作流来源与恢复范围见[原件说明](../robot_originals/README.md)；不再使用早期重建入口。
 
 ### 工具链内部架构
 
@@ -79,20 +79,20 @@ flowchart TB
   CLI --> VIEW[机械臂 RViz：模型、TF、点云与目标]
 ```
 
-`test` 不自动调用 `home` 或底盘返程；面板中的机械臂工具与底盘去返程独立。命令成功也不等于锁止、电气连接或实际充电已经验证。文件状态和写入辅助、模型启动中的重建部分见 [重建说明](../arm_stack/RECONSTRUCTION.md)。
+`test` 不自动调用 `home` 或底盘返程；面板中的机械臂工具与底盘去返程独立。命令成功也不等于锁止、电气连接或实际充电已经验证。工作流、运行时辅助及模型启动均已由原件恢复，来源见 [原件说明](../robot_originals/README.md)。
 
 ## 仿真与规划
 
 ```mermaid
 flowchart LR
-  U[明确指定的本地 URDF] --> M[重建模型显示入口]
+  U[明确指定的本地 URDF] --> M[原版模型显示入口]
   J[已有真实或隔离测试关节反馈] --> M
   M --> V[RViz 模型与 TF]
-  D[外部 DOBOT Nova2 MoveIt 配置] --> P[纯规划入口：执行关闭]
+  D[已收录 DOBOT Nova2 MoveIt 配置] --> P[纯规划入口：执行关闭]
   P --> R[规划结果供检查]
-  G[官方 Gazebo 与虚拟控制组件] --> S[待安装并验证的隔离仿真]
+  G[自有 charging_dock_sim] --> S[ROS 2 规划演示与 RViz]
 ```
 
-已补模型显示与纯规划包装，但不含假关节发布器、现场手眼标定或完整 Gazebo 工程。官方 Nova2 URDF 和 5 个 MoveIt 配置与历史现场哈希一致；完整现场提交、网格依赖和执行适配器仍待核对。官方依赖应固定版本并保留 Dobot 版权，见 [DOBOT 来源与许可](../arm_stack/DOBOT_DEPENDENCY.md)。
+原模型启动、Nova2 模型/网格、MoveIt 配置、执行适配器与自有 `charging_dock_sim` 已收录；本车手眼标定在 `robot_originals/`。独立 Gazebo 物理仿真包未包含。DOBOT 副本保留原版权和包声明，现场缺 Git 元数据，不能据此确定整套上游提交。见 [DOBOT 来源与许可](../arm_stack/DOBOT_DEPENDENCY.md)。
 
-可以离线阅读和运行针对性合成测试；安装完整官方依赖后才具备模型/规划展示的前提，本轮没有启动 RViz/MoveIt/Gazebo，也没有完成仿真或实机全流程验收。当前相关测试共 61 项通过，详见 [重建边界](../arm_stack/RECONSTRUCTION.md)与[收录状态](ARM_SOURCE_SCOPE.md)。
+可以离线阅读和运行针对性检查。原件恢复时 41 项源码、哈希、就绪与合成时序检查通过；未启动 RViz/MoveIt/Gazebo，未完成仿真或实机全流程验收。命令和当前边界见 [How to use](HOW_TO_USE.md)与[环境说明](../robot_originals/ENVIRONMENT.md)。

@@ -2,13 +2,13 @@
 
 2026-11-09 更新 / Update: 原版源码已从现场恢复，昨日重建实现已替换；本页此前“缺失/重建”状态属于历史记录。当前范围与缺项以 [恢复说明](../arm_stack/README.md) 为准。 Field originals now supersede reconstructions; older missing-source statements are historical.
 
-Project-owned historical charge_robot, ICP/V3 and planning sources plus limited reconstructions are included in `arm_stack/`. Current field identity, dependency completeness and a unified runtime layout remain unverified; panel tools still use a separate installation. This is not a complete arm deployment package.
+Use the 599 hash-verified field originals in `robot_originals/` for same-robot restoration. `arm_stack/` is a path-adapted reading view, and originals replace the earlier reconstructed implementations. The panel calls separately deployed arm tools. Complete source inclusion does not establish a configured or accepted runtime. Start with [How to use](HOW_TO_USE.en.md).
 
 [中文](DEPLOYMENT.md)
 
 Use a ROS 2 Humble environment with PyQt5, NumPy, Pillow, PyYAML and gnome-terminal. Dependency versions in [DEPENDENCIES](DEPENDENCIES.md) are historical observations, not a reproducible lockfile.
 
-For a disconnected UI preview run `bash start.sh --offline`. Hardware use additionally requires externally supplied vendor drivers, reviewed navigation parameters, maps, calibration and the charge_robot toolchain. None are bundled.
+For a disconnected UI preview run `bash start.sh --offline`. `robot_originals/` includes the arm/vision toolchain, current DOBOT sources/models/configuration, project simulation, template and authorized robot-specific calibration. Hardware use still needs base/lidar drivers, navigation parameters, maps, ROS/camera/Python dependencies and workspace builds. See [environment notes](../robot_originals/ENVIRONMENT.md).
 
 | Variable | Meaning |
 | --- | --- |

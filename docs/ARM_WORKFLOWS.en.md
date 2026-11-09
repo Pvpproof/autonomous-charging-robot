@@ -2,11 +2,11 @@
 
 [中文](ARM_WORKFLOWS.md) · [English](ARM_WORKFLOWS.en.md) · [首页 / Home](../README.en.md)
 
-Preserved from the published home page at `1f118a1` and checked against the included sources. These are implementation paths, not current hardware acceptance.
+These paths describe the recovered originals in `robot_originals/nova2_tools/`, not current hardware acceptance. For commands, see [How to use](HOW_TO_USE.en.md).
 
 ## charge_robot test: vision alignment through insertion
 
-`charge_robot test` performs **ICP socket localization → camera alignment → V3 measurement → gun prepose → 75 mm linear insertion**. Planning and vision stages are sequenced automatically, while every motion requires a separate terminal confirmation. This describes the included implementation; [deployment dependencies and configuration remain incomplete](../arm_stack/README.md).
+`charge_robot test` performs **ICP socket localization → camera alignment → V3 measurement → gun prepose → 75 mm linear insertion**. Planning and vision stages are sequenced automatically, while every motion requires a separate terminal confirmation. Original files have been recovered; see [environment requirements and pending validation](../robot_originals/ENVIRONMENT.md).
 
 1. **Start a new cycle.** Check that execution is idle, clean up previous vision/planning processes, create a new cycle and start the real connection, joint feedback, model/TF, planning-only MoveIt, execution adapter, ICP, pose/cloud bridge and arm RViz. Startup does not automatically home the arm.
 2. **Wait for readiness and stable ICP.** Require real connection, fresh complete joints, an actual GetPose response, MoveIt interfaces and valid ICP geometry. Stable measurements and hand-eye calibration provide the planning target.
@@ -60,7 +60,7 @@ flowchart TD
   MOVE --> OK
 ```
 
-Panel test, home and base return are separately initiated. Arm workflow success is not a base-return prerequisite. See [reconstruction notes](../arm_stack/RECONSTRUCTION.md) for historical/reconstructed sources and unverified integration.
+Panel test, home and base return are separately initiated. Arm workflow success is not a base-return prerequisite. See [original-source notes](../robot_originals/README.md) for provenance and scope; earlier reconstructed workflow entries have been replaced.
 
 ### Toolchain architecture
 
@@ -79,20 +79,20 @@ flowchart TB
   CLI --> VIEW[Arm RViz: model, TF, clouds and target]
 ```
 
-`test` does not automatically invoke `home` or base return. Arm tools and recorded-route base return remain independent. Command completion does not establish mechanical locking, electrical connection or charging. Reconstructed status/writing and model-startup helpers are identified in the [reconstruction notes](../arm_stack/RECONSTRUCTION.md).
+`test` does not automatically invoke `home` or base return. Arm tools and recorded-route base return remain independent. Command completion does not establish mechanical locking, electrical connection or charging. Workflow/runtime and model-startup helpers now come from the [recovered originals](../robot_originals/README.md).
 
 ## Simulation and planning
 
 ```mermaid
 flowchart LR
-  U[Explicit local URDF] --> M[Reconstructed model display]
+  U[Explicit local URDF] --> M[Original model display]
   J[Existing real or isolated test joint feedback] --> M
   M --> V[RViz model and TF]
-  D[External DOBOT Nova2 MoveIt configuration] --> P[Plan-only entry: execution disabled]
+  D[Included DOBOT Nova2 MoveIt configuration] --> P[Plan-only entry: execution disabled]
   P --> R[Plan for inspection]
-  G[Official Gazebo and virtual controllers] --> S[Isolated simulation pending setup and validation]
+  G[Project charging_dock_sim] --> S[ROS 2 planning demo and RViz]
 ```
 
-Model-display and plan-only wrappers are included; fake joint publishers, site calibration and a complete Gazebo project are not. Six official model/MoveIt files match historical field hashes, but the complete field revision, meshes and execution adapter still need verification. Pin external dependencies and preserve Dobot notices; see [upstream audit](../arm_stack/DOBOT_DEPENDENCY.md).
+Original model launch, Nova2 models/meshes, MoveIt configuration, execution adapter and project charging_dock_sim are included. Robot-specific calibration is in robot_originals; the separate Gazebo physics package is absent. Preserve Dobot notices and package declarations. Missing field Git metadata prevents identifying the complete snapshot as one upstream commit; see [upstream audit](../arm_stack/DOBOT_DEPENDENCY.md).
 
-Source inspection and synthetic tests work without hardware when test dependencies are installed. Actual model/planning visualization requires the reviewed upstream stack. No RViz/MoveIt/Gazebo or hardware run was performed in this update. There are 61 passing targeted tests; these do not establish end-to-end simulation or hardware acceptance.
+The original-source recovery had 41 passing source, hash, readiness and synthetic timing checks. No RViz/MoveIt/Gazebo or hardware run was performed; end-to-end simulation and physical acceptance remain separate. Commands and requirements are in [How to use](HOW_TO_USE.en.md) and [environment notes](../robot_originals/ENVIRONMENT.md).
