@@ -1,5 +1,9 @@
 # Autonomous Charging Robot for GB/T Electric Vehicles
 
+See [environment and completeness](robot_originals/ENVIRONMENT.md): 599 original files are included; system dependencies and runtime acceptance remain separate deployment steps.
+
+**2026-11-09 field-source recovery:** Original charge_robot, ICP, V3, startup and project simulation files have been retrieved read-only and supersede the reconstructed implementations. See [provenance and scope](arm_stack/README.md). At the owner’s request, [robot_originals](robot_originals/README.md) now includes the exact originals, vendor dependencies and this robot’s calibration with a layout-preserving copy tool. No device execution occurred.
+
 **A ROS 2 / PyQt5 R&D workstation combining mobile navigation, visual localization, arm insertion and recorded-route return for GB/T charging interfaces.**
 
 [中文](README.md) · [Documentation](docs/README.md) · [Deployment](docs/DEPLOYMENT.en.md) · [Testing](docs/TESTING.en.md)
@@ -139,7 +143,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-  U[Explicit local URDF] --> M[Reconstructed model display]
+  U[Explicit local URDF] --> M[Restored model display]
   J[Existing real or isolated test joint feedback] --> M
   M --> V[RViz model and TF]
   D[External DOBOT Nova2 MoveIt configuration] --> P[Plan-only entry: execution disabled]
@@ -147,9 +151,7 @@ flowchart LR
   G[Official Gazebo and virtual controllers] --> S[Isolated simulation pending setup and validation]
 ```
 
-Model-display and plan-only wrappers are included; fake joint publishers, site calibration and a complete Gazebo project are not. Six official model/MoveIt files match historical field hashes, but the complete field revision, meshes and execution adapter still need verification. Pin external dependencies and preserve Dobot notices; see [upstream audit](arm_stack/DOBOT_DEPENDENCY.md).
-
-Source inspection and synthetic tests work without hardware when test dependencies are installed. Actual model/planning visualization requires the reviewed upstream stack. No RViz/MoveIt/Gazebo or hardware run was performed in this update. There are 61 passing targeted tests; these do not establish end-to-end simulation or hardware acceptance.
+Original model-display and plan-only wrappers and the project simulation package are included; site calibration and external vendor assets remain separate. Six official model/MoveIt files match historical field hashes, but the complete field revision, meshes and execution adapter still need verification. Pin external dependencies and preserve Dobot notices; see [upstream audit](arm_stack/DOBOT_DEPENDENCY.md).
 
 </details>
 
@@ -173,3 +175,7 @@ Original `start.sh`, `app.py`, `navigation.launch.py` and other compatibility en
 Owned code and the original SVG diagrams are [MIT licensed](LICENSE). External terms remain separate: PyQt GPL/commercial licensing, historical mapping-package noncommercial metadata and unresolved vendor permissions need review. No third-party imagery, SDKs, models, field photos, maps, routes, site calibration or credentials were added. [Third-party notices](THIRD_PARTY_NOTICES.md) · [Dependency audit](docs/DEPENDENCIES.md)
 
 [Contributing](CONTRIBUTING.en.md) · [Changelog](CHANGELOG.md) · [Source provenance](docs/source-manifest.json)
+
+## Complete system download scope
+
+The download covers this entire repository: mobile-base panel, maps/targets, navigation and recorded-route return, arm test/home, ICP/V3, template and robot-specific calibration, DOBOT models/MoveIt, project simulation and documentation. It is a complete repository source bundle, not an arm-only archive or OS image. Install external dependencies as documented; the separate Gazebo physics package is not included.

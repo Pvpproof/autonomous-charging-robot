@@ -10,7 +10,6 @@ At the prepose:
   gun +Y = socket +Y (socket top / gun flat top up)
   gun +X = socket -X (right-handed frame)
 """
-from publication_paths import vision_path, hand_eye_path
 import json, math, os, sys, time, uuid
 from pathlib import Path
 import numpy as np
@@ -26,12 +25,12 @@ from geometry_msgs.msg import PoseStamped, TransformStamped
 from tf2_ros import TransformBroadcaster
 from scipy.spatial.transform import Rotation
 
-SOCKET_TARGET = Path(str(vision_path('results/realtime_runs/frozen_pnp_v3_socket_target.json')))
-CAMERA_REQUEST = Path(str(vision_path('results/realtime_runs/frozen_pnp_v3_request.json')))
-ICP_SELECTION = Path(str(vision_path('results/realtime_runs/latest_camera_pose_selection.json')))
-PENDING_TRAJECTORY = Path(str(vision_path('results/realtime_runs/pending_trajectory.json')))
-REPORT = Path(str(vision_path('results/realtime_runs/latest_gun_prepose_plan_only.json')))
-GUN_TRAJ_FILE = Path(str(vision_path('results/realtime_runs/pending_gun_trajectory.json')))
+SOCKET_TARGET = Path('/opt/charging-robot-local/charging_socket_vision/results/realtime_runs/frozen_pnp_v3_socket_target.json')
+CAMERA_REQUEST = Path('/opt/charging-robot-local/charging_socket_vision/results/realtime_runs/frozen_pnp_v3_request.json')
+ICP_SELECTION = Path('/opt/charging-robot-local/charging_socket_vision/results/realtime_runs/latest_camera_pose_selection.json')
+PENDING_TRAJECTORY = Path('/opt/charging-robot-local/charging_socket_vision/results/realtime_runs/pending_trajectory.json')
+REPORT = Path('/opt/charging-robot-local/charging_socket_vision/results/realtime_runs/latest_gun_prepose_plan_only.json')
+GUN_TRAJ_FILE = Path('/opt/charging-robot-local/charging_socket_vision/results/realtime_runs/pending_gun_trajectory.json')
 JOINTS = [f'joint{i}' for i in range(1,7)]
 GROUP = 'nova2_group'
 EE = 'Link6'
@@ -207,7 +206,7 @@ class Planner(Node):
         g=MoveGroup.Goal(); g.request.group_name=GROUP; g.request.start_state.joint_state.name=JOINTS
         g.request.start_state.joint_state.position=seed.tolist(); g.request.goal_constraints=[constraints(goal)]
         g.request.allowed_planning_time=10.; g.request.num_planning_attempts=6
-        g.request.max_velocity_scaling_factor=.10; g.request.max_acceleration_scaling_factor=.10
+        g.request.max_velocity_scaling_factor=.15; g.request.max_acceleration_scaling_factor=.10
         g.request.pipeline_id='ompl'; g.request.planner_id='RRTConnect'; g.planning_options.plan_only=True
         f=self.move.send_goal_async(g); rclpy.spin_until_future_complete(self,f,timeout_sec=15); h=f.result()
         if h is None or not h.accepted: raise RuntimeError('规划目标被拒绝')

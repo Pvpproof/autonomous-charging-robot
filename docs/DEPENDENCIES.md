@@ -38,3 +38,5 @@ Pvpproof 自有代码现采用 MIT，见 LICENSE 与 THIRD_PARTY_NOTICES.md；�
 机械臂源码补充：arm_stack 已加入可得自有历史源码。其外部导入还包括 OpenCV、Open3D、SciPy、RealSense Python SDK、MoveIt/control_msgs、Dobot 消息、moveit_configs_utils 等；本轮未重新锁定其版本或核实全部适用许可，不附带这些库、SDK 或模型。完整运行依赖与当前缺件见 [arm_stack](../arm_stack/README.md)。
 
 DOBOT Nova2 模型/MoveIt 已完成固定上游提交与 6 项历史哈希比对，根许可 MIT、部分包元数据另有 BSD/TODO；具体边界见 [上游核对](../arm_stack/DOBOT_DEPENDENCY.md)，未将厂家资产纳入自有 MIT。
+
+2026-11-09：当前原版与依赖已经只读恢复至本地。自有应用公开派生文件见 arm_stack/field-source-manifest.json；DOBOT 383 个文件保留在隔离目录，未纳入仓库。自有仿真包保留原 Apache-2.0 声明。

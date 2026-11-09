@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Validate and mark the latest RGB PnP V3 target as frozen for gun-plan."""
-from publication_paths import vision_path, hand_eye_path
 import json
 import sys
 import time
@@ -8,7 +7,7 @@ import uuid
 from stable_pose_selection import collect
 from pathlib import Path
 
-root = Path(str(vision_path('results/realtime_runs')))
+root = Path('/opt/charging-robot-local/charging_socket_vision/results/realtime_runs')
 target_path = root / 'latest_camera_socket_target.json'
 request_path = root / 'latest_camera_plan_request.json'
 frozen_target_path = root / 'frozen_pnp_v3_socket_target.json'

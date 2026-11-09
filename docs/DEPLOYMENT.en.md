@@ -1,5 +1,7 @@
 # Deployment
 
+2026-11-09 更新 / Update: 原版源码已从现场恢复，昨日重建实现已替换；本页此前“缺失/重建”状态属于历史记录。当前范围与缺项以 [恢复说明](../arm_stack/README.md) 为准。 Field originals now supersede reconstructions; older missing-source statements are historical.
+
 Project-owned historical charge_robot, ICP/V3 and planning sources plus limited reconstructions are included in `arm_stack/`. Current field identity, dependency completeness and a unified runtime layout remain unverified; panel tools still use a separate installation. This is not a complete arm deployment package.
 
 [中文](DEPLOYMENT.md)

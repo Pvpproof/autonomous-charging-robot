@@ -1,0 +1,8 @@
+{
+  "fusion_mode": "icp_v3",
+  "position_icp_weight": 0.30,
+  "rotation_icp_weight": 0.50,
+  "max_position_delta_mm": 15.0,
+  "max_rotation_delta_deg": 8.0,
+  "insertion_axis": "compensated_tool_z"
+}

@@ -1,5 +1,7 @@
 # Architecture and boundaries
 
+2026-11-09 更新 / Update: 原版源码已从现场恢复，昨日重建实现已替换；本页此前“缺失/重建”状态属于历史记录。当前范围与缺项以 [恢复说明](../arm_stack/README.md) 为准。 Field originals now supersede reconstructions; older missing-source statements are historical.
+
 Pvpproof-owned historical arm workflow, ICP/V3 and planning sources plus limited reconstructions are included in `arm_stack/`. They are not a complete deployable environment; current field identity is unverified. MoveIt, SDKs and vendor models remain external. [Source status](ARM_SOURCE_SCOPE.md).
 
 [中文](ARCHITECTURE.md)

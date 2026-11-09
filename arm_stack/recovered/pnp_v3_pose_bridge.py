@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Publish fresh read-only RGB PnP V3 poses and export the gun planner target."""
-from publication_paths import vision_path, hand_eye_path
 import json
 import re
 import time
@@ -18,11 +17,11 @@ from builtin_interfaces.msg import Duration
 from visualization_msgs.msg import Marker, MarkerArray
 
 
-ROOT = Path(str(vision_path('')))
+ROOT = Path('/opt/charging-robot-local/charging_socket_vision')
 LIVE = ROOT / 'pnp_live_test_20261023_M07DN5/pnp_live_rgb_v3/live_results/latest_pose_readonly.json'
 TARGET = ROOT / 'results/realtime_runs/latest_camera_socket_target.json'
 REQUEST = ROOT / 'results/realtime_runs/latest_camera_plan_request.json'
-HAND_EYE = Path(str(hand_eye_path()))
+HAND_EYE = Path('/opt/charging-robot-local/charging_robot_tools/calibration/hand_eye_calibration_result_ros_24mm.npz')
 MAX_AGE_S = 1.0
 
 

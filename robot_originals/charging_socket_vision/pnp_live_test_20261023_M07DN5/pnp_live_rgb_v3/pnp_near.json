@@ -1,0 +1,22 @@
+{
+  "feature_points_socket_m": [[-0.008,0.0112,-0.0075],[0.008,0.0112,-0.0075],[-0.016,0,-0.0075],[0,0,-0.0075],[0.016,0,-0.0075],[-0.008,-0.0139,-0.0075],[0.008,-0.0139,-0.0075]],
+  "working_z_m": [0.13,0.15],
+  "initialization_z_m": [0.10,0.25],
+  "min_feature_separation_px": 12.0,
+  "max_reprojection_rmse_px": 1.5,
+  "max_reprojection_error_px": 3.0,
+  "minimum_facing_cosine": 0.3,
+  "minimum_upright_cosine": 0.5,
+  "ambiguity_rotation_deg": 5.0,
+  "ambiguity_translation_m": 0.003,
+  "ambiguity_rmse_gap_px": 0.20,
+  "layout_match_radius_px": 14.0,
+  "max_layout_candidates": 12,
+  "confirm_frames": 3,
+  "confirmation_window_s": 0.5,
+  "confirmation_translation_m": 0.003,
+  "confirmation_rotation_deg": 3.0,
+  "max_feature_motion_px": 18.0,
+  "max_forward_backward_error_px": 0.8,
+  "max_measurement_age_s": 0.5
+}

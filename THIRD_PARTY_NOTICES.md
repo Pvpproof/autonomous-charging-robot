@@ -17,3 +17,11 @@ MIT covers Pvpproof-owned source, tests, native helpers and documentation. It do
 PyQt 官方许可说明：[Riverbank](https://www.riverbankcomputing.com/software/pyqt/intro)。项目 MIT 文本：[OSI](https://opensource.org/license/mit)。历史版本及逐项来源见 [DEPENDENCIES.md](docs/DEPENDENCIES.md)。Commercial use or redistribution of a combined system requires reviewing the actual dependencies and their licenses.
 
 本次未发现已跟踪自有源码内的第三方版权头；这不替代上游权属调查。后续引入第三方文件必须保留原许可并单独标识。论文正文、实拍数据和现场材料未纳入本次授权发布。
+
+## 原版恢复例外 / Original-source licensing exception
+
+arm_stack/simulation/charging_dock_sim 保留现场原 package.xml 的 Apache-2.0 声明，不被根 MIT 统一改授权。DOBOT 依赖仅复制至本地隔离目录，保留原版权，未纳入公开树。
+
+## 用户要求的原版恢复包 / Owner-requested original bundle
+
+robot_originals/nova2_ros2_ws/src/dobot_ros2_v4 内为现用第三方副本，保留原 Dobot LICENSE 与 package.xml 的 BSD/TODO 等原声明，不以根 Pvpproof MIT 重署。原仿真包保留 Apache-2.0；本车标定和参数经用户明确要求附带，仅适用于此车。

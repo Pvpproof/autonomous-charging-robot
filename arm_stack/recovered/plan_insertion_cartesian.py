@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """Plan only: full Cartesian path, then validate joint-interpolated TCP samples."""
 import json, math, time, uuid
-from insertion_limits import INSERTION_DEPTH_M, MAX_INSERTION_DEPTH_MM
 import numpy as np
 import rclpy
 from scipy.spatial.transform import Rotation
 from geometry_msgs.msg import Pose
 from moveit_msgs.srv import GetCartesianPath,GetStateValidity,GetPositionIK
-from insert_force import Runner,ROOT,atomic
+from insertion_runtime import Runner,ROOT,atomic
 from prepare_insertion_target import prepare
 from insertion_geometry import check_tcp,segment_samples,axis_report,seeded_cartesian_path
 
@@ -19,7 +18,7 @@ def plan(n):
     if (np.linalg.norm(T[:3,3]-expected[:3,3])>.001 or
         Rotation.from_matrix(expected[:3,:3].T@T[:3,:3]).magnitude()>math.radians(.5)):
         raise RuntimeError('实际TCP不在已验收的gun预备位，请重新gun-plan/execute')
-    depth=INSERTION_DEPTH_M;axis=T[:3,2];origin=T[:3,3];R=T[:3,:3];quat=Rotation.from_matrix(L[:3,:3]).as_quat()
+    depth=.075;axis=T[:3,2];origin=T[:3,3];R=T[:3,:3];quat=Rotation.from_matrix(L[:3,:3]).as_quat()
     c=n.create_client(GetCartesianPath,'/compute_cartesian_path')
     req=GetCartesianPath.Request();req.header.frame_id='base_link';req.group_name='nova2_group';req.link_name='Link6'
     req.start_state.joint_state.name=names;req.start_state.joint_state.position=list(q)
@@ -51,7 +50,7 @@ def plan(n):
         if not all(k in lookup for k in names):raise RuntimeError('细化IK缺少关节')
         qi=np.array([lookup[k] for k in names],float)
         solved[0]+=1
-        if solved[0]%20==0:print('[直线细化] 已求解%d/%d个1mm目标'%(solved[0],round(depth/.001)),flush=True)
+        if solved[0]%20==0:print('[直线细化] 已求解%d/75个1mm目标'%solved[0],flush=True)
         return qi
     path=seeded_cartesian_path(q,depth,solve)
     endpoint_poses=[T]
@@ -72,19 +71,19 @@ def plan(n):
     points=[];last=q;elapsed=0.
     for i,qi in enumerate(path):
         if i:
-            elapsed+=max(.05,np.linalg.norm(endpoint_poses[i][:3,3]-endpoint_poses[i-1][:3,3])/.005,
+            elapsed+=max(.05,np.linalg.norm(endpoint_poses[i][:3,3]-endpoint_poses[i-1][:3,3])/.010,
                          float(max(abs(qi-last)))/math.radians(10))
         points.append(dict(positions=qi.tolist(),velocities=[],accelerations=[],time_from_start=dict(sec=int(elapsed),nanosec=int((elapsed%1)*1e9))))
         last=qi
     data=dict(source);data.update(stage='insertion',plan_id='insertion-'+uuid.uuid4().hex,
-        source_gun_plan_id=source['plan_id'],planned_at=time.time(),insertion_depth_mm=depth*1000.0,points=points,
+        source_gun_plan_id=source['plan_id'],planned_at=time.time(),insertion_depth_mm=75.,cartesian_speed_mm_s=10.,points=points,
         path_validation=dict(method='cartesian_full_path_joint_interpolation_samples',fraction=float(out.fraction),
             sample_count=checks,coarse_moveit_points=coarse_count,refined_points=len(path),
             refinement='seeded_cartesian_1mm',max_local_joint_delta_deg=float(np.max(abs(np.degrees(np.diff(path,axis=0))))),max_lateral_mm=.5,max_rotation_deg=.25,joint_sample_deg=.1),
         insertion_start_tcp_base=T.tolist(),insertion_axis=axis_report(T,-np.array(source['T_base_from_socket'])[:3,2],depth),
         planning_ready=True)
     if max(abs(n.current()-q))>math.radians(.1):raise RuntimeError('规划期间机械臂位置改变')
-    atomic(dest,data);print('INSERTION_CARTESIAN_READY 75mm; samples=%d; speed<=5mm/s'%checks)
+    atomic(dest,data);print('INSERTION_CARTESIAN_READY 75mm; samples=%d; planned_speed<=10mm/s'%checks)
     print(json.dumps(data['insertion_axis'],ensure_ascii=False))
 
 def main():

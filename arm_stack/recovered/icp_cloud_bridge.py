@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from publication_paths import vision_path, hand_eye_path
 import json
 import time
 from pathlib import Path
@@ -18,11 +17,11 @@ from visualization_msgs.msg import Marker, MarkerArray
 from scipy.spatial.transform import Rotation
 
 
-ROOT = Path(str(vision_path('')))
+ROOT = Path('/opt/charging-robot-local/charging_socket_vision')
 POSE = ROOT / 'results/v3_diagnostics/latest_pose_readonly.json'
 CLOUD = ROOT / 'results/v3_diagnostics/latest_target_camera.ply'
 RGBD_CLOUD = ROOT / 'results/v3_diagnostics/latest_rgbd_camera.ply'
-HAND_EYE = Path(str(hand_eye_path()))
+HAND_EYE = Path('/opt/charging-robot-local/charging_robot_tools/calibration/hand_eye_calibration_result_ros_24mm.npz')
 
 
 def rot_dobot(rx, ry, rz):

@@ -1,5 +1,7 @@
 # 机械臂源码补全 / Arm source import
 
+2026-11-09 更新 / Update: 原版源码已从现场恢复，昨日重建实现已替换；本页此前“缺失/重建”状态属于历史记录。当前范围与缺项以 [恢复说明](../arm_stack/README.md) 为准。 Field originals now supersede reconstructions; older missing-source statements are historical.
+
 当前清单以 [arm_stack/README.md](../arm_stack/README.md) 为准。下文按阶段保留历史盘点；“未提交/未推送”和缺件描述仅指各阶段当时的状态。Current inventory is in arm_stack; earlier missing-item and uncommitted statements below are historical.
 
 用户确认 charge_robot 工具链、ICP、V3、机械臂仿真和路径规划应用均由 Pvpproof 编写。之前将“未收入仓库”与“第三方代码”混为一谈的说明已更正。用户自有代码拟按项目 MIT 发布，第三方 SDK、MoveIt 及厂家模型保持各自许可。

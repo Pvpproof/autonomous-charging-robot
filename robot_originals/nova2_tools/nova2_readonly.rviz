@@ -1,0 +1,124 @@
+Panels:
+- Class: rviz_common/Displays
+  Name: Displays
+  Property Tree Widget:
+    Expanded:
+    - /RobotModel1
+    - /ChargingGunTCPAxes1
+    - /CameraAxes1
+    - /PlannedGunTCPAxes1
+    - /RGBDPointCloud1
+    - /ICPPointCloud1
+    - /ChargingPortPose1
+    - /ICPMarkers1
+- Class: rviz_common/Views
+  Name: Views
+Visualization Manager:
+  Displays:
+  - Class: rviz_default_plugins/Grid
+    Name: Grid
+    Value: true
+    Plane: XY
+    Plane Cell Count: 20
+    Cell Size: 0.1
+    Line Style: Lines
+    Line Width: 0.03
+    Color: 160; 160; 160
+    Alpha: 0.5
+  - Alpha: 1
+    Class: rviz_default_plugins/RobotModel
+    Collision Enabled: false
+    Description Source: Topic
+    Description Topic:
+      Depth: 5
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /robot_description
+    Enabled: true
+    Links:
+      All Links Enabled: true
+    Name: RobotModel
+    Visual Enabled: true
+    Value: true
+  - Class: rviz_default_plugins/Axes
+    Name: ChargingGunTCPAxes
+    Enabled: true
+    Reference Frame: charging_gun_tcp
+    Length: 0.12
+    Radius: 0.006
+    Alpha: 1
+  - Class: rviz_default_plugins/Axes
+    Name: PlannedGunTCPAxes
+    Enabled: true
+    Reference Frame: planned_gun_tcp
+    Length: 0.12
+    Radius: 0.006
+    Alpha: 1
+  - Class: rviz_default_plugins/Axes
+    Name: CameraAxes
+    Enabled: true
+    Reference Frame: camera_frame
+    Length: 0.1
+    Radius: 0.005
+    Alpha: 1
+  - Class: rviz_default_plugins/PointCloud2
+    Name: RGBDPointCloud
+    Topic: /icp/rgbd_pointcloud_base
+    Enabled: true
+    Style: Points
+    Size (Pixels): 3
+    Size (m): 0.003
+    Color Transformer: RGB8
+    Queue Size: 2
+    Decay Time: 0.5
+  - Class: rviz_default_plugins/PointCloud2
+    Name: ICPPointCloud
+    Topic: /icp/pointcloud_base
+    Enabled: true
+    Style: Points
+    Size (Pixels): 5
+    Size (m): 0.005
+    Color Transformer: FlatColor
+    Color: 255; 210; 0
+    Queue Size: 2
+    Decay Time: 0.5
+  - Class: rviz_default_plugins/Pose
+    Name: ChargingPortPose
+    Topic: /charging_port_target
+    Enabled: false
+    Shape: Arrow
+    Color: 0; 255; 0
+    Shaft Length: 0.12
+    Shaft Radius: 0.008
+    Head Length: 0.03
+    Head Radius: 0.015
+    Queue Size: 1
+  - Class: rviz_default_plugins/MarkerArray
+    Name: ICPMarkers
+    Topic: /icp/markers
+    Enabled: true
+    Queue Size: 10
+  Global Options:
+    Fixed Frame: base_link
+    Frame Rate: 30
+  Tools:
+  - Class: rviz_default_plugins/Interact
+  - Class: rviz_default_plugins/MoveCamera
+  - Class: rviz_default_plugins/Select
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 1.8
+      Focal Point:
+        X: 0.0
+        Y: 0.0
+        Z: 0.45
+      Name: Current View
+      Pitch: 0.45
+      Target Frame: base_link
+      Yaw: -0.8
+Window Geometry:
+  Height: 975
+  Width: 1400

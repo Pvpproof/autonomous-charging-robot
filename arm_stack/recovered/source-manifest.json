@@ -4,70 +4,85 @@
     {
       "file": "plan_camera_pre_align_nearest_ik.py",
       "historical_sha256": "f1437c5abfdd2e2752c517d7cd8617cea4cf61d9be6643cc86331cb92a1132a8",
-      "published_sha256": "6c9f439e92e71a41957a9d865757fb9980b6412b976267e6852bdfaee56a6d8e",
+      "published_sha256": "8bdf94dd0cbea8151a976e6734f926ef2b3e8509ce7d168c87c12507a568cbff",
       "evidence_date": "2026-10-28/29",
       "evidence": "historical hash match in 5 retained records",
-      "current_field_verified": false,
-      "publication_change": "replace account-specific runtime/calibration paths with explicit environment configuration",
+      "current_field_verified": true,
+      "publication_change": "personal home replaced with non-live layout placeholder; duplicate historical location synchronized to current source",
       "local_imports": [
         "plan_flow_guard",
         "publication_paths",
         "stable_pose_selection"
-      ]
+      ],
+      "previous_published_sha256": "6c9f439e92e71a41957a9d865757fb9980b6412b976267e6852bdfaee56a6d8e",
+      "version_status": "source bytes verified against field 2026-11-09 before publication path adaptation",
+      "source_verified_date": "2026-11-09"
     },
     {
       "file": "plan_charging_gun_prepose.py",
       "historical_sha256": "7b22afec916933b2884bd4d6bbf92fb392061904134b68c3dca9d7dce58d5f69",
-      "published_sha256": "96089966248fc35687ff1c6143670b5bc4bc113d048190b9b772cfabe02a659d",
+      "published_sha256": "df715108298383a410b65bbb36ba632a700f43af1376a2242adcafddd6051dde",
       "evidence_date": "2026-10-28/29",
       "evidence": "historical hash match in 2 retained records",
-      "current_field_verified": false,
-      "publication_change": "replace account-specific runtime/calibration paths with explicit environment configuration",
+      "current_field_verified": true,
+      "publication_change": "personal home replaced with non-live layout placeholder; duplicate historical location synchronized to current source",
       "local_imports": [
         "gun_pose_validation",
         "publication_paths",
         "stable_pose_selection"
-      ]
+      ],
+      "previous_published_sha256": "96089966248fc35687ff1c6143670b5bc4bc113d048190b9b772cfabe02a659d",
+      "version_status": "source bytes verified against field 2026-11-09 before publication path adaptation",
+      "source_verified_date": "2026-11-09"
     },
     {
       "file": "plan_flow_guard.py",
       "historical_sha256": "860001b16d351f93933678fd2463ed316ebcb55f38b168127b3bfabfbdec9e57",
-      "published_sha256": "a4625ccbd26fd6e13da38bde708d7c129982d9ae82b60ef92923a321a0a2422c",
+      "published_sha256": "11e8ee2e135c03b6628c352153f06b8c7b6545de0d13ff76d6c9cf9bcc0ef4b0",
       "evidence_date": "2026-10-28/29",
       "evidence": "historical hash match in 2 retained records",
-      "current_field_verified": false,
-      "publication_change": "replace account-specific runtime/calibration paths with explicit environment configuration",
+      "current_field_verified": true,
+      "publication_change": "personal home replaced with non-live layout placeholder; duplicate historical location synchronized to current source",
       "local_imports": [
         "gun_pose_validation",
         "publication_paths"
-      ]
+      ],
+      "previous_published_sha256": "a4625ccbd26fd6e13da38bde708d7c129982d9ae82b60ef92923a321a0a2422c",
+      "version_status": "source bytes verified against field 2026-11-09 before publication path adaptation",
+      "source_verified_date": "2026-11-09"
     },
     {
       "file": "freeze_pnp_v3_target.py",
       "historical_sha256": "179ce54b45ee17e04ba1dcab7b49b3e1d33b39489466a0a3c75b0b6b9b05f80e",
-      "published_sha256": "dc4022d531d46f75285c4c39a5105c4b01b87dfba823ab4f2d21ff388e1d920f",
+      "published_sha256": "9b311e6b19740b38a09ebedbfad11d268a8c6b0e4665c3d906dace36dc8db8b3",
       "evidence_date": "2026-10-29",
       "evidence": "historical hash match in 2 retained records",
-      "current_field_verified": false,
-      "publication_change": "replace account-specific runtime/calibration paths with explicit environment configuration",
+      "current_field_verified": true,
+      "publication_change": "personal home replaced with non-live layout placeholder; duplicate historical location synchronized to current source",
       "local_imports": [
         "publication_paths",
         "stable_pose_selection"
-      ]
+      ],
+      "previous_published_sha256": "dc4022d531d46f75285c4c39a5105c4b01b87dfba823ab4f2d21ff388e1d920f",
+      "version_status": "source bytes verified against field 2026-11-09 before publication path adaptation",
+      "source_verified_date": "2026-11-09"
     },
     {
       "file": "plan_insertion_cartesian.py",
       "historical_sha256": "de7ad54d1b725837560fb6c54d3c1a675796b0835276b391a4469e29b1d678bc",
-      "published_sha256": "3ec52c4ca9fe36ddcf65fb333b9fdbed23233e8273efd12dd326a5e10b7cb2c8",
+      "published_sha256": "3205d5ef0cd702fd4a424bf4784d1b19cecdc63aede27e0d831994ec36e3b179",
       "evidence_date": "2026-10-29",
       "evidence": "historical hash match in 13 retained records",
-      "current_field_verified": false,
-      "publication_change": "none; owner explicitly selected 75 mm insertion policy on 2026-11-08; not deployed/field tested",
+      "current_field_verified": true,
+      "publication_change": "duplicate historical location synchronized to current source",
       "local_imports": [
         "insert_force",
         "insertion_geometry",
         "prepare_insertion_target"
-      ]
+      ],
+      "previous_published_sha256": "3ec52c4ca9fe36ddcf65fb333b9fdbed23233e8273efd12dd326a5e10b7cb2c8",
+      "version_status": "source bytes verified against field 2026-11-09 before publication path adaptation",
+      "source_verified_date": "2026-11-09"
     },
     {
       "file": "retract_inserted.py",
@@ -75,35 +90,44 @@
       "published_sha256": "cd179553c4628946716e32100a3b5324db217ea888a98e195673b23995301e4f",
       "evidence_date": "2026-11-06",
       "evidence": "historical hash match in 2 retained records",
-      "current_field_verified": false,
-      "publication_change": "none",
+      "current_field_verified": true,
+      "publication_change": "duplicate historical location synchronized to current source",
       "local_imports": [
         "insert_back"
-      ]
+      ],
+      "previous_published_sha256": "cd179553c4628946716e32100a3b5324db217ea888a98e195673b23995301e4f",
+      "version_status": "source bytes verified against field 2026-11-09 before publication path adaptation",
+      "source_verified_date": "2026-11-09"
     },
     {
       "file": "icp_cloud_bridge.py",
       "historical_sha256": "00a67784239c9f0ab08deedc131f6ac6edf57596a106d5f3bb37af95d60d2073",
-      "published_sha256": "f986738642d1f156b3791dbd4f8f0bd0e792df2f4387fb62a87038006d09aa9b",
+      "published_sha256": "3cc22c5796d860dcab21c7924ef9cfee08db43bbc23c9b8de80a059c71447d5a",
       "evidence_date": "2026-11-03",
       "evidence": "historical hash match in 1 retained records",
-      "current_field_verified": false,
-      "publication_change": "replace account-specific runtime/calibration paths with explicit environment configuration",
+      "current_field_verified": true,
+      "publication_change": "personal home replaced with non-live layout placeholder; duplicate historical location synchronized to current source",
       "local_imports": [
         "publication_paths"
-      ]
+      ],
+      "previous_published_sha256": "f986738642d1f156b3791dbd4f8f0bd0e792df2f4387fb62a87038006d09aa9b",
+      "version_status": "source bytes verified against field 2026-11-09 before publication path adaptation",
+      "source_verified_date": "2026-11-09"
     },
     {
       "file": "pnp_v3_pose_bridge.py",
       "historical_sha256": "c33d2c4bf3a2d6e1bb864fad5e8d4317842c8605c04503b6ecfaae0861f64a4d",
-      "published_sha256": "7a277d491ba3ddf34c252b696a0befcc2d9cff3bcdea8fb5aae3ec91b1447911",
+      "published_sha256": "0965cc82796ebddf1e678dca595b9aaba2968d39701555e713db62320e908f98",
       "evidence_date": "2026-11-03",
       "evidence": "historical hash match in 1 retained records",
-      "current_field_verified": false,
-      "publication_change": "replace account-specific runtime/calibration paths with explicit environment configuration",
+      "current_field_verified": true,
+      "publication_change": "personal home replaced with non-live layout placeholder; duplicate historical location synchronized to current source",
       "local_imports": [
         "publication_paths"
-      ]
+      ],
+      "previous_published_sha256": "7a277d491ba3ddf34c252b696a0befcc2d9cff3bcdea8fb5aae3ec91b1447911",
+      "version_status": "source bytes verified against field 2026-11-09 before publication path adaptation",
+      "source_verified_date": "2026-11-09"
     }
   ],
   "vendor_sources_included": false,

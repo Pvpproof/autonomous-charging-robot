@@ -1,5 +1,7 @@
 # 部署与运行边界
 
+2026-11-09 更新 / Update: 原版源码已从现场恢复，昨日重建实现已替换；本页此前“缺失/重建”状态属于历史记录。当前范围与缺项以 [恢复说明](../arm_stack/README.md) 为准。 Field originals now supersede reconstructions; older missing-source statements are historical.
+
 `charge_robot`、ICP/V3 与机械臂规划应用是作者自有源码，历史版本与有限重建文件已收录在 `arm_stack/`。当前现场版本、依赖闭包及统一运行布局尚待核对，面板仍使用独立安装工具；本仓库不是完整机械臂部署包。
 
 [English](DEPLOYMENT.en.md)

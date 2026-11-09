@@ -1,5 +1,4 @@
 """File-only planning status checks; never imports ROS or sends commands."""
-from publication_paths import vision_path, hand_eye_path
 import json
 import math
 import sys
@@ -8,7 +7,7 @@ import uuid
 from pathlib import Path
 from gun_pose_validation import validate_saved
 
-ROOT = Path(str(vision_path('results/realtime_runs')))
+ROOT = Path('/opt/charging-robot-local/charging_socket_vision/results/realtime_runs')
 REQUEST = ROOT / 'latest_camera_plan_request.json'
 
 

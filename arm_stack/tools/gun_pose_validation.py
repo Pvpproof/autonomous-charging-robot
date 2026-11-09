@@ -6,8 +6,8 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 JOINT_TOLERANCE_RAD=0.0005
-MAX_POSITION_ERROR_M=0.001
-MAX_ROTATION_ERROR_DEG=0.5
+MAX_POSITION_ERROR_M=0.005
+MAX_ROTATION_ERROR_DEG=0.9
 TCP_OFFSET_M=np.array([0.,0.,.123])
 TCP_ROTATION=Rotation.from_euler('z',-90.,degrees=True).as_matrix()
 

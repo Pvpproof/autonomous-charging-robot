@@ -1,5 +1,9 @@
 # 国标电车自动充电机器人
 
+环境与文件齐备情况见 [同车原版环境说明](robot_originals/ENVIRONMENT.md)：当前 599 个原文件，环境软件通过文档安装，运行验收单独进行。
+
+**2026-11-09 原件恢复：** 已从机器人只读补齐原版 charge_robot、ICP、V3、模型启动链和自有仿真包，替换昨日重建实现。源码/模板/配置已核对哈希，详情见 [原件恢复](arm_stack/README.md)。按用户要求，完整原版、现用 DOBOT 依赖及本车标定另收入 [robot_originals](robot_originals/README.md)，附带保留原目录布局的恢复工具；本轮未实机运行。
+
 **面向国标充电接口，串联移动导航、视觉定位、机械臂插接与轨迹返程的 ROS 2 / PyQt5 研发工作台。**
 
 [English](README.en.md) · [文档导航](docs/README.md) · [部署](docs/DEPLOYMENT.md) · [测试](docs/TESTING.md)
@@ -141,7 +145,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-  U[明确指定的本地 URDF] --> M[重建模型显示入口]
+  U[明确指定的本地 URDF] --> M[原版模型显示入口]
   J[已有真实或隔离测试关节反馈] --> M
   M --> V[RViz 模型与 TF]
   D[外部 DOBOT Nova2 MoveIt 配置] --> P[纯规划入口：执行关闭]
@@ -150,8 +154,6 @@ flowchart LR
 ```
 
 已补模型显示与纯规划包装，但不含假关节发布器、现场手眼标定或完整 Gazebo 工程。官方 Nova2 URDF 和 5 个 MoveIt 配置与历史现场哈希一致；完整现场提交、网格依赖和执行适配器仍待核对。官方依赖应固定版本并保留 Dobot 版权，见 [DOBOT 来源与许可](arm_stack/DOBOT_DEPENDENCY.md)。
-
-可以离线阅读和运行针对性合成测试；安装完整官方依赖后才具备模型/规划展示的前提，本轮没有启动 RViz/MoveIt/Gazebo，也没有完成仿真或实机全流程验收。当前相关测试共 61 项通过，详见 [重建边界](arm_stack/RECONSTRUCTION.md)与[收录状态](docs/ARM_SOURCE_SCOPE.md)。
 
 </details>
 
@@ -175,3 +177,7 @@ flowchart LR
 自有代码及本仓库原创 SVG 图采用 [MIT](LICENSE)。第三方组件保留原许可：PyQt GPL/商业许可、历史建图包非商业声明和部分厂家授权仍需核实。未引入第三方图像、SDK、模型、实拍、地图、轨迹、专用标定或凭据。[第三方边界](THIRD_PARTY_NOTICES.md) · [依赖核查](docs/DEPENDENCIES.md)
 
 [贡献指南](CONTRIBUTING.md) · [更新日志](CHANGELOG.md) · [源码来源](docs/source-manifest.json)
+
+## 完整系统下载范围
+
+本次交付覆盖整个仓库：底盘面板、地图与点位、导航和实际轨迹去返程、机械臂 test/home、ICP/V3 相机程序、充电口模板、本车标定、DOBOT 模型与 MoveIt、自有仿真及全部使用说明。完整系统源码包按原车恢复布局附带 robot_originals，不是仅机械臂包。软件环境仍按文档安装，独立 Gazebo 物理仿真包未包含。详见 [中文恢复说明](docs/本车恢复说明.md)。

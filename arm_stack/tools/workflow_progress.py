@@ -1,132 +1,69 @@
-"""Reconstructed file-only planning progress, not the missing field original.
-
-Observed interfaces: begin camera|gun, fail REASON, wait camera|gun, missing().
-No ROS, subprocess, hardware connection, trajectory execution or automatic resume.
-"""
-import argparse
-import importlib
-import json
-import math
-import os
+#!/usr/bin/env python3
+"""File-only workflow progress. No robot or camera commands."""
+import json,sys,time
 from pathlib import Path
-import time
-import uuid
-from insertion_runtime import atomic
-
-RECONSTRUCTED = True
-STAGES = ('camera', 'gun')
-
-def root_path():
-    value = os.environ.get('CHARGING_WORKFLOW_ROOT', '')
-    path = Path(value)
-    if not value or not path.is_absolute() or not path.is_dir():
-        raise RuntimeError('Set CHARGING_WORKFLOW_ROOT to an existing reviewed absolute runtime directory')
-    return path
-
+from stable_pose_selection import atomic_json
+from plan_flow_guard import validate
+ROOT=Path('/opt/charging-robot-local/charging_socket_vision/results/realtime_runs')
+ATTEMPT=ROOT/'latest_planning_attempt.json'
+PLANNER_STARTUP_GRACE_S=30.0
 def read(path):
-    value = json.loads(Path(path).read_text())
-    if not isinstance(value, dict):
-        raise ValueError('Expected JSON object: ' + Path(path).name)
-    return value
-
-def cycle(root):
-    value = read(root / 'workflow_cycle.json').get('cycle_id')
-    if not isinstance(value, str) or not value:
-        raise RuntimeError('Current workflow cycle_id is missing; no cycle is invented')
-    return value
-
-def begin(stage, root=None, now=None):
-    if stage not in STAGES:
-        raise ValueError('Unknown planning stage')
-    root = root_path() if root is None else Path(root)
-    record = dict(schema_version=1, implementation='reconstructed-publication-v1',
-                  attempt_id=uuid.uuid4().hex, stage=stage, cycle_id=cycle(root),
-                  started_at=time.time() if now is None else now, status='pending')
-    atomic(root / 'latest_planning_attempt.json', record)
-    return record
-
-def fail(reason, root=None):
-    root = root_path() if root is None else Path(root)
-    record = read(root / 'latest_planning_attempt.json')
-    record.update(status='failed', reason=str(reason))
-    atomic(root / 'latest_planning_attempt.json', record)
-    return record
-
-def missing(root=None):
-    root = root_path() if root is None else Path(root)
-    try:
-        record = read(root / 'latest_planning_attempt.json')
-    except (OSError, ValueError):
-        return 'No readable planning attempt; regenerate the plan (reconstructed status helper)'
-    return 'Planning attempt ' + str(record.get('status', 'unknown')) + ': ' + str(record.get('reason', 'no eligible trajectory yet'))
-
-def default_validator(data, root):
-    # Reuse the recovered eligibility checker. Never replace it with file-exists success.
-    guard = importlib.import_module('plan_flow_guard')
-    if Path(guard.ROOT).resolve() != root.resolve():
-        raise RuntimeError('Planning validator and progress helper use different runtime roots')
-    return guard.validate(data)
-
-def inspect_attempt(stage, root, attempt_id, validator=None, now=None):
-    root = Path(root)
-    state = read(root / 'latest_planning_attempt.json')
-    if state.get('attempt_id') != attempt_id or state.get('stage') != stage:
-        raise RuntimeError('Planning attempt superseded or stage mismatch')
-    if state.get('cycle_id') != cycle(root):
-        raise RuntimeError('Workflow cycle changed')
-    if state.get('status') != 'pending':
-        raise RuntimeError('Attempt is not pending: ' + str(state.get('reason', state.get('status'))))
-    plan_path = root / 'pending_trajectory.json'
-    if not plan_path.exists():
-        return None
-    data = read(plan_path)
-    stamp = data.get('planned_at')
-    if isinstance(stamp, bool) or not isinstance(stamp, (int, float)) or not math.isfinite(stamp):
-        raise RuntimeError('Invalid plan timestamp')
-    if stamp < state['started_at']:
-        return None  # Old output cannot complete a new attempt.
-    current_time = time.time() if now is None else now
-    if stamp > current_time or data.get('stage') != stage or data.get('cycle_id') != state['cycle_id']:
-        raise RuntimeError('Plan time, stage or cycle mismatch')
-    if not isinstance(data.get('plan_id'), str) or not data['plan_id']:
-        raise RuntimeError('Plan identity missing')
-    (default_validator if validator is None else validator)(data, root)
-    # Detect replaced attempts/plans during validation; no completion is persisted.
-    if read(root / 'latest_planning_attempt.json') != state or read(plan_path) != data or cycle(root) != state['cycle_id']:
-        raise RuntimeError('Planning data changed during validation')
-    return data
-
-def wait(stage, root=None, timeout=60., validator=None, clock=time.monotonic, sleep=time.sleep):
-    if stage not in STAGES or not math.isfinite(timeout) or not 0 < timeout <= 600:
-        raise ValueError('Invalid stage or timeout (0 < seconds <= 600)')
-    root = root_path() if root is None else Path(root)
-    attempt = read(root / 'latest_planning_attempt.json')['attempt_id']
-    deadline = clock() + timeout
-    while clock() < deadline:
-        plan = inspect_attempt(stage, root, attempt, validator=validator)
-        if plan is not None:
-            return plan
-        sleep(min(.1, max(0., deadline-clock())))
-    raise RuntimeError('Planning wait timed out; no execution authorized')
-
-def main(argv=None):
-    parser=argparse.ArgumentParser(description=__doc__)
-    sub=parser.add_subparsers(dest='command',required=True)
-    sub.add_parser('begin').add_argument('stage',choices=STAGES)
-    sub.add_parser('fail').add_argument('reason')
-    waiter=sub.add_parser('wait');waiter.add_argument('stage',choices=STAGES);waiter.add_argument('--timeout',type=float,default=60.)
-    sub.add_parser('missing')
-    args=parser.parse_args(argv)
-    try:
-        if args.command=='begin':print(begin(args.stage)['attempt_id'])
-        elif args.command=='fail':fail(args.reason)
-        elif args.command=='missing':print(missing());return 2
+    try:return json.loads(path.read_text())
+    except (OSError,ValueError):return {}
+def begin(stage):
+    if stage=='gun':(ROOT/'latest_gun_prepose_plan_only.json').unlink(missing_ok=True)
+    atomic_json(ATTEMPT,dict(stage=stage,status='planning',started_at=time.time()))
+def finish(status,error=None):
+    d=read(ATTEMPT);d.update(status=status,updated_at=time.time())
+    if error:d['error']=error
+    atomic_json(ATTEMPT,d)
+def missing():
+    a=read(ATTEMPT);cycle=read(ROOT/'workflow_cycle.json')
+    # A fresh cycle invalidates previous attempt messages.
+    if a.get('started_at',0)>=cycle.get('updated_at',0):
+        if a.get('status')=='planning':return '规划仍在进行，请等待规划命令返回成功。'
+        if a.get('status')=='failed':return '最近规划失败：'+str(a.get('error','查看规划窗口'))+'；修正后重新规划。'
+    d=read(ROOT/'last_dispatched_trajectory.json')
+    if d:return '上一条轨迹已提交执行，不能重复执行；请查看执行结果并规划下一阶段。'
+    return '没有待执行轨迹；请先成功完成 cam-plan 或 gun-plan。'
+def wait(stage,timeout=100):
+    deadline=time.monotonic()+timeout;started=read(ATTEMPT).get('started_at',time.time())
+    while time.monotonic()<deadline:
+        p=read(ROOT/'pending_trajectory.json')
+        request=read(ROOT/'latest_camera_plan_request.json')
+        camera_complete=(stage!='camera' or (request.get('status')=='complete'
+                         and request.get('plan_id')==p.get('plan_id')))
+        if p.get('stage')==stage and p.get('planned_at',0)>=started and camera_complete:
+            validate(p);finish('ready')
+            print('[规划成功] 轨迹已保存并通过执行资格检查。下一步：charge_robot execute',flush=True)
+            return
+        if stage=='camera':
+            d=read(ROOT/'latest_camera_plan_request.json')
+            if d.get('requested_at',0)>=started:
+                if d.get('status')=='failed':raise RuntimeError(str(d.get('error')))
+                if d.get('status')=='complete' and d.get('planning_ready') is False:
+                    raise RuntimeError('ICP几何质量未达到可执行要求；当前仅生成预览，请重新采集后 cam-plan')
         else:
-            plan=wait(args.stage,timeout=args.timeout)
-            print('Reconstructed status: planning validation passed, plan_id='+plan['plan_id']+'; no motion sent')
-        return 0
-    except (Exception,KeyboardInterrupt) as error:
-        print('WORKFLOW_PROGRESS_REFUSED:',error)
-        return 2
-
-if __name__=='__main__':raise SystemExit(main())
+            d=read(ROOT/'latest_gun_prepose_plan_only.json')
+            path=ROOT/'latest_gun_prepose_plan_only.json'
+            if path.exists() and d.get('planning_status')=='failed':
+                raise RuntimeError(str(d.get('error')))
+        # Distinguish a planner that never started/crashed from one still calculating.
+        if time.time()-started>PLANNER_STARTUP_GRACE_S:
+            from charge_workflow_state import pids
+            name='plan_camera_pre_align_nearest_ik.py' if stage=='camera' else 'plan_charging_gun_prepose.py'
+            if not pids('/opt/charging-robot-local/nova2_tools/'+name):
+                raise RuntimeError('规划进程已退出或窗口未启动，请查看对应窗口错误')
+        time.sleep(.2)
+    raise RuntimeError('等待规划超时；请查看规划窗口后重新规划')
+def main():
+    action=sys.argv[1]
+    if action=='begin':begin(sys.argv[2])
+    elif action=='fail':finish('failed',sys.argv[2])
+    elif action=='missing':print('[无法执行] '+missing())
+    elif action=='wait':wait(sys.argv[2])
+    else:raise ValueError(action)
+if __name__=='__main__':
+    try:main()
+    except Exception as e:
+        finish('failed',str(e));print('[规划未完成] '+str(e),file=sys.stderr);sys.exit(2)

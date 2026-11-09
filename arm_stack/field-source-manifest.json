@@ -1,0 +1,1159 @@
+{
+  "source": "read-only field copy, 2026-11-09; no device programs started",
+  "remote_host": "ubuntu",
+  "files": [
+    {
+      "archive_path": "simulation/charging_dock_sim/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "public_path": "arm_stack/simulation/charging_dock_sim/charging_dock_sim/__init__.py",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_ros2_ws/src/charging_dock_sim/charging_dock_sim/__init__.py"
+    },
+    {
+      "archive_path": "simulation/charging_dock_sim/auto_dock.py",
+      "sha256": "d13b9303f27a7e704ef0601717f64857750408fd9aab9314c73510ed5c1bb243",
+      "bytes": 6390,
+      "public_path": "arm_stack/simulation/charging_dock_sim/charging_dock_sim/auto_dock.py",
+      "published_sha256": "d13b9303f27a7e704ef0601717f64857750408fd9aab9314c73510ed5c1bb243",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_ros2_ws/src/charging_dock_sim/charging_dock_sim/auto_dock.py"
+    },
+    {
+      "archive_path": "simulation/charging_dock_sim/plan_docking.py",
+      "sha256": "6c58f4df8662551cf33e23c7b284f74e3357be20a22975456d06ab92494cb8b5",
+      "bytes": 7349,
+      "public_path": "arm_stack/simulation/charging_dock_sim/charging_dock_sim/plan_docking.py",
+      "published_sha256": "6c58f4df8662551cf33e23c7b284f74e3357be20a22975456d06ab92494cb8b5",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_ros2_ws/src/charging_dock_sim/charging_dock_sim/plan_docking.py"
+    },
+    {
+      "archive_path": "simulation/charging_dock_sim/scene_publisher.py",
+      "sha256": "1cd1d9ba31958741075a80d9415e29ca4472d90ecb25ab1e28c49d3480e76af4",
+      "bytes": 5807,
+      "public_path": "arm_stack/simulation/charging_dock_sim/charging_dock_sim/scene_publisher.py",
+      "published_sha256": "1cd1d9ba31958741075a80d9415e29ca4472d90ecb25ab1e28c49d3480e76af4",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_ros2_ws/src/charging_dock_sim/charging_dock_sim/scene_publisher.py"
+    },
+    {
+      "archive_path": "simulation/config/docking_params.yaml",
+      "sha256": "95f00f276e69382a64d9550658cefa85b332d39878b781f0848834c695b96eb8",
+      "bytes": 813,
+      "public_path": "arm_stack/simulation/charging_dock_sim/config/docking_params.yaml",
+      "published_sha256": "95f00f276e69382a64d9550658cefa85b332d39878b781f0848834c695b96eb8",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_ros2_ws/src/charging_dock_sim/config/docking_params.yaml"
+    },
+    {
+      "archive_path": "simulation/launch/auto_dock_demo.launch.py",
+      "sha256": "173ae02726661ae99ed64b34d5a251d9e109a84bb8024b0df3871298ae1f5dbc",
+      "bytes": 1267,
+      "public_path": "arm_stack/simulation/charging_dock_sim/launch/auto_dock_demo.launch.py",
+      "published_sha256": "173ae02726661ae99ed64b34d5a251d9e109a84bb8024b0df3871298ae1f5dbc",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_ros2_ws/src/charging_dock_sim/launch/auto_dock_demo.launch.py"
+    },
+    {
+      "archive_path": "simulation/launch/charging_dock_demo.launch.py",
+      "sha256": "5974135b272e47f376bdf9cbe2c82810681f4913cbcbdb4a2f500b1c9053c1ad",
+      "bytes": 1272,
+      "public_path": "arm_stack/simulation/charging_dock_sim/launch/charging_dock_demo.launch.py",
+      "published_sha256": "5974135b272e47f376bdf9cbe2c82810681f4913cbcbdb4a2f500b1c9053c1ad",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_ros2_ws/src/charging_dock_sim/launch/charging_dock_demo.launch.py"
+    },
+    {
+      "archive_path": "simulation/package.xml",
+      "sha256": "279b0931bb1f07dd87dbc1ed3133b256cbf5e2fe91b1e6860ce64f05b36c9d7d",
+      "bytes": 826,
+      "public_path": "arm_stack/simulation/charging_dock_sim/package.xml",
+      "published_sha256": "279b0931bb1f07dd87dbc1ed3133b256cbf5e2fe91b1e6860ce64f05b36c9d7d",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_ros2_ws/src/charging_dock_sim/package.xml"
+    },
+    {
+      "archive_path": "simulation/resource/charging_dock_sim",
+      "sha256": "4f7a9fe4068a47eaa37f8c370a49ba08ac201b995ceb4d84b04e6a17c4640c6c",
+      "bytes": 18,
+      "public_path": "arm_stack/simulation/charging_dock_sim/resource/charging_dock_sim",
+      "published_sha256": "4f7a9fe4068a47eaa37f8c370a49ba08ac201b995ceb4d84b04e6a17c4640c6c",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_ros2_ws/src/charging_dock_sim/resource/charging_dock_sim"
+    },
+    {
+      "archive_path": "simulation/setup.cfg",
+      "sha256": "2bde9f8fd820e8cc3b65852364fde51538d021448fda70522b8bc5725fd2b480",
+      "bytes": 103,
+      "public_path": "arm_stack/simulation/charging_dock_sim/setup.cfg",
+      "published_sha256": "2bde9f8fd820e8cc3b65852364fde51538d021448fda70522b8bc5725fd2b480",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_ros2_ws/src/charging_dock_sim/setup.cfg"
+    },
+    {
+      "archive_path": "simulation/setup.py",
+      "sha256": "171edbab0f55b51f7af0325090718b9403422d4475c11acf29ed89041a161d0d",
+      "bytes": 831,
+      "public_path": "arm_stack/simulation/charging_dock_sim/setup.py",
+      "published_sha256": "171edbab0f55b51f7af0325090718b9403422d4475c11acf29ed89041a161d0d",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_ros2_ws/src/charging_dock_sim/setup.py"
+    },
+    {
+      "archive_path": "tools/NOVA2_PREALIGN_WORKFLOW.md",
+      "sha256": "5819cb0bd85896910196c99b3109dd288175749511a674997f87fa0276c000b7",
+      "bytes": 4138,
+      "public_path": "arm_stack/tools/NOVA2_PREALIGN_WORKFLOW.md",
+      "published_sha256": "d2214256f4720e4f2d67a1a6a167746e91a4f0470680aa9d29aa89c9efa50cf8",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/NOVA2_PREALIGN_WORKFLOW.md"
+    },
+    {
+      "archive_path": "tools/arm_bringup_isolated.launch.py",
+      "sha256": "95c5f42507256e921fab7c507c84457b3510e7a742f492e05208a6377a6d7b17",
+      "bytes": 856,
+      "public_path": "arm_stack/tools/arm_bringup_isolated.launch.py",
+      "published_sha256": "95c5f42507256e921fab7c507c84457b3510e7a742f492e05208a6377a6d7b17",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/arm_bringup_isolated.launch.py"
+    },
+    {
+      "archive_path": "tools/arm_readiness.py",
+      "sha256": "9eac64e53b80a0c656bc752ba8e86bdf0cf8d5a5feabbb08e341078800bf3771",
+      "bytes": 7138,
+      "public_path": "arm_stack/tools/arm_readiness.py",
+      "published_sha256": "9eac64e53b80a0c656bc752ba8e86bdf0cf8d5a5feabbb08e341078800bf3771",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/arm_readiness.py"
+    },
+    {
+      "archive_path": "tools/camera_reference.py",
+      "sha256": "807a9c53382c7c8e1dfc61c60dcc14f1c09bd170f5ca95b5c77307c25776e5ca",
+      "bytes": 3261,
+      "public_path": "arm_stack/tools/camera_reference.py",
+      "published_sha256": "807a9c53382c7c8e1dfc61c60dcc14f1c09bd170f5ca95b5c77307c25776e5ca",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/camera_reference.py"
+    },
+    {
+      "archive_path": "tools/charge_robot.sh",
+      "sha256": "40f4ae9873755d8938d9603a2e6c1cba1096d6ddefd1ae7b6914fc24dc9df322",
+      "bytes": 29783,
+      "public_path": "arm_stack/tools/charge_robot.sh",
+      "published_sha256": "416312d3969e0b72afcc4db22f09d7bc6404e401b56870ef035d20a5076e896a",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/charge_robot.sh"
+    },
+    {
+      "archive_path": "tools/charge_startup_checks.py",
+      "sha256": "dc34766827cdafed5ad3d5422e2999cc89024b5887a568140c09cf112808e7a5",
+      "bytes": 15110,
+      "public_path": "arm_stack/tools/charge_startup_checks.py",
+      "published_sha256": "c616b843f99b49314ee596496aef0fc77d06bb858afbe99ebd51e426978d092b",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/charge_startup_checks.py"
+    },
+    {
+      "archive_path": "tools/charge_workflow_state.py",
+      "sha256": "d03ad253432acdb9154c39b95044d3cd3d146ff2edf711fbf603c107f4ea80e6",
+      "bytes": 5689,
+      "public_path": "arm_stack/tools/charge_workflow_state.py",
+      "published_sha256": "6534457e41bc61d86485acef618fabaa7de7632c5f59708dd31b5fe1ef19aacb",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/charge_workflow_state.py"
+    },
+    {
+      "archive_path": "tools/clean_nova2_sim.sh",
+      "sha256": "69ba5a9623c943df5ff752e4241725427a7a99470fa4595de1b28ea90680ba72",
+      "bytes": 2228,
+      "public_path": "arm_stack/tools/clean_nova2_sim.sh",
+      "published_sha256": "f13b733ed4f9a16136d368b7b06429d1ffc64608e07338e78a5ea41839746cae",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/clean_nova2_sim.sh"
+    },
+    {
+      "archive_path": "tools/demo_sequence.py",
+      "sha256": "a5c3dce0952ceaab9c64ee40a04f6fc25f0d80232f9ed3fed37d1d2dad4035a1",
+      "bytes": 19075,
+      "public_path": "arm_stack/tools/demo_sequence.py",
+      "published_sha256": "eddeb98d4d12d19dd8152124e15cacdebcb7f1828cecf9f557bbf49354ae9fff",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/demo_sequence.py"
+    },
+    {
+      "archive_path": "tools/disable_robot.sh",
+      "sha256": "ab32b440c62986c2787192b716592af3d76f7cb96b59517210e390cc95ba06cb",
+      "bytes": 257,
+      "public_path": "arm_stack/tools/disable_robot.sh",
+      "published_sha256": "df1fc5edcd431390eea43e56d1a403f0e1f19fe79761891635a4ac3ef75e59a5",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/disable_robot.sh"
+    },
+    {
+      "archive_path": "tools/enable_robot.sh",
+      "sha256": "1bdca926e2c085ab13bf0baaecdba9ea5976a318cc8233aa6d05aa6d95adea32",
+      "bytes": 533,
+      "public_path": "arm_stack/tools/enable_robot.sh",
+      "published_sha256": "d433bba9b58c610262c94518f1dfdefec1458db586bc7e8665564192a94838b4",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/enable_robot.sh"
+    },
+    {
+      "archive_path": "tools/execute_pending_trajectory.py",
+      "sha256": "9c12bde985a06013d02698c257e49e56a5b520bea6b108ab59c0700de085d6a3",
+      "bytes": 16574,
+      "public_path": "arm_stack/tools/execute_pending_trajectory.py",
+      "published_sha256": "75bf56112829463008b453bc8a6622557e89568c43edf38b42f296745460778c",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/execute_pending_trajectory.py"
+    },
+    {
+      "archive_path": "tools/execute_pre_align_movj.py",
+      "sha256": "56389997370e1e5e3285d876f6efb238dd93d1a615e863023b434312e79c3069",
+      "bytes": 4388,
+      "public_path": "arm_stack/tools/execute_pre_align_movj.py",
+      "published_sha256": "ef55faa289654e75b27620e8bacfbf6a4f7c11fdb9ab15e151f6516f07c592ac",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/execute_pre_align_movj.py"
+    },
+    {
+      "archive_path": "tools/freeze_icp_gun_target.py",
+      "sha256": "13597281ae52a4dc695ab0690cdea016fe8f302317a88c55e9fb5e8f5a9d42e3",
+      "bytes": 2555,
+      "public_path": "arm_stack/tools/freeze_icp_gun_target.py",
+      "published_sha256": "50bb8138413dfe332a96cf6cc417f1e415de925b749deb4dac28d89e8e2527e4",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/freeze_icp_gun_target.py"
+    },
+    {
+      "archive_path": "tools/freeze_pnp_v3_target.py",
+      "sha256": "179ce54b45ee17e04ba1dcab7b49b3e1d33b39489466a0a3c75b0b6b9b05f80e",
+      "bytes": 3213,
+      "public_path": "arm_stack/tools/freeze_pnp_v3_target.py",
+      "published_sha256": "9b311e6b19740b38a09ebedbfad11d268a8c6b0e4665c3d906dace36dc8db8b3",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/freeze_pnp_v3_target.py"
+    },
+    {
+      "archive_path": "tools/gun_pose_validation.py",
+      "sha256": "62311371c6d9f460c34031b84f037685caed36ff1cb903ef42856b603df9e04a",
+      "bytes": 6486,
+      "public_path": "arm_stack/tools/gun_pose_validation.py",
+      "published_sha256": "bc69a936a709972fbf9b09ce3b3936cb90431729ea93cf30fb79aa04bc29721e",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/gun_pose_validation.py"
+    },
+    {
+      "archive_path": "tools/gun_target_policy.json",
+      "sha256": "46fd1372a80e15fd98eff5ab9665db7cdf8a446f7fd9fdbd5f29c71d8d5aee59",
+      "bytes": 200,
+      "public_path": "arm_stack/tools/gun_target_policy.json",
+      "published_sha256": "46fd1372a80e15fd98eff5ab9665db7cdf8a446f7fd9fdbd5f29c71d8d5aee59",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/gun_target_policy.json"
+    },
+    {
+      "archive_path": "tools/gun_target_policy.py",
+      "sha256": "775d9da1d95a0b8ddc90913aa74d85b0babce3fc057256502e4b9f4462ea3d5b",
+      "bytes": 2266,
+      "public_path": "arm_stack/tools/gun_target_policy.py",
+      "published_sha256": "951515d51b5626438f062351c877086a1282be3093d89cd02423bf26b6a5d658",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/gun_target_policy.py"
+    },
+    {
+      "archive_path": "tools/insert_back.py",
+      "sha256": "0f64f7783153d68fc7d5ced9543727b5aa400c1f96abf69835c13c901af0ace2",
+      "bytes": 8091,
+      "public_path": "arm_stack/tools/insert_back.py",
+      "published_sha256": "0f64f7783153d68fc7d5ced9543727b5aa400c1f96abf69835c13c901af0ace2",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/insert_back.py"
+    },
+    {
+      "archive_path": "tools/insert_execute.py",
+      "sha256": "e311c85a1f1398c97bfea7bbc3d3d185a5014dba05de40773f61e7a178d8c0f3",
+      "bytes": 6602,
+      "public_path": "arm_stack/tools/insert_execute.py",
+      "published_sha256": "1717980592392b0ee2691c694aad41a21d29c3b9683c2b6316e4c1f1a6d95fc9",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/insert_execute.py"
+    },
+    {
+      "archive_path": "tools/insertion_geometry.py",
+      "sha256": "e7705af2cacb91a0451b15061518c64b0bf439e2e28ee4a003be78c0d3397281",
+      "bytes": 2636,
+      "public_path": "arm_stack/tools/insertion_geometry.py",
+      "published_sha256": "e7705af2cacb91a0451b15061518c64b0bf439e2e28ee4a003be78c0d3397281",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/insertion_geometry.py"
+    },
+    {
+      "archive_path": "tools/insertion_profile.json",
+      "sha256": "9df7beba66a409effabaf7ea30edd3aa79c55ac5f34935594221974aebbee6d2",
+      "bytes": 345,
+      "public_path": "arm_stack/tools/insertion_profile.json",
+      "published_sha256": "9df7beba66a409effabaf7ea30edd3aa79c55ac5f34935594221974aebbee6d2",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/insertion_profile.json"
+    },
+    {
+      "archive_path": "tools/insertion_runtime.py",
+      "sha256": "cfd40e5048ff54d51d411752a6f2685807deb5953d0f1a02db25fab428ed3dbc",
+      "bytes": 6072,
+      "public_path": "arm_stack/tools/insertion_runtime.py",
+      "published_sha256": "6679d4d2b2c2a527c7a91d35df9182de9ba3e75d38b22e89c8eb944c28de0e8f",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/insertion_runtime.py"
+    },
+    {
+      "archive_path": "tools/insertion_safety.py",
+      "sha256": "702c02a367f046c7ad8410966837cead706bcd74bf3987253d925097f30baa33",
+      "bytes": 11889,
+      "public_path": "arm_stack/tools/insertion_safety.py",
+      "published_sha256": "702c02a367f046c7ad8410966837cead706bcd74bf3987253d925097f30baa33",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/insertion_safety.py"
+    },
+    {
+      "archive_path": "tools/nova2_icp.rviz",
+      "sha256": "a6d48107454d61f7d0fb66b13cda65d20667131daf8764def243eae5afc9e7b2",
+      "bytes": 3894,
+      "public_path": "arm_stack/tools/nova2_icp.rviz",
+      "published_sha256": "a6d48107454d61f7d0fb66b13cda65d20667131daf8764def243eae5afc9e7b2",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/nova2_icp.rviz"
+    },
+    {
+      "archive_path": "tools/nova2_readonly.rviz",
+      "sha256": "3afed39a62d510431520b0ae05693bd15663544ea75836f8b25abc7675afcfb3",
+      "bytes": 2868,
+      "public_path": "arm_stack/tools/nova2_readonly.rviz",
+      "published_sha256": "3afed39a62d510431520b0ae05693bd15663544ea75836f8b25abc7675afcfb3",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/nova2_readonly.rviz"
+    },
+    {
+      "archive_path": "tools/nova2_rviz.launch.py",
+      "sha256": "a8745ecb8e028483174ddc2ed8629705a086a7a2c28c4764cbd32df3aac97805",
+      "bytes": 980,
+      "public_path": "arm_stack/tools/nova2_rviz.launch.py",
+      "published_sha256": "c6fb34f76cbdf9a47076fc114d33ba78e504909507caf34a41b7c9d4703a8b1c",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/nova2_rviz.launch.py"
+    },
+    {
+      "archive_path": "tools/plan_camera_pre_align.py",
+      "sha256": "77a0d8bc4939950003fe6f97852f75c1f97a6280cc03c459ba555b458467ca30",
+      "bytes": 6142,
+      "public_path": "arm_stack/tools/plan_camera_pre_align.py",
+      "published_sha256": "9750978a6775f8b9d44049f41098b84b0a7afb3f911c5d037afe340aec1e9be2",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/plan_camera_pre_align.py"
+    },
+    {
+      "archive_path": "tools/plan_camera_pre_align.sh",
+      "sha256": "b46460320ef78e111407f975fadd83609b81453e9b7f1a6f25580a4083176c30",
+      "bytes": 146,
+      "public_path": "arm_stack/tools/plan_camera_pre_align.sh",
+      "published_sha256": "31170c287e9b693d88b4038e52195db43c4ddf51de3b668c9f2e149e3f6f3953",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/plan_camera_pre_align.sh"
+    },
+    {
+      "archive_path": "tools/plan_camera_pre_align_nearest_ik.py",
+      "sha256": "de5c647644ab3125b17e79c3c700765b8e23035b7de3ff754e51ac6216ddc4d2",
+      "bytes": 23023,
+      "public_path": "arm_stack/tools/plan_camera_pre_align_nearest_ik.py",
+      "published_sha256": "8bdf94dd0cbea8151a976e6734f926ef2b3e8509ce7d168c87c12507a568cbff",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/plan_camera_pre_align_nearest_ik.py"
+    },
+    {
+      "archive_path": "tools/plan_charging_gun_prepose.py",
+      "sha256": "436fbde81f2e64f5197617ff250753a18e8bb9b27015b3391f3caf57382c3bb7",
+      "bytes": 16732,
+      "public_path": "arm_stack/tools/plan_charging_gun_prepose.py",
+      "published_sha256": "df715108298383a410b65bbb36ba632a700f43af1376a2242adcafddd6051dde",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/plan_charging_gun_prepose.py"
+    },
+    {
+      "archive_path": "tools/plan_charging_workflow.sh",
+      "sha256": "46078e89f34c4cf7adcc61110146423c7bd404c91b9007e7198d5db7ef16bc50",
+      "bytes": 280,
+      "public_path": "arm_stack/tools/plan_charging_workflow.sh",
+      "published_sha256": "b10bbc7c67cc25c77beb84fd740f416a8bd40cb6dc60866e2d94f19a3b4687fc",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/plan_charging_workflow.sh"
+    },
+    {
+      "archive_path": "tools/plan_flow_guard.py",
+      "sha256": "860001b16d351f93933678fd2463ed316ebcb55f38b168127b3bfabfbdec9e57",
+      "bytes": 7662,
+      "public_path": "arm_stack/tools/plan_flow_guard.py",
+      "published_sha256": "11e8ee2e135c03b6628c352153f06b8c7b6545de0d13ff76d6c9cf9bcc0ef4b0",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/plan_flow_guard.py"
+    },
+    {
+      "archive_path": "tools/plan_insertion_cartesian.py",
+      "sha256": "3205d5ef0cd702fd4a424bf4784d1b19cecdc63aede27e0d831994ec36e3b179",
+      "bytes": 6476,
+      "public_path": "arm_stack/tools/plan_insertion_cartesian.py",
+      "published_sha256": "3205d5ef0cd702fd4a424bf4784d1b19cecdc63aede27e0d831994ec36e3b179",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/plan_insertion_cartesian.py"
+    },
+    {
+      "archive_path": "tools/plan_insertion_depth.py",
+      "sha256": "de90d5e209b87b1c419dbc1387dfd507749185562c535aeda978edd8f07f1b41",
+      "bytes": 1711,
+      "public_path": "arm_stack/tools/plan_insertion_depth.py",
+      "published_sha256": "1a3bfd65976868c4cdad9623119f193d24530b1da189fa9557fec2be4d2b49cb",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/plan_insertion_depth.py"
+    },
+    {
+      "archive_path": "tools/prepare_insertion_target.py",
+      "sha256": "820b59d5e8dfc7678331ee7c34bd8ed3e2ed178db90a61317405080ec4ede991",
+      "bytes": 2620,
+      "public_path": "arm_stack/tools/prepare_insertion_target.py",
+      "published_sha256": "ffcdb8b0ae7a8764fea6f7070b7295b11208a71fdcd5cfce455e177ff317597f",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/prepare_insertion_target.py"
+    },
+    {
+      "archive_path": "tools/retract_inserted.py",
+      "sha256": "cd179553c4628946716e32100a3b5324db217ea888a98e195673b23995301e4f",
+      "bytes": 399,
+      "public_path": "arm_stack/tools/retract_inserted.py",
+      "published_sha256": "cd179553c4628946716e32100a3b5324db217ea888a98e195673b23995301e4f",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/retract_inserted.py"
+    },
+    {
+      "archive_path": "tools/return_to_initial_pose.py",
+      "sha256": "d3fd4db25c5a6abdbe41251c37a50b6cf0942b5bb493732eb668fad888a5d10f",
+      "bytes": 6548,
+      "public_path": "arm_stack/tools/return_to_initial_pose.py",
+      "published_sha256": "671a5bdace45030c19256d5326cfa9368af5f33a9be5729d7d524bbb1d764bb0",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/return_to_initial_pose.py"
+    },
+    {
+      "archive_path": "tools/source_feedback.py",
+      "sha256": "fd2a99893ac49ef24e09b7be101c7df48f3b343e8c1b28ca9fbc11e393ce9d4b",
+      "bytes": 2353,
+      "public_path": "arm_stack/tools/source_feedback.py",
+      "published_sha256": "fd2a99893ac49ef24e09b7be101c7df48f3b343e8c1b28ca9fbc11e393ce9d4b",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/source_feedback.py"
+    },
+    {
+      "archive_path": "tools/stable_pose_selection.py",
+      "sha256": "2d084a70ed4cfb9204098ed4e84f22bce71bbb2e0afb4e489d55dd6679046de5",
+      "bytes": 5989,
+      "public_path": "arm_stack/tools/stable_pose_selection.py",
+      "published_sha256": "2d084a70ed4cfb9204098ed4e84f22bce71bbb2e0afb4e489d55dd6679046de5",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/stable_pose_selection.py"
+    },
+    {
+      "archive_path": "tools/start_bringup.sh",
+      "sha256": "28bb580d8fc5cee2e09c841a846ed4604068c6a9fe948fe944c7dfcabc0aef62",
+      "bytes": 135,
+      "public_path": "arm_stack/tools/start_bringup.sh",
+      "published_sha256": "ff57f5f5e7d6adcf8adf8571edd70410e26b7568916b77ea677dfb47a70667a6",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/start_bringup.sh"
+    },
+    {
+      "archive_path": "tools/start_charging_workflow.sh",
+      "sha256": "2eb274bc1c82bb8022f518e1349ff477c9226de923ddf4eb428ee5e7da2ac6de",
+      "bytes": 2102,
+      "public_path": "arm_stack/tools/start_charging_workflow.sh",
+      "published_sha256": "c0ca40adbd55806b1fa73c852c84801981761985aa9b6d281485f7ff6dc3670e",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/start_charging_workflow.sh"
+    },
+    {
+      "archive_path": "tools/start_joint_bridge.sh",
+      "sha256": "23ce9e835247d94f5a73b3a700131fb29d94c62e35a30c899eab088a4f0896e0",
+      "bytes": 186,
+      "public_path": "arm_stack/tools/start_joint_bridge.sh",
+      "published_sha256": "2d3c05ce26b874e66d441acce6b26de7e584b3799fd48c1c653274a35b419084",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/start_joint_bridge.sh"
+    },
+    {
+      "archive_path": "tools/start_moveit.sh",
+      "sha256": "6792dbd432224fd42e3082755728a5300c2f02cf9afb336c4d90de0914f186f9",
+      "bytes": 125,
+      "public_path": "arm_stack/tools/start_moveit.sh",
+      "published_sha256": "dda71cec3617a5ef0910f52c337ee7887b340af8bb4767f187925c5d9d0e932f",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/start_moveit.sh"
+    },
+    {
+      "archive_path": "tools/start_nova2_icp_rviz.sh",
+      "sha256": "ca569801621ba7a7097d36823952acaadbb0eba32ce2dc8399eeec7ff70f5869",
+      "bytes": 594,
+      "public_path": "arm_stack/tools/start_nova2_icp_rviz.sh",
+      "published_sha256": "d39668843fc7e9451c4527bd7d2cbef4d03e587acd1b56936e93cfe31982ce8b",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/start_nova2_icp_rviz.sh"
+    },
+    {
+      "archive_path": "tools/start_nova2_moveit_plan_only.sh",
+      "sha256": "ea60de6b6f5a0afdcadc32c3165beada445d20147cb2651999574d04e21963cd",
+      "bytes": 157,
+      "public_path": "arm_stack/tools/start_nova2_moveit_plan_only.sh",
+      "published_sha256": "35167bbd0048713fad57b23304e709160bc7b34932773df25299441e55a05ed7",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/start_nova2_moveit_plan_only.sh"
+    },
+    {
+      "archive_path": "tools/start_nova2_real_model.sh",
+      "sha256": "888cc60877eff7244bbafd7aade94664756cd1da7b387fccef62bb4cd48a1787",
+      "bytes": 141,
+      "public_path": "arm_stack/tools/start_nova2_real_model.sh",
+      "published_sha256": "2ffd8b5494086cc5b513dcd9df918d96ea7e3e9dbf4d43a28674c8deecfcb366",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/start_nova2_real_model.sh"
+    },
+    {
+      "archive_path": "tools/start_nova2_sim_no_rviz.sh",
+      "sha256": "d1ed0c9db2003ca6506a52fa4b9d646ed8c1d4289be033e370339aa64c0aa1b9",
+      "bytes": 635,
+      "public_path": "arm_stack/tools/start_nova2_sim_no_rviz.sh",
+      "published_sha256": "d1075c89a6e33acaa9cca847d8e081fa356e75fc9fd321133f34770196494522",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/start_nova2_sim_no_rviz.sh"
+    },
+    {
+      "archive_path": "tools/status.sh",
+      "sha256": "e8df9fe13ca05e30d145e7253a402e3e55707cfcc5288f5dd9943a90839f9a6b",
+      "bytes": 764,
+      "public_path": "arm_stack/tools/status.sh",
+      "published_sha256": "5e4cb3b1d17cc3b0273b2c4cdf72f35173286c9173a434d9e9a1adc658c3a47e",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/status.sh"
+    },
+    {
+      "archive_path": "tools/verified_joint_feedback.py",
+      "sha256": "4daa622bd8115e7092c2ed0dd1bbd64ff3df96c3acc7c1c3bd558f4a08a31a4b",
+      "bytes": 2800,
+      "public_path": "arm_stack/tools/verified_joint_feedback.py",
+      "published_sha256": "4daa622bd8115e7092c2ed0dd1bbd64ff3df96c3acc7c1c3bd558f4a08a31a4b",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/verified_joint_feedback.py"
+    },
+    {
+      "archive_path": "tools/workflow_progress.py",
+      "sha256": "01425f2f0012117dc5b6c02af7ce715e5a24285e19f03e8180984ed7090ea756",
+      "bytes": 3887,
+      "public_path": "arm_stack/tools/workflow_progress.py",
+      "published_sha256": "fbf746cc9652be081fca4c7b87e0a4a69822c218a09c30d6e578a83311bcc89f",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/workflow_progress.py"
+    },
+    {
+      "archive_path": "vision/README.md",
+      "sha256": "81a9c0b9cee9fba444ab0bc07c5ddf9bc6adcae7c13725687bd832dda0595422",
+      "bytes": 1975,
+      "public_path": "arm_stack/vision/README.md",
+      "published_sha256": "7c5aa52896eddd5dca3c5279d2d5ce2d3148085f304276ca24c10997715fb1e2",
+      "publication_changes": [
+        "personal design-source archive path replaced by layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/README.md"
+    },
+    {
+      "archive_path": "vision/charging_preview.py",
+      "sha256": "7ba2aaf6dc05de3ca1937d9ece08b8531fee19942141d6916c36b111fbbded72",
+      "bytes": 9968,
+      "public_path": "arm_stack/vision/charging_preview.py",
+      "published_sha256": "7ba2aaf6dc05de3ca1937d9ece08b8531fee19942141d6916c36b111fbbded72",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/charging_preview.py"
+    },
+    {
+      "archive_path": "vision/collect_socket_template.py",
+      "sha256": "1d43a90a659fa2efbdad2c6d0834925a6ddf65ce99ba344508dbae6fb9490581",
+      "bytes": 4670,
+      "public_path": "arm_stack/vision/collect_socket_template.py",
+      "published_sha256": "5b7e5dfa57bc76ad8b2cfac0002c65df84d06a6c99e4596a2c273baf13fcca36",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/collect_socket_template.py"
+    },
+    {
+      "archive_path": "vision/config/realtime_socket_pose.json",
+      "sha256": "9bd3071a21ffc6f81870e75a358df4329d498c9681f541ee87c59bd62f024106",
+      "bytes": 2236,
+      "public_path": "arm_stack/vision/config/realtime_socket_pose.json",
+      "published_sha256": "9bd3071a21ffc6f81870e75a358df4329d498c9681f541ee87c59bd62f024106",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/config/realtime_socket_pose.json"
+    },
+    {
+      "archive_path": "vision/icp_cloud_bridge.py",
+      "sha256": "00a67784239c9f0ab08deedc131f6ac6edf57596a106d5f3bb37af95d60d2073",
+      "bytes": 14213,
+      "public_path": "arm_stack/vision/icp_cloud_bridge.py",
+      "published_sha256": "3cc22c5796d860dcab21c7924ef9cfee08db43bbc23c9b8de80a059c71447d5a",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/icp_cloud_bridge.py"
+    },
+    {
+      "archive_path": "vision/model/socket_frame_and_rim_2mm_m.ply",
+      "sha256": "272b2ea7106a8da5930201d7ec0a590081a2b041de1bff2938be4ad1496f2e25",
+      "bytes": 28492,
+      "public_path": "arm_stack/vision/model/socket_frame_and_rim_2mm_m.ply",
+      "published_sha256": "272b2ea7106a8da5930201d7ec0a590081a2b041de1bff2938be4ad1496f2e25",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/model/socket_frame_and_rim_2mm_m.ply"
+    },
+    {
+      "archive_path": "vision/pnp_v3_pose_bridge.py",
+      "sha256": "c33d2c4bf3a2d6e1bb864fad5e8d4317842c8605c04503b6ecfaae0861f64a4d",
+      "bytes": 8792,
+      "public_path": "arm_stack/vision/pnp_v3_pose_bridge.py",
+      "published_sha256": "0965cc82796ebddf1e678dca595b9aaba2968d39701555e713db62320e908f98",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_v3_pose_bridge.py"
+    },
+    {
+      "archive_path": "vision/realtime_socket_pose.py",
+      "sha256": "2a26d04cf94412a957510f7a1657a834f3ccc3bf66d0574513ff504b87bb30b3",
+      "bytes": 88633,
+      "public_path": "arm_stack/vision/icp/realtime_socket_pose.py",
+      "published_sha256": "df57efccd70b3e2f51eda78a4c3a28d540ac62b31d7bcd4e3b97a4919cfb7207",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/realtime_socket_pose.py"
+    },
+    {
+      "archive_path": "vision/register_socket_offline.py",
+      "sha256": "56ad64a3af6ca398c5a0a095cb5f11879d0efe1cafd980a97810bae7f965a9d1",
+      "bytes": 10471,
+      "public_path": "arm_stack/vision/register_socket_offline.py",
+      "published_sha256": "56ad64a3af6ca398c5a0a095cb5f11879d0efe1cafd980a97810bae7f965a9d1",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/register_socket_offline.py"
+    },
+    {
+      "archive_path": "vision/socket_multiview_backend.py",
+      "sha256": "6c6c9527d0de7a164ebc02743be0d8a3050ab325ac1569ad4ddc5a1f177c221a",
+      "bytes": 3393,
+      "public_path": "arm_stack/vision/socket_multiview_backend.py",
+      "published_sha256": "6c6c9527d0de7a164ebc02743be0d8a3050ab325ac1569ad4ddc5a1f177c221a",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/socket_multiview_backend.py"
+    },
+    {
+      "archive_path": "vision/v3/Jetson\u5b9e\u65f6\u76f8\u673a\u4f7f\u7528\u8bf4\u660e.md",
+      "sha256": "42e1be72af7be78ae11ee3cafe261210b4ceae1bf0a6cff1d2bcef0ebfec2b72",
+      "bytes": 6818,
+      "public_path": "arm_stack/vision/v3/Jetson\u5b9e\u65f6\u76f8\u673a\u4f7f\u7528\u8bf4\u660e.md",
+      "published_sha256": "42e1be72af7be78ae11ee3cafe261210b4ceae1bf0a6cff1d2bcef0ebfec2b72",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_live_test_20261023_M07DN5/pnp_live_rgb_v3/Jetson\u5b9e\u65f6\u76f8\u673a\u4f7f\u7528\u8bf4\u660e.md"
+    },
+    {
+      "archive_path": "vision/v3/automatic_recovery.py",
+      "sha256": "fbbb2849cc900b94c2f52b8a172e34715f000034eaee67904e8e09689661274b",
+      "bytes": 3919,
+      "public_path": "arm_stack/vision/v3/automatic_recovery.py",
+      "published_sha256": "fbbb2849cc900b94c2f52b8a172e34715f000034eaee67904e8e09689661274b",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_live_test_20261023_M07DN5/pnp_live_rgb_v3/automatic_recovery.py"
+    },
+    {
+      "archive_path": "vision/v3/check_environment.py",
+      "sha256": "f2b097f7258b7870d472c6c3c265982d9c56bf6c13bbe9debbec014d6e547128",
+      "bytes": 826,
+      "public_path": "arm_stack/vision/v3/check_environment.py",
+      "published_sha256": "f2b097f7258b7870d472c6c3c265982d9c56bf6c13bbe9debbec014d6e547128",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_live_test_20261023_M07DN5/pnp_live_rgb_v3/check_environment.py"
+    },
+    {
+      "archive_path": "vision/v3/live_core.py",
+      "sha256": "76a2ccff796321608b49253f98ea9fee6538b2bbb1a46cc896f319b02d3d0e4d",
+      "bytes": 8593,
+      "public_path": "arm_stack/vision/v3/live_core.py",
+      "published_sha256": "76a2ccff796321608b49253f98ea9fee6538b2bbb1a46cc896f319b02d3d0e4d",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_live_test_20261023_M07DN5/pnp_live_rgb_v3/live_core.py"
+    },
+    {
+      "archive_path": "vision/v3/live_settings.json",
+      "sha256": "feaf53e6abbb53a92bc6500908fd9d9fa6396fbf93546ef619a8b55812ccb8d2",
+      "bytes": 223,
+      "public_path": "arm_stack/vision/v3/live_settings.json",
+      "published_sha256": "feaf53e6abbb53a92bc6500908fd9d9fa6396fbf93546ef619a8b55812ccb8d2",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_live_test_20261023_M07DN5/pnp_live_rgb_v3/live_settings.json"
+    },
+    {
+      "archive_path": "vision/v3/pnp_near.json",
+      "sha256": "74fe63e91e182dcd3c056fa796bfbf279d1a2ecf7d7454f6fe7a039fb729ea54",
+      "bytes": 824,
+      "public_path": "arm_stack/vision/v3/pnp_near.json",
+      "published_sha256": "74fe63e91e182dcd3c056fa796bfbf279d1a2ecf7d7454f6fe7a039fb729ea54",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_live_test_20261023_M07DN5/pnp_live_rgb_v3/pnp_near.json"
+    },
+    {
+      "archive_path": "vision/v3/ring_baseline.py",
+      "sha256": "d9bcfc2a5fd841a7da8c4f7c7431730d0c11a13158cd48b1e0448976c05a782d",
+      "bytes": 1649,
+      "public_path": "arm_stack/vision/v3/ring_baseline.py",
+      "published_sha256": "d9bcfc2a5fd841a7da8c4f7c7431730d0c11a13158cd48b1e0448976c05a782d",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_live_test_20261023_M07DN5/pnp_live_rgb_v3/ring_baseline.py"
+    },
+    {
+      "archive_path": "vision/v3/ring_refinement.py",
+      "sha256": "efc41f946708586d70277d3e235462919f40e756a2e7790cf17090fdfa90340a",
+      "bytes": 2116,
+      "public_path": "arm_stack/vision/v3/ring_refinement.py",
+      "published_sha256": "efc41f946708586d70277d3e235462919f40e756a2e7790cf17090fdfa90340a",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_live_test_20261023_M07DN5/pnp_live_rgb_v3/ring_refinement.py"
+    },
+    {
+      "archive_path": "vision/v3/run_live.py",
+      "sha256": "6d2d94e64c59aff389956298f8badd11151ae16718a75763b3145c8642291e66",
+      "bytes": 9725,
+      "public_path": "arm_stack/vision/v3/run_live.py",
+      "published_sha256": "6d2d94e64c59aff389956298f8badd11151ae16718a75763b3145c8642291e66",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_live_test_20261023_M07DN5/pnp_live_rgb_v3/run_live.py"
+    },
+    {
+      "archive_path": "vision/v3/socket_pnp.py",
+      "sha256": "0f20ec364810097427ee14ec6642f4984d7044579b59a99bb1773d33aeda9d94",
+      "bytes": 13560,
+      "public_path": "arm_stack/vision/v3/socket_pnp.py",
+      "published_sha256": "0f20ec364810097427ee14ec6642f4984d7044579b59a99bb1773d33aeda9d94",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_live_test_20261023_M07DN5/pnp_live_rgb_v3/socket_pnp.py"
+    },
+    {
+      "archive_path": "vision/v3/test_live.py",
+      "sha256": "29de5a75cf39a92fe8768771f236feeac5de3cec9d0cedcc1cb6100deba50d0f",
+      "bytes": 6862,
+      "public_path": "arm_stack/vision/v3/test_live.py",
+      "published_sha256": "29de5a75cf39a92fe8768771f236feeac5de3cec9d0cedcc1cb6100deba50d0f",
+      "publication_changes": [],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_live_test_20261023_M07DN5/pnp_live_rgb_v3/test_live.py"
+    },
+    {
+      "archive_path": "tools/plan_insertion_cartesian.py",
+      "sha256": "3205d5ef0cd702fd4a424bf4784d1b19cecdc63aede27e0d831994ec36e3b179",
+      "bytes": 6476,
+      "public_path": "arm_stack/recovered/plan_insertion_cartesian.py",
+      "published_sha256": "3205d5ef0cd702fd4a424bf4784d1b19cecdc63aede27e0d831994ec36e3b179",
+      "publication_changes": [
+        "duplicate historical location synchronized to current source"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/plan_insertion_cartesian.py"
+    },
+    {
+      "archive_path": "tools/plan_charging_gun_prepose.py",
+      "sha256": "436fbde81f2e64f5197617ff250753a18e8bb9b27015b3391f3caf57382c3bb7",
+      "bytes": 16732,
+      "public_path": "arm_stack/recovered/plan_charging_gun_prepose.py",
+      "published_sha256": "df715108298383a410b65bbb36ba632a700f43af1376a2242adcafddd6051dde",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder",
+        "duplicate historical location synchronized to current source"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/plan_charging_gun_prepose.py"
+    },
+    {
+      "archive_path": "tools/freeze_pnp_v3_target.py",
+      "sha256": "179ce54b45ee17e04ba1dcab7b49b3e1d33b39489466a0a3c75b0b6b9b05f80e",
+      "bytes": 3213,
+      "public_path": "arm_stack/recovered/freeze_pnp_v3_target.py",
+      "published_sha256": "9b311e6b19740b38a09ebedbfad11d268a8c6b0e4665c3d906dace36dc8db8b3",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder",
+        "duplicate historical location synchronized to current source"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/freeze_pnp_v3_target.py"
+    },
+    {
+      "archive_path": "vision/icp_cloud_bridge.py",
+      "sha256": "00a67784239c9f0ab08deedc131f6ac6edf57596a106d5f3bb37af95d60d2073",
+      "bytes": 14213,
+      "public_path": "arm_stack/recovered/icp_cloud_bridge.py",
+      "published_sha256": "3cc22c5796d860dcab21c7924ef9cfee08db43bbc23c9b8de80a059c71447d5a",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder",
+        "duplicate historical location synchronized to current source"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/icp_cloud_bridge.py"
+    },
+    {
+      "archive_path": "vision/pnp_v3_pose_bridge.py",
+      "sha256": "c33d2c4bf3a2d6e1bb864fad5e8d4317842c8605c04503b6ecfaae0861f64a4d",
+      "bytes": 8792,
+      "public_path": "arm_stack/recovered/pnp_v3_pose_bridge.py",
+      "published_sha256": "0965cc82796ebddf1e678dca595b9aaba2968d39701555e713db62320e908f98",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder",
+        "duplicate historical location synchronized to current source"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "charging_socket_vision/pnp_v3_pose_bridge.py"
+    },
+    {
+      "archive_path": "tools/plan_flow_guard.py",
+      "sha256": "860001b16d351f93933678fd2463ed316ebcb55f38b168127b3bfabfbdec9e57",
+      "bytes": 7662,
+      "public_path": "arm_stack/recovered/plan_flow_guard.py",
+      "published_sha256": "11e8ee2e135c03b6628c352153f06b8c7b6545de0d13ff76d6c9cf9bcc0ef4b0",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder",
+        "duplicate historical location synchronized to current source"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/plan_flow_guard.py"
+    },
+    {
+      "archive_path": "tools/plan_camera_pre_align_nearest_ik.py",
+      "sha256": "de5c647644ab3125b17e79c3c700765b8e23035b7de3ff754e51ac6216ddc4d2",
+      "bytes": 23023,
+      "public_path": "arm_stack/recovered/plan_camera_pre_align_nearest_ik.py",
+      "published_sha256": "8bdf94dd0cbea8151a976e6734f926ef2b3e8509ce7d168c87c12507a568cbff",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder",
+        "duplicate historical location synchronized to current source"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/plan_camera_pre_align_nearest_ik.py"
+    },
+    {
+      "archive_path": "tools/retract_inserted.py",
+      "sha256": "cd179553c4628946716e32100a3b5324db217ea888a98e195673b23995301e4f",
+      "bytes": 399,
+      "public_path": "arm_stack/recovered/retract_inserted.py",
+      "published_sha256": "cd179553c4628946716e32100a3b5324db217ea888a98e195673b23995301e4f",
+      "publication_changes": [
+        "duplicate historical location synchronized to current source"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/retract_inserted.py"
+    },
+    {
+      "archive_path": "tools/nova2_env.sh",
+      "sha256": "f659b025e9550c33687d140b90c4fd12c2dff8fea99ef23a345cba1126de2caf",
+      "bytes": 276,
+      "public_path": "arm_stack/tools/nova2_env.sh",
+      "published_sha256": "c8d20403df0b9d60050f49138a7e445f707018483637a373252eeec96a24ad5e",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder",
+        "controller address moved to explicit local environment"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/nova2_env.sh"
+    },
+    {
+      "archive_path": "tools/nova2_real_model.launch.py",
+      "sha256": "d5bf290cd2c31dc63a1bed5bbf94c2b758b2d4331f5fff09246f3521d51256f0",
+      "bytes": 1665,
+      "public_path": "arm_stack/tools/nova2_real_model.launch.py",
+      "published_sha256": "c107a037633689ac5adc0bb109923647632f9f0a5759185d9ae5d0d0ce67a461",
+      "publication_changes": [
+        "personal home replaced with non-live layout placeholder",
+        "camera static-transform Node omitted because it embeds private hand-eye calibration; no replacement transform invented"
+      ],
+      "source_verified_date": "2026-11-09",
+      "motion_verified": false,
+      "source_path_relative_to_robot_home": "nova2_tools/nova2_real_model.launch.py"
+    }
+  ],
+  "held_out_of_public": [],
+  "vendor_snapshot": {
+    "files": 383,
+    "published": false,
+    "reason": "upstream attribution/version/local modifications require final review"
+  },
+  "excluded": [
+    "credentials, keys, caches, runtime logs/traces/images",
+    "camera/hand-eye calibration, initial_arm_pose.yaml, gun_lateral_compensation.json"
+  ],
+  "public_runtime_ready": false,
+  "removed_superseded_files": [
+    "arm_stack/tools/insertion_limits.py",
+    "arm_stack/tools/insert_force.py",
+    "arm_stack/recovered/publication_paths.py",
+    "tests/test_reconstructed_workflow.py",
+    "tests/test_arm_model_entries.py",
+    "tests/test_insertion_depth75.py"
+  ],
+  "owner_authorized_addition": "specific robot camera/hand-eye/home/compensation profile, 2026-11-09; see robot_originals/source-manifest.json"
+}

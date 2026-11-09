@@ -10,7 +10,6 @@ from trajectory_msgs.msg import JointTrajectory,JointTrajectoryPoint
 from dobot_msgs_v4.srv import GetAngle,RobotMode
 from std_srvs.srv import Trigger
 from insertion_runtime import atomic
-from insertion_limits import checked_depth_mm
 ROOT=Path('/opt/charging-robot-local/charging_socket_vision/results/realtime_runs')
 P=ROOT/'pending_insertion_trajectory.json';REPORT=ROOT/'latest_insertion_execution_feedback.json'
 
@@ -59,8 +58,7 @@ class E(Node):
   prepare()
   source=json.loads((ROOT/'last_dispatched_trajectory.json').read_text())
   if d.get('source_gun_plan_id')!=source.get('plan_id') or d.get('cycle_id')!=source.get('cycle_id'):raise RuntimeError('插入轨迹不属于本轮gun预备位')
-  if d.get('planning_ready') is not True:raise RuntimeError('插入轨迹未标记规划成功')
-  checked_depth_mm(d.get('insertion_depth_mm',0))
+  if d.get('planning_ready') is not True or not 0<float(d.get('insertion_depth_mm',0))<=75:raise RuntimeError('没有有效的75mm以内插入轨迹，请重新insert-plan；旧80mm计划不再接受')
   if not sys.stdin.isatty() or input('普通位置插入（无力控/扭矩接触判断）。确认路径安全、急停可触及；按Enter插入，其他取消：').strip():return 2
   if self.read(self.mode,RobotMode.Request()).strip()!='{5}':raise RuntimeError('机械臂未处于静止使能状态')
   q=self.joints()

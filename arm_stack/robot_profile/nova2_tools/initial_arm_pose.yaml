@@ -1,0 +1,10 @@
+# Nova2 charging robot fixed startup pose
+# Captured from live GetAngle by charge_robot set-home
+# Units: radians
+initial_arm_pose:
+  joint1: 3.125331420948962
+  joint2: -0.214783708408926
+  joint3: 2.670643480207155
+  joint4: -2.239986977936058
+  joint5: 4.733959504610088
+  joint6: 4.707950608096868

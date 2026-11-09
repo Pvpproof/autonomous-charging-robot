@@ -1,5 +1,7 @@
 # 架构与模块边界
 
+2026-11-09 更新 / Update: 原版源码已从现场恢复，昨日重建实现已替换；本页此前“缺失/重建”状态属于历史记录。当前范围与缺项以 [恢复说明](../arm_stack/README.md) 为准。 Field originals now supersede reconstructions; older missing-source statements are historical.
+
 机械臂工作流、ICP/V3 与规划应用由 Pvpproof 自写，历史源码和有限重建版已收录在 `arm_stack/`；尚未统一为完整可部署环境，当前现场版本待核对。MoveIt、SDK 与厂家模型仍是外部依赖。[源码状态](ARM_SOURCE_SCOPE.md)。
 
 [English](ARCHITECTURE.en.md)

@@ -104,7 +104,7 @@ def run(n,confirmed=False):
  try:
   if depth>.0001:
    g=FollowJointTrajectory.Goal();g.trajectory=traj;n.submitted=True
-
+   
    try:n.active=n.wait(n.action.send_goal_async(g),10)
    except RuntimeError as error:raise RuntimeError('回退Action接受响应超时；可能已接收，禁止重复提交') from error
    if not n.active.accepted:

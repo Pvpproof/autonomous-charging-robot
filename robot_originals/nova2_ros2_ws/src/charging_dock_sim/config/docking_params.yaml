@@ -1,0 +1,29 @@
+charging_dock_scene:
+  ros__parameters:
+    planning_frame: dummy_link
+    port_frame: charging_port_entry
+    target_topic: /charging_port_target
+    port_xyz: [0.40, 0.0, 0.45]
+    port_rpy: [0.0, 0.0, 0.0]
+    port_size: [0.075, 0.075]
+    port_wall: 0.006
+    port_depth: 0.035
+    gun_size: [0.050, 0.040]
+    gun_insert_length: 0.035
+
+plan_charging_dock:
+  ros__parameters:
+    planning_group: nova2_group
+    end_effector_link: Link6
+    planning_frame: dummy_link
+    target_topic: /charging_port_target
+    port_xyz: [0.40, 0.0, 0.45]
+    port_rpy: [0.0, 0.0, 0.0]
+    dock_relative_rpy: [1.5708, 0.0, 1.5708]
+    pre_insert_distance: 0.12
+    insert_depth: 0.035
+    cartesian_step: 0.003
+    min_cartesian_fraction: 0.98
+    planning_time: 5.0
+    velocity_scaling: 0.15
+    acceleration_scaling: 0.15

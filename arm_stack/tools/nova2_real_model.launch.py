@@ -1,34 +1,30 @@
-"""Reconstructed model-only launch; no embedded site transforms or fake joints.
-
-Historical source had private camera calibration. This replacement intentionally
-publishes the supplied URDF only; docking frames must be configured separately.
-"""
-import os
 from pathlib import Path
-import xml.etree.ElementTree as ET
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
-RECONSTRUCTED = True
+URDF = Path('/opt/charging-robot-local/nova2_ros2_ws/install/dobot_rviz/share/dobot_rviz/urdf/nova2_robot.urdf')
 
-def model_configuration(environ=None):
-    environ=os.environ if environ is None else environ
-    value=environ.get('CHARGING_ARM_URDF','')
-    path=Path(value)
-    if not value or not path.is_absolute() or not path.is_file():
-        raise RuntimeError('CHARGING_ARM_URDF must name an existing reviewed absolute URDF file')
-    text=path.read_text();robot=ET.fromstring(text)
-    if robot.tag!='robot' or not robot.findall('link'):
-        raise ValueError('Expected a resolved URDF robot with links, not a Xacro template')
-    if any('xacro' in element.tag for element in robot.iter()):
-        raise ValueError('Resolve Xacro with the reviewed configuration before model display')
-    topic=environ.get('CHARGING_ARM_JOINT_STATES_TOPIC','/joint_states')
-    if not topic.startswith('/') or any(char.isspace() for char in topic):
-        raise ValueError('Joint feedback topic must be an absolute ROS topic')
-    return text,topic
 
 def generate_launch_description():
-    text,topic=model_configuration()
-    return LaunchDescription([Node(package='robot_state_publisher',executable='robot_state_publisher',
-        name='nova2_robot_state_publisher',output='screen',
-        parameters=[{'robot_description':text}],remappings=[('/joint_states',topic)])])
+    robot_description = URDF.read_text()
+    return LaunchDescription([
+        Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            name='nova2_robot_state_publisher',
+            output='screen',
+            parameters=[{'robot_description': robot_description}],
+        ),
+        # Visualization-only frame for the charging-gun TCP. This does not
+        # change the controller TCP and does not command robot motion.
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='charging_gun_tcp_static_tf',
+            output='screen',
+            arguments=['--x', '0', '--y', '0', '--z', '0.123', '--roll', '0', '--pitch', '0', '--yaw', '-1.5707963267948966', '--frame-id', 'Link6', '--child-frame-id', 'charging_gun_tcp'],
+        ),
+        # Visualization-only camera frame from the existing hand-eye result.
+        # p_Link6 = R_cam2gripper * p_camera + t_cam2gripper.
+        # Site-specific camera transform omitted from publication; original retained privately.
+    ])

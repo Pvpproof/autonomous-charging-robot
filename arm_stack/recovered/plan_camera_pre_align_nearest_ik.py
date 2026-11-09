@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from publication_paths import vision_path, hand_eye_path
 import json, os, re, sys, time
 import uuid
 from plan_flow_guard import begin, finish
@@ -18,13 +17,13 @@ from trajectory_msgs.msg import JointTrajectoryPoint
 from scipy.spatial.transform import Rotation
 from dobot_msgs_v4.srv import GetPose
 
-POSE_JSON=Path(str(vision_path('results/v3_diagnostics/latest_pose_readonly.json')))
-POSE_CACHE=Path(str(vision_path('results/realtime_runs/camera_target_pose_cache.json')))
-HAND_EYE=Path(str(hand_eye_path()))
+POSE_JSON=Path('/opt/charging-robot-local/charging_socket_vision/results/v3_diagnostics/latest_pose_readonly.json')
+POSE_CACHE=Path('/opt/charging-robot-local/charging_socket_vision/results/realtime_runs/camera_target_pose_cache.json')
+HAND_EYE=Path('/opt/charging-robot-local/charging_robot_tools/calibration/hand_eye_calibration_result_ros_24mm.npz')
 BASE='base_link'; GROUP='nova2_group'; EE='Link6'; DIST=.140
 DISTANCES=(.140,.130)
 JOINTS=['joint1','joint2','joint3','joint4','joint5','joint6']
-CAM_TRAJ_FILE=Path(str(vision_path('results/realtime_runs/pending_camera_trajectory.json')))
+CAM_TRAJ_FILE=Path('/opt/charging-robot-local/charging_socket_vision/results/realtime_runs/pending_camera_trajectory.json')
 PENDING_TRAJ_FILE=CAM_TRAJ_FILE.with_name('pending_trajectory.json')
 SOCKET_TARGET_FILE=CAM_TRAJ_FILE.with_name('latest_camera_socket_target.json')
 REQUEST=CAM_TRAJ_FILE.with_name('latest_camera_plan_request.json')
@@ -208,7 +207,7 @@ class Planner(Node):
         valid,contacts=self.check_state(goalj)
         if not valid: raise RuntimeError(f'IK goal state invalid: {contacts}')
         if not self.move.wait_for_server(10): raise RuntimeError('MoveGroup unavailable')
-        goal=MoveGroup.Goal(); goal.request.group_name=GROUP; goal.request.start_state.joint_state.name=JOINTS; goal.request.start_state.joint_state.position=list(map(float,seed)); goal.request.goal_constraints=[joint_constraints(goalj)]; goal.request.allowed_planning_time=10.; goal.request.num_planning_attempts=5; goal.request.max_velocity_scaling_factor=.10; goal.request.max_acceleration_scaling_factor=.10; goal.request.pipeline_id='ompl'; goal.request.planner_id='RRTConnect'; goal.planning_options.plan_only=True; goal.planning_options.replan=False
+        goal=MoveGroup.Goal(); goal.request.group_name=GROUP; goal.request.start_state.joint_state.name=JOINTS; goal.request.start_state.joint_state.position=list(map(float,seed)); goal.request.goal_constraints=[joint_constraints(goalj)]; goal.request.allowed_planning_time=10.; goal.request.num_planning_attempts=5; goal.request.max_velocity_scaling_factor=.15; goal.request.max_acceleration_scaling_factor=.10; goal.request.pipeline_id='ompl'; goal.request.planner_id='RRTConnect'; goal.planning_options.plan_only=True; goal.planning_options.replan=False
         f=self.move.send_goal_async(goal); rclpy.spin_until_future_complete(self,f,timeout_sec=15); h=f.result()
         if h is None or not h.accepted: raise RuntimeError('planning goal rejected')
         rf=h.get_result_async(); rclpy.spin_until_future_complete(self,rf,timeout_sec=30); result=rf.result().result
